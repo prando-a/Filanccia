@@ -325,21 +325,15 @@ export default class Scene_1_1 extends Phaser.Scene {
   }
 
   onArrival() {
-    // Llegando a la plaza
-    this.showAmbientText('La Plaza Central de Filanccia...');
-
     // Detener animación de caminar
     this.tweens.killTweensOf(this.familyContainer);
 
-    // Pausa antes de transición
-    this.time.delayedCall(3000, () => {
-      this.scenePhase = 'transition';
+    this.scenePhase = 'transition';
 
-      // Fade out
-      this.cameras.main.fadeOut(1500, 0, 0, 0);
-      this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start('Scene_1_2');
-      });
+    // Fade out directo
+    this.cameras.main.fadeOut(1000, 0, 0, 0);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.start('Scene_1_2');
     });
   }
 }

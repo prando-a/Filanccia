@@ -7,6 +7,8 @@ import GameScene from './scenes/GameScene.js';
 import Scene_1_0 from './scenes/Scene_1_0.js';
 import Scene_1_1 from './scenes/Scene_1_1.js';
 import Scene_1_2 from './scenes/Scene_1_2.js';
+import Scene_1_3 from './scenes/Scene_1_3.js';
+import Scene_1_4 from './scenes/Scene_1_4.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -21,7 +23,9 @@ const config = {
     GameScene,
     Scene_1_0,
     Scene_1_1,
-    Scene_1_2
+    Scene_1_2,
+    Scene_1_3,
+    Scene_1_4
   ],
   physics: {
     default: 'arcade',

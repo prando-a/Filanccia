@@ -100,10 +100,11 @@
 (Marlo vuelve a mirar al espejo)
 
 <Subescena: Cinemática - Zoom-in temporal hacia Marlo mirando al espejo
-![como en este ejemplo](./media-ref/000.webp) >
+![como en este ejemplo](./info/story/media-ref/000.webp) >
 
 
 (Marlo se coloca su máscara para el carnaval)
+
 </Subescena>
 
 </Fade out>
@@ -113,16 +114,20 @@
 ```
 [UBICACIÓN]: Calles de Filanccia
 
+</Fade in>
+
 (Marlo camina con sus padres, detrás de ellos, hacia la plaza)
 <Parallax vertical hacia arriba>
 
 [Por definir: diálogos opcionales, ambientación]
 
-</Transición>
+</Fade out>
 ```
 
 #### Escena 1-2: Plaza Central
 ```
+</Fade in>
+
 [UBICACIÓN]: Plaza Central de Filanccia
 
 (Multitud rodea el centro de la plaza)
@@ -133,17 +138,20 @@ el centenario de nuestra ciudad...
 
 {Alcalde}: ¡QUE COMIENCE EL CARNAVAL!
 
-</Fundido a negro>
+</Fade out>
 ```
 
 #### Escena 1-3: Palacio de la Alcaldía - Hall
 ```
 [UBICACIÓN]: Hall del Palacio de la Alcaldía
 
+</Fade in>
+
 (Ballo Mascherato - todos los enmascarados bailan)
+(Los músicos tocan la orquesta [POR DEFINIR POSICIÓN])
 [Por definir: detalles del baile, interacciones]
 
-(La orquesta finaliza)
+(La orquesta finaliza y el baile se detiene lentamente)
 
 {Alcalde}: (Brindis) Queridos ciudadanos, hoy no solo celebramos
 el centenario de Filanccia... También anuncio que mi hijo
@@ -151,7 +159,7 @@ el centenario de Filanccia... También anuncio que mi hijo
 
 (El hijo del Alcalde es presentado ante la multitud)
 
-</Fundido a negro>
+</Fade out>
 ```
 
 #### Escena 1-4: El Asesinato
@@ -177,7 +185,7 @@ el centenario de Filanccia... También anuncio que mi hijo
 [Pensamiento de Marlo]: "No... necesito ver eso."
 
 === GAMEPLAY ===
-(El jugador puede mover a Marlo por el mapa)
+(El jugador puede mover a Marlo por el mapa entero del Palacio de la Alcaldía)
 (Objetivo: acercarse al cadáver, encontrar pistas)
 ```
 
