@@ -37,30 +37,15 @@ export default class Scene_1_0 extends Phaser.Scene {
     this.add.rectangle(centerX, height * 0.75, width, height * 0.5, 0x4a3a2a);
 
     // ============================================
-    // PLACEHOLDER - MARLO
+    // MARLO (sprite real)
     // ============================================
 
-    // Marlo (placeholder: rectángulo verde con etiqueta)
-    this.marlo = this.add.container(centerX, height * 0.55);
+    // Marlo mirando al espejo (vemos su cara como reflejo)
+    this.marlo = this.add.image(centerX, height * 0.6, 'marlo_idle_north')
+      .setOrigin(0.5, 1);
 
-    const marloBody = this.add.rectangle(0, 0, 40, 60, 0x4a7c4e);
-    const marloHead = this.add.circle(0, -40, 18, 0xf5d0c5);
-    const marloLabel = this.add.text(0, 45, 'MARLO', {
-      fontSize: '14px',
-      color: '#ffffff',
-      fontStyle: 'bold'
-    }).setOrigin(0.5);
-
-    this.marlo.add([marloBody, marloHead, marloLabel]);
-
-    // Estado de Marlo: 'espejo' (mirando al espejo/arriba) o 'frente' (mirando al jugador/abajo)
+    // Estado de Marlo: 'espejo' (norte) o 'frente' (sur)
     this.marloState = 'espejo';
-
-    // Indicador de dirección
-    this.directionIndicator = this.add.text(centerX, height * 0.55 - 70, '↑', {
-      fontSize: '24px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
 
     // ============================================
     // PLACEHOLDER - MÁSCARA
@@ -84,7 +69,7 @@ export default class Scene_1_0 extends Phaser.Scene {
       fontSize: '14px',
       color: '#ffffff',
       backgroundColor: '#00000088',
-      padding: { x: 8, y: 4 }
+      padding: { x: 2, y: 1 }
     });
 
     // ============================================
@@ -232,15 +217,16 @@ export default class Scene_1_0 extends Phaser.Scene {
   }
 
   marloTurn(direction, callback) {
-    // Animación simple: cambiar el indicador de dirección
-    const newArrow = direction === 'espejo' ? '↑' : '↓';
+    // Animación: flip horizontal y cambiar textura
+    // 'espejo' = south (vemos su cara como reflejo), 'frente' = north (se da la vuelta)
+    const newTexture = direction === 'espejo' ? 'marlo_idle_south' : 'marlo_idle_north';
 
     this.tweens.add({
       targets: this.marlo,
       scaleX: 0,
       duration: 150,
       onComplete: () => {
-        this.directionIndicator.setText(newArrow);
+        this.marlo.setTexture(newTexture);
         this.marloState = direction;
 
         this.tweens.add({
@@ -314,10 +300,8 @@ export default class Scene_1_0 extends Phaser.Scene {
           delay: 1200,
           ease: 'Power2',
           onComplete: () => {
-            // Máscara "puesta" - cambiar color de la cabeza
-            this.marlo.getAt(1).setFillStyle(0xffd700); // Cabeza ahora dorada
-
-            // Ocultar máscara separada
+            // Máscara "puesta" - ocultar máscara separada
+            // (El sprite de Marlo ya tiene la máscara en el diseño)
             this.mascara.setVisible(false);
 
             // Pausa dramática

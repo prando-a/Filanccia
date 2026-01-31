@@ -65,14 +65,19 @@ export default class Scene_1_1 extends Phaser.Scene {
     // Contenedor de la familia
     this.familyContainer = this.add.container(centerX, height * 0.65);
 
-    // Padres (adelante)
-    const padre = this.createCharacterPlaceholder(-30, -20, 0x3a5a7a, 'PADRE');
-    const madre = this.createCharacterPlaceholder(30, -20, 0x7a3a5a, 'MADRE');
+    // Padres (adelante) - usando sprites reales con animación de caminar
+    this.padre = this.add.sprite(-30, -20, 'father_idle_north').setOrigin(0.5, 1);
+    this.madre = this.add.sprite(30, -20, 'mother_idle_north').setOrigin(0.5, 1);
 
     // Marlo (detrás de los padres)
-    const marlo = this.createCharacterPlaceholder(0, 30, 0x4a7c4e, 'MARLO');
+    this.marlo = this.add.sprite(0, 30, 'marlo_idle_north').setOrigin(0.5, 1);
 
-    this.familyContainer.add([padre, madre, marlo]);
+    this.familyContainer.add([this.padre, this.madre, this.marlo]);
+
+    // Iniciar animaciones de caminar
+    this.padre.play('father_walk_north');
+    this.madre.play('mother_walk_north');
+    this.marlo.play('marlo_walk_north');
 
     // Animación de caminar (bobbing sutil)
     this.tweens.add({
@@ -127,20 +132,6 @@ export default class Scene_1_1 extends Phaser.Scene {
         this.scrollProgress = this.totalScrollHeight; // Saltar al final
       }
     });
-  }
-
-  createCharacterPlaceholder(x, y, color, label) {
-    const container = this.add.container(x, y);
-
-    const body = this.add.rectangle(0, 0, 28, 45, color);
-    const head = this.add.circle(0, -30, 12, 0xf5d0c5);
-    const labelText = this.add.text(0, 35, label, {
-      fontSize: '10px',
-      color: '#ffffff'
-    }).setOrigin(0.5);
-
-    container.add([body, head, labelText]);
-    return container;
   }
 
   createFarBuildings() {
@@ -327,6 +318,14 @@ export default class Scene_1_1 extends Phaser.Scene {
   onArrival() {
     // Detener animación de caminar
     this.tweens.killTweensOf(this.familyContainer);
+
+    // Detener animaciones de sprites y mostrar idle
+    this.padre.stop();
+    this.padre.setTexture('father_idle_north');
+    this.madre.stop();
+    this.madre.setTexture('mother_idle_north');
+    this.marlo.stop();
+    this.marlo.setTexture('marlo_idle_north');
 
     this.scenePhase = 'transition';
 

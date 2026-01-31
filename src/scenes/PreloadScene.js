@@ -46,35 +46,165 @@ export default class PreloadScene extends Phaser.Scene {
     // LOAD ALL GAME ASSETS HERE
     // ============================================
 
-    // Example: Character sprites
-    // this.load.spritesheet('player', 'assets/images/characters/player.png', {
-    //   frameWidth: 64,
-    //   frameHeight: 64
-    // });
+    const charPath = 'src/assets/characters';
 
-    // Example: Tilesets
-    // this.load.image('tileset', 'assets/images/tiles/tileset.png');
+    // ----- MARLO -----
+    // Idle (4 direcciones)
+    this.load.image('marlo_idle_south', `${charPath}/marlo1.png`);
+    this.load.image('marlo_idle_west', `${charPath}/marlo2.png`);
+    this.load.image('marlo_idle_east', `${charPath}/marlo3.png`);
+    this.load.image('marlo_idle_north', `${charPath}/marlo4.png`);
+    // Walk spritesheets (4 frames cada uno)
+    this.load.spritesheet('marlo_walk_north', `${charPath}/marloWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('marlo_walk_south', `${charPath}/marloWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('marlo_walk_east', `${charPath}/marloWalkEast.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('marlo_walk_west', `${charPath}/marloWalkWest.png`, { frameWidth: 64, frameHeight: 64 });
 
-    // Example: Tilemaps
-    // this.load.tilemapTiledJSON('map1', 'assets/maps/map1.json');
+    // ----- FATHER (Padre) -----
+    this.load.image('father_idle_south', `${charPath}/father1.png`);
+    this.load.image('father_idle_west', `${charPath}/father2.png`);
+    this.load.image('father_idle_east', `${charPath}/father3.png`);
+    this.load.image('father_idle_north', `${charPath}/father4.png`);
+    this.load.spritesheet('father_walk_north', `${charPath}/fatherWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('father_walk_south', `${charPath}/fatherWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('father_walk_east', `${charPath}/fatherWalkEast.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('father_walk_west', `${charPath}/fatherWalkWest.png`, { frameWidth: 64, frameHeight: 64 });
 
-    // Example: UI elements
-    // this.load.image('button', 'assets/images/ui/button.png');
+    // ----- MOTHER (Madre) -----
+    this.load.image('mother_idle_south', `${charPath}/mother1.png`);
+    this.load.image('mother_idle_west', `${charPath}/mother2.png`);
+    this.load.image('mother_idle_east', `${charPath}/mother3.png`);
+    this.load.image('mother_idle_north', `${charPath}/mother4.png`);
+    this.load.spritesheet('mother_walk_north', `${charPath}/motherWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('mother_walk_south', `${charPath}/motherWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('mother_walk_east', `${charPath}/motherWalkEast.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('mother_walk_west', `${charPath}/motherWalkWest.png`, { frameWidth: 64, frameHeight: 64 });
 
-    // Example: Audio
-    // this.load.audio('bgm', 'assets/audio/bgm.mp3');
-    // this.load.audio('sfx_click', 'assets/audio/click.wav');
+    // ----- CARABINIERI -----
+    this.load.image('carabiniere', `${charPath}/carabinieri1.png`);
+
+    // ----- VILLAIN (Strappavolti) -----
+    this.load.image('villain_idle_south', `${charPath}/villain1.png`);
+    this.load.image('villain_idle_west', `${charPath}/villain2.png`);
+    this.load.image('villain_idle_east', `${charPath}/villain3.png`);
+    this.load.image('villain_idle_north', `${charPath}/villain4.png`);
+    this.load.spritesheet('villain_walk_north', `${charPath}/villainWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('villain_walk_south', `${charPath}/villainWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('villain_walk_east', `${charPath}/villainWalkEast.png`, { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('villain_walk_west', `${charPath}/villainWalkWest.png`, { frameWidth: 64, frameHeight: 64 });
+
+    // ----- ALABARDIERI -----
+    this.load.image('alabardiere', `${charPath}/alabardieri1.png`);
   }
 
   create() {
-    // Create global animations here
-    // Example:
-    // this.anims.create({
-    //   key: 'player_idle',
-    //   frames: this.anims.generateFrameNumbers('player', { start: 0, end: 3 }),
-    //   frameRate: 8,
-    //   repeat: -1
-    // });
+    // ============================================
+    // CREATE GLOBAL ANIMATIONS
+    // ============================================
+
+    // ----- MARLO ANIMATIONS -----
+    this.anims.create({
+      key: 'marlo_walk_north',
+      frames: this.anims.generateFrameNumbers('marlo_walk_north', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'marlo_walk_south',
+      frames: this.anims.generateFrameNumbers('marlo_walk_south', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'marlo_walk_east',
+      frames: this.anims.generateFrameNumbers('marlo_walk_east', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'marlo_walk_west',
+      frames: this.anims.generateFrameNumbers('marlo_walk_west', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+
+    // ----- FATHER ANIMATIONS -----
+    this.anims.create({
+      key: 'father_walk_north',
+      frames: this.anims.generateFrameNumbers('father_walk_north', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'father_walk_south',
+      frames: this.anims.generateFrameNumbers('father_walk_south', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'father_walk_east',
+      frames: this.anims.generateFrameNumbers('father_walk_east', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'father_walk_west',
+      frames: this.anims.generateFrameNumbers('father_walk_west', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+
+    // ----- MOTHER ANIMATIONS -----
+    this.anims.create({
+      key: 'mother_walk_north',
+      frames: this.anims.generateFrameNumbers('mother_walk_north', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'mother_walk_south',
+      frames: this.anims.generateFrameNumbers('mother_walk_south', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'mother_walk_east',
+      frames: this.anims.generateFrameNumbers('mother_walk_east', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'mother_walk_west',
+      frames: this.anims.generateFrameNumbers('mother_walk_west', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+
+    // ----- VILLAIN ANIMATIONS -----
+    this.anims.create({
+      key: 'villain_walk_north',
+      frames: this.anims.generateFrameNumbers('villain_walk_north', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'villain_walk_south',
+      frames: this.anims.generateFrameNumbers('villain_walk_south', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'villain_walk_east',
+      frames: this.anims.generateFrameNumbers('villain_walk_east', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'villain_walk_west',
+      frames: this.anims.generateFrameNumbers('villain_walk_west', { start: 0, end: 3 }),
+      frameRate: 8,
+      repeat: -1
+    });
 
     // Short delay then go to menu
     this.time.delayedCall(500, () => {
