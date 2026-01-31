@@ -439,6 +439,18 @@
                  "width":32,
                  "x":122,
                  "y":149.5
+                }, 
+                {
+                 "ellipse":true,
+                 "height":32,
+                 "id":38,
+                 "name":"mother_spawn",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":500,
+                 "y":322.5
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -447,7 +459,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":38,
+ "nextobjectid":39,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",
