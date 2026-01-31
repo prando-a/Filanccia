@@ -66,6 +66,11 @@ export default class Scene_1_0 extends Phaser.Scene {
 
     this.marlo = this.physics.add.sprite(spawnX, spawnY, 'marlo_idle_north')
       .setOrigin(0.5, 0.5);
+
+    // Ajustar el collider del jugador (más pequeño que el sprite)
+    this.marlo.body.setSize(20, 12);
+    this.marlo.body.setOffset(22, 48);
+
     this.marlo.setCollideWorldBounds(true);
     this.physics.add.collider(this.marlo, this.colliders);
 
@@ -73,14 +78,26 @@ export default class Scene_1_0 extends Phaser.Scene {
     this.marloDirection = 'north';
 
     // ============================================
-    // MADRE (aparece en la entrada)
+    // MADRE (aparece desde mother_spawn)
     // ============================================
 
-    // Posición de la entrada (ajustar según el mapa)
-    this.entradaX = this.map.widthInPixels - 80;
-    this.entradaY = spawnY + 20;
+    // Obtener mother_spawn del mapa
+    let motherSpawnX = 516;
+    let motherSpawnY = 338;
 
-    this.madre = this.add.sprite(this.entradaX + 100, this.entradaY, 'mother_idle_west')
+    if (objectsLayer) {
+      const motherSpawn = objectsLayer.objects.find(obj => obj.name === 'mother_spawn');
+      if (motherSpawn) {
+        motherSpawnX = motherSpawn.x + (motherSpawn.width || 0) / 2;
+        motherSpawnY = motherSpawn.y + (motherSpawn.height || 0) / 2;
+      }
+    }
+
+    this.motherSpawnX = motherSpawnX;
+    this.motherSpawnY = motherSpawnY;
+
+    // La madre empieza fuera de pantalla (más a la derecha del spawn)
+    this.madre = this.add.sprite(motherSpawnX + 80, motherSpawnY, 'mother_idle_west')
       .setOrigin(0.5, 0.5)
       .setVisible(false);
 
@@ -102,10 +119,10 @@ export default class Scene_1_0 extends Phaser.Scene {
     // ZONA DE SALIDA (para gameplay)
     // ============================================
 
-    // Zona de salida cerca de la entrada
+    // Zona de salida cerca del mother_spawn (la puerta)
     this.zonaSalida = this.add.rectangle(
-      this.map.widthInPixels - 40,
-      this.entradaY,
+      motherSpawnX + 60,
+      motherSpawnY,
       60, 80,
       0x00ff00, 0
     );
@@ -304,14 +321,14 @@ export default class Scene_1_0 extends Phaser.Scene {
 
   madreAparece(callback) {
     this.madre.setVisible(true);
-    this.madre.setPosition(this.entradaX + 100, this.entradaY);
+    this.madre.setPosition(this.motherSpawnX + 80, this.motherSpawnY);
 
-    // Madre entra caminando
+    // Madre entra caminando hacia la izquierda
     this.madre.play('mother_walk_west');
 
     this.tweens.add({
       targets: this.madre,
-      x: this.entradaX,
+      x: this.motherSpawnX,
       duration: 800,
       ease: 'Linear',
       onComplete: () => {
@@ -331,7 +348,7 @@ export default class Scene_1_0 extends Phaser.Scene {
 
       this.tweens.add({
         targets: this.madre,
-        x: this.entradaX + 120,
+        x: this.motherSpawnX + 100,
         duration: 600,
         ease: 'Linear',
         onComplete: () => {
@@ -477,14 +494,14 @@ export default class Scene_1_0 extends Phaser.Scene {
 
     if (this.instructionText) this.instructionText.destroy();
 
-    // Marlo camina hacia la salida
+    // Marlo camina hacia la salida (hacia la derecha, donde está la puerta)
     this.marlo.setVelocity(0);
     this.marlo.play('marlo_walk_east');
 
     this.tweens.add({
       targets: this.marlo,
-      x: this.map.widthInPixels + 50,
-      duration: 800,
+      x: this.motherSpawnX + 100,
+      duration: 600,
       onComplete: () => {
         this.cameras.main.fadeOut(1000, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {
