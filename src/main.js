@@ -4,6 +4,9 @@ import BootScene from './scenes/BootScene.js';
 import PreloadScene from './scenes/PreloadScene.js';
 import MenuScene from './scenes/MenuScene.js';
 import GameScene from './scenes/GameScene.js';
+import Scene_1_0 from './scenes/Scene_1_0.js';
+import Scene_1_1 from './scenes/Scene_1_1.js';
+import Scene_1_2 from './scenes/Scene_1_2.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -15,7 +18,10 @@ const config = {
     BootScene,
     PreloadScene,
     MenuScene,
-    GameScene
+    GameScene,
+    Scene_1_0,
+    Scene_1_1,
+    Scene_1_2
   ],
   physics: {
     default: 'arcade',
