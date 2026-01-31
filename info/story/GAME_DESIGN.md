@@ -85,15 +85,19 @@
 
 #### Escena 1-0: Casa de Marlo - Baño
 ```
-[UBICACIÓN]: Casa de Marlo - cuarto de baño (Mapa Tiled)
+[UBICACIÓN]: Casa de Marlo - cuarto de baño (Mapa Tiled ya está cargado)
 
 </Fade in>
 (Marlo frente al espejo, mirando adelante)
 </Pausa 2 seg>
 
+(Madre de Marlo aparece en la entrada)
+
 {Madre}: ¡Marlo! ¡Llegamos tarde, date prisa!
 
 (Marlo se da la vuelta)
+
+(La madre sale del lugar)
 
 {Marlo}: ¡Ya voy! ¡Ya estoy listo!
 
@@ -106,6 +110,10 @@
 (Marlo se coloca su máscara para el carnaval)
 
 </Subescena>
+
+=== GAMEPLAY ===
+(El jugador puede mover a Marlo por el mapa)
+(Objetivo. Salir del lugar para pasar a la siguiente escena)
 
 </Fade out>
 ```

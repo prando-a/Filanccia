@@ -95,6 +95,17 @@ export default class PreloadScene extends Phaser.Scene {
 
     // ----- ALABARDIERI -----
     this.load.image('alabardiere', `${charPath}/alabardieri1.png`);
+
+    // ============================================
+    // TILEMAPS AND TILESETS
+    // ============================================
+
+    const mapPath = 'src/assets/map';
+
+    // Scene 1 (Baño de Marlo)
+    this.load.tilemapTiledJSON('scene1_map', `${mapPath}/scene1.json`);
+    this.load.image('tileset_interior1', `${mapPath}/interior1.png`);
+    this.load.image('tileset_castleExterior', `${mapPath}/castleTilesExterior.png`);
   }
 
   create() {

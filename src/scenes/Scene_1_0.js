@@ -9,75 +9,139 @@ export default class Scene_1_0 extends Phaser.Scene {
 
   create() {
     const { width, height } = this.scale;
-    const centerX = width / 2;
-    const centerY = height / 2;
 
     // ============================================
-    // PLACEHOLDERS - ESCENARIO
+    // TILEMAP - ESCENARIO
     // ============================================
 
-    // Fondo del baño
-    this.add.rectangle(centerX, centerY, width, height, 0x2a3a4a);
+    this.map = this.make.tilemap({ key: 'scene1_map' });
 
-    // Pared
-    this.add.rectangle(centerX, height * 0.3, width, height * 0.4, 0x3a4a5a);
+    const tilesetInterior = this.map.addTilesetImage('interior1', 'tileset_interior1');
+    const tilesetExterior = this.map.addTilesetImage('castleTilesExterior', 'tileset_castleExterior');
 
-    // Espejo (rectángulo con borde)
-    const espejo = this.add.rectangle(centerX, height * 0.35, 120, 160, 0x87CEEB);
-    this.add.rectangle(centerX, height * 0.35, 130, 170)
-      .setStrokeStyle(4, 0x8B4513);
-
-    // Etiqueta del espejo
-    this.add.text(centerX, height * 0.35 - 100, '[ESPEJO]', {
-      fontSize: '12px',
-      color: '#888888'
-    }).setOrigin(0.5);
-
-    // Suelo
-    this.add.rectangle(centerX, height * 0.75, width, height * 0.5, 0x4a3a2a);
+    this.floorLayer = this.map.createLayer('floor', [tilesetInterior, tilesetExterior], 0, 0);
 
     // ============================================
-    // MARLO (sprite real)
+    // COLLIDERS
     // ============================================
 
-    // Marlo mirando al espejo (vemos su cara como reflejo)
-    this.marlo = this.add.image(centerX, height * 0.6, 'marlo_idle_north')
-      .setOrigin(0.5, 1);
+    this.colliders = this.physics.add.staticGroup();
 
-    // Estado de Marlo: 'espejo' (norte) o 'frente' (sur)
+    const colliderObjects = this.map.getObjectLayer('colliders');
+    if (colliderObjects) {
+      colliderObjects.objects.forEach(obj => {
+        const collider = this.add.rectangle(
+          obj.x + obj.width / 2,
+          obj.y + obj.height / 2,
+          obj.width,
+          obj.height
+        );
+        this.physics.add.existing(collider, true);
+        this.colliders.add(collider);
+      });
+    }
+
+    // ============================================
+    // PUNTO DE SPAWN
+    // ============================================
+
+    const objectsLayer = this.map.getObjectLayer('objects');
+    let spawnX = 138;
+    let spawnY = 165;
+
+    if (objectsLayer) {
+      const spawnPoint = objectsLayer.objects.find(obj => obj.name === 'player_spawn');
+      if (spawnPoint) {
+        spawnX = spawnPoint.x + (spawnPoint.width || 0) / 2;
+        spawnY = spawnPoint.y + (spawnPoint.height || 0) / 2;
+      }
+    }
+
+    this.spawnX = spawnX;
+    this.spawnY = spawnY;
+
+    // ============================================
+    // MARLO (sprite con física)
+    // ============================================
+
+    this.marlo = this.physics.add.sprite(spawnX, spawnY, 'marlo_idle_north')
+      .setOrigin(0.5, 0.5);
+    this.marlo.setCollideWorldBounds(true);
+    this.physics.add.collider(this.marlo, this.colliders);
+
     this.marloState = 'espejo';
+    this.marloDirection = 'north';
+
+    // ============================================
+    // MADRE (aparece en la entrada)
+    // ============================================
+
+    // Posición de la entrada (ajustar según el mapa)
+    this.entradaX = this.map.widthInPixels - 80;
+    this.entradaY = spawnY + 20;
+
+    this.madre = this.add.sprite(this.entradaX + 100, this.entradaY, 'mother_idle_west')
+      .setOrigin(0.5, 0.5)
+      .setVisible(false);
 
     // ============================================
     // PLACEHOLDER - MÁSCARA
     // ============================================
 
-    // La máscara aparecerá durante la cinemática
-    this.mascara = this.add.container(centerX + 80, height * 0.55);
+    this.mascara = this.add.container(spawnX + 50, spawnY);
     const mascaraShape = this.add.ellipse(0, 0, 30, 40, 0xffd700);
     const mascaraLabel = this.add.text(0, 30, '[MÁSCARA]', {
       fontSize: '10px',
       color: '#888888'
     }).setOrigin(0.5);
     this.mascara.add([mascaraShape, mascaraLabel]);
-    this.mascara.setVisible(false); // Oculta hasta la cinemática
+    this.mascara.setVisible(false);
+    this.mascara.setDepth(10);
 
     // ============================================
-    // UI - Indicador de escena (debug)
+    // ZONA DE SALIDA (para gameplay)
     // ============================================
 
-    this.add.text(10, 10, 'ESCENA 1-0: Casa de Marlo - Baño', {
+    // Zona de salida cerca de la entrada
+    this.zonaSalida = this.add.rectangle(
+      this.map.widthInPixels - 40,
+      this.entradaY,
+      60, 80,
+      0x00ff00, 0
+    );
+    this.physics.add.existing(this.zonaSalida, true);
+
+    // ============================================
+    // CÁMARA
+    // ============================================
+
+    const mapWidth = this.map.widthInPixels;
+    const mapHeight = this.map.heightInPixels;
+
+    if (mapWidth < width || mapHeight < height) {
+      this.cameras.main.setBounds(0, 0, Math.max(mapWidth, width), Math.max(mapHeight, height));
+      this.cameras.main.centerOn(mapWidth / 2, mapHeight / 2);
+    } else {
+      this.cameras.main.setBounds(0, 0, mapWidth, mapHeight);
+    }
+
+    // ============================================
+    // UI
+    // ============================================
+
+    this.debugText = this.add.text(10, 10, 'ESCENA 1-0: Casa de Marlo - Baño', {
       fontSize: '14px',
       color: '#ffffff',
       backgroundColor: '#00000088',
       padding: { x: 2, y: 1 }
-    });
+    }).setScrollFactor(0).setDepth(1000);
 
     // ============================================
     // CAJA DE DIÁLOGO
     // ============================================
 
-    this.dialogueBox = this.add.container(centerX, height - 80);
-    this.dialogueBox.setVisible(false);
+    this.dialogueBox = this.add.container(width / 2, height - 80);
+    this.dialogueBox.setVisible(false).setScrollFactor(0).setDepth(1000);
 
     const boxBg = this.add.rectangle(0, 0, width - 60, 120, 0x000000, 0.85);
     boxBg.setStrokeStyle(2, 0xffffff);
@@ -102,18 +166,27 @@ export default class Scene_1_0 extends Phaser.Scene {
     this.dialogueBox.add([boxBg, this.speakerText, this.dialogueText, this.continueHint]);
 
     // ============================================
-    // SECUENCIA DE LA ESCENA
+    // CONTROLES
+    // ============================================
+
+    this.cursors = this.input.keyboard.createCursorKeys();
+    this.wasd = this.input.keyboard.addKeys({
+      up: 'W', down: 'S', left: 'A', right: 'D'
+    });
+
+    // ============================================
+    // SECUENCIA
     // ============================================
 
     this.currentStep = 0;
     this.isAnimating = false;
     this.waitingForInput = false;
+    this.gameplayMode = false;
 
-    // Input para avanzar diálogos
     this.input.keyboard.on('keydown-SPACE', () => this.handleInput());
     this.input.on('pointerdown', () => this.handleInput());
 
-    // Iniciar secuencia con fade in
+    // Iniciar con fade in
     this.cameras.main.fadeIn(1000, 0, 0, 0);
     this.cameras.main.once('camerafadeincomplete', () => {
       this.time.delayedCall(500, () => this.runSequence());
@@ -121,6 +194,8 @@ export default class Scene_1_0 extends Phaser.Scene {
   }
 
   handleInput() {
+    if (this.gameplayMode) return;
+
     if (this.waitingForInput && !this.isAnimating) {
       this.waitingForInput = false;
       this.dialogueBox.setVisible(false);
@@ -129,15 +204,11 @@ export default class Scene_1_0 extends Phaser.Scene {
     }
   }
 
-  showDialogue(speaker, text, callback) {
+  showDialogue(speaker, text) {
     this.speakerText.setText(speaker);
     this.dialogueText.setText(text);
     this.dialogueBox.setVisible(true);
-
-    if (callback) {
-      // Auto-avanzar después de mostrar
-      this.waitingForInput = true;
-    }
+    this.waitingForInput = true;
   }
 
   runSequence() {
@@ -155,13 +226,22 @@ export default class Scene_1_0 extends Phaser.Scene {
         break;
 
       case 1:
-        // Madre grita (off-screen)
-        this.showDialogue('Madre (off)', '¡Marlo! ¡Llegamos tarde, date prisa!', true);
-        this.waitingForInput = true;
+        // Madre aparece en la entrada
+        this.isAnimating = true;
+        this.madreAparece(() => {
+          this.isAnimating = false;
+          this.currentStep++;
+          this.runSequence();
+        });
         break;
 
       case 2:
-        // Marlo se da la vuelta
+        // Madre habla
+        this.showDialogue('Madre', '¡Marlo! ¡Llegamos tarde, date prisa!');
+        break;
+
+      case 3:
+        // Marlo se da la vuelta hacia la madre
         this.isAnimating = true;
         this.marloTurn('frente', () => {
           this.isAnimating = false;
@@ -170,13 +250,22 @@ export default class Scene_1_0 extends Phaser.Scene {
         });
         break;
 
-      case 3:
-        // Marlo responde
-        this.showDialogue('Marlo', '¡Ya voy! ¡Ya estoy listo!', true);
-        this.waitingForInput = true;
+      case 4:
+        // La madre sale del lugar
+        this.isAnimating = true;
+        this.madreSale(() => {
+          this.isAnimating = false;
+          this.currentStep++;
+          this.runSequence();
+        });
         break;
 
-      case 4:
+      case 5:
+        // Marlo responde (madre ya se fue)
+        this.showDialogue('Marlo', '¡Ya voy! ¡Ya estoy listo!');
+        break;
+
+      case 6:
         // Marlo vuelve a mirar al espejo
         this.isAnimating = true;
         this.marloTurn('espejo', () => {
@@ -186,17 +275,17 @@ export default class Scene_1_0 extends Phaser.Scene {
         });
         break;
 
-      case 5:
+      case 7:
         // Pausa antes de la cinemática
         this.isAnimating = true;
-        this.time.delayedCall(1000, () => {
+        this.time.delayedCall(500, () => {
           this.isAnimating = false;
           this.currentStep++;
           this.runSequence();
         });
         break;
 
-      case 6:
+      case 8:
         // Cinemática: colocarse la máscara
         this.isAnimating = true;
         this.cinematicaMascara(() => {
@@ -206,20 +295,55 @@ export default class Scene_1_0 extends Phaser.Scene {
         });
         break;
 
-      case 7:
-        // Fade out y transición a siguiente escena
-        this.cameras.main.fadeOut(1000, 0, 0, 0);
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-          this.scene.start('Scene_1_1');
-        });
+      case 9:
+        // Iniciar gameplay
+        this.startGameplay();
         break;
     }
   }
 
+  madreAparece(callback) {
+    this.madre.setVisible(true);
+    this.madre.setPosition(this.entradaX + 100, this.entradaY);
+
+    // Madre entra caminando
+    this.madre.play('mother_walk_west');
+
+    this.tweens.add({
+      targets: this.madre,
+      x: this.entradaX,
+      duration: 800,
+      ease: 'Linear',
+      onComplete: () => {
+        this.madre.stop();
+        this.madre.setTexture('mother_idle_west');
+        this.time.delayedCall(200, callback);
+      }
+    });
+  }
+
+  madreSale(callback) {
+    // Madre se da la vuelta y sale
+    this.madre.setTexture('mother_idle_east');
+
+    this.time.delayedCall(300, () => {
+      this.madre.play('mother_walk_east');
+
+      this.tweens.add({
+        targets: this.madre,
+        x: this.entradaX + 120,
+        duration: 600,
+        ease: 'Linear',
+        onComplete: () => {
+          this.madre.setVisible(false);
+          callback();
+        }
+      });
+    });
+  }
+
   marloTurn(direction, callback) {
-    // Animación: flip horizontal y cambiar textura
-    // 'espejo' = south (vemos su cara como reflejo), 'frente' = north (se da la vuelta)
-    const newTexture = direction === 'espejo' ? 'marlo_idle_south' : 'marlo_idle_north';
+    const newTexture = direction === 'espejo' ? 'marlo_idle_north' : 'marlo_idle_south';
 
     this.tweens.add({
       targets: this.marlo,
@@ -228,6 +352,7 @@ export default class Scene_1_0 extends Phaser.Scene {
       onComplete: () => {
         this.marlo.setTexture(newTexture);
         this.marloState = direction;
+        this.marloDirection = direction === 'espejo' ? 'north' : 'south';
 
         this.tweens.add({
           targets: this.marlo,
@@ -241,37 +366,25 @@ export default class Scene_1_0 extends Phaser.Scene {
 
   cinematicaMascara(callback) {
     const { width, height } = this.scale;
-    const centerX = width / 2;
 
-    // ============================================
-    // FASE 1: Zoom-in hacia Marlo y el espejo
-    // ============================================
+    const focusX = this.marlo.x;
+    const focusY = this.marlo.y - 30;
 
-    // Punto de enfoque: entre Marlo y el espejo
-    const focusX = centerX;
-    const focusY = height * 0.45;
-
-    // Zoom-in de la cámara
     this.tweens.add({
       targets: this.cameras.main,
-      zoom: 1.8,
+      zoom: 2,
       scrollX: focusX - width / 2,
-      scrollY: focusY - height / 2 + 50,
+      scrollY: focusY - height / 2,
       duration: 1500,
       ease: 'Power2',
       onComplete: () => {
-        // ============================================
-        // FASE 2: Colocarse la máscara (zoom aplicado)
-        // ============================================
-
-        // Mostrar texto de cinemática (ajustado para el zoom)
-        const cinText = this.add.text(centerX, height * 0.15, '[ Marlo se coloca su máscara ]', {
-          fontSize: '10px',
+        const cinText = this.add.text(focusX, focusY - 60, '[ Marlo se coloca su máscara ]', {
+          fontSize: '8px',
           color: '#ffd700',
           fontStyle: 'italic',
           backgroundColor: '#00000088',
-          padding: { x: 8, y: 4 }
-        }).setOrigin(0.5).setAlpha(0);
+          padding: { x: 4, y: 2 }
+        }).setOrigin(0.5).setAlpha(0).setDepth(100);
 
         this.tweens.add({
           targets: cinText,
@@ -279,10 +392,9 @@ export default class Scene_1_0 extends Phaser.Scene {
           duration: 500
         });
 
-        // Mostrar máscara
         this.mascara.setVisible(true);
         this.mascara.setAlpha(0);
-        this.mascara.setPosition(centerX + 50, height * 0.55);
+        this.mascara.setPosition(this.marlo.x + 30, this.marlo.y);
 
         this.tweens.add({
           targets: this.mascara,
@@ -291,36 +403,31 @@ export default class Scene_1_0 extends Phaser.Scene {
           delay: 500
         });
 
-        // Mover máscara hacia Marlo
         this.tweens.add({
           targets: this.mascara,
-          x: centerX,
-          y: height * 0.55 - 40,
+          x: this.marlo.x,
+          y: this.marlo.y - 20,
           duration: 1000,
           delay: 1200,
           ease: 'Power2',
           onComplete: () => {
-            // Máscara "puesta" - ocultar máscara separada
-            // (El sprite de Marlo ya tiene la máscara en el diseño)
             this.mascara.setVisible(false);
 
-            // Pausa dramática
             this.time.delayedCall(1000, () => {
-              // ============================================
-              // FASE 3: Zoom-out y finalizar
-              // ============================================
-
               this.tweens.add({
                 targets: cinText,
                 alpha: 0,
                 duration: 400
               });
 
+              const mapCenterX = this.map.widthInPixels / 2;
+              const mapCenterY = this.map.heightInPixels / 2;
+
               this.tweens.add({
                 targets: this.cameras.main,
                 zoom: 1,
-                scrollX: 0,
-                scrollY: 0,
+                scrollX: mapCenterX - width / 2,
+                scrollY: mapCenterY - height / 2,
                 duration: 1000,
                 ease: 'Power2',
                 onComplete: () => {
@@ -332,5 +439,103 @@ export default class Scene_1_0 extends Phaser.Scene {
         });
       }
     });
+  }
+
+  startGameplay() {
+    this.gameplayMode = true;
+
+    this.debugText.setText('ESCENA 1-0: GAMEPLAY - Sal del baño');
+
+    // Instrucciones
+    this.instructionText = this.add.text(
+      this.scale.width / 2, 50,
+      'Usa las flechas o WASD para mover a Marlo\nSal por la puerta',
+      {
+        fontSize: '14px',
+        color: '#ffffff',
+        backgroundColor: '#00000088',
+        padding: { x: 10, y: 5 },
+        align: 'center'
+      }
+    ).setOrigin(0.5).setScrollFactor(0).setDepth(1000);
+
+    // Marlo mira hacia la salida
+    this.marlo.setTexture('marlo_idle_east');
+    this.marloDirection = 'east';
+
+    // Detector de salida
+    this.physics.add.overlap(this.marlo, this.zonaSalida, () => {
+      if (!this.exiting) {
+        this.exiting = true;
+        this.exitScene();
+      }
+    });
+  }
+
+  exitScene() {
+    this.gameplayMode = false;
+
+    if (this.instructionText) this.instructionText.destroy();
+
+    // Marlo camina hacia la salida
+    this.marlo.setVelocity(0);
+    this.marlo.play('marlo_walk_east');
+
+    this.tweens.add({
+      targets: this.marlo,
+      x: this.map.widthInPixels + 50,
+      duration: 800,
+      onComplete: () => {
+        this.cameras.main.fadeOut(1000, 0, 0, 0);
+        this.cameras.main.once('camerafadeoutcomplete', () => {
+          this.scene.start('Scene_1_1');
+        });
+      }
+    });
+  }
+
+  update() {
+    if (!this.gameplayMode) {
+      this.marlo.setVelocity(0);
+      return;
+    }
+
+    // Movimiento de Marlo
+    let vx = 0;
+    let vy = 0;
+
+    if (this.cursors.left.isDown || this.wasd.left.isDown) vx = -1;
+    if (this.cursors.right.isDown || this.wasd.right.isDown) vx = 1;
+    if (this.cursors.up.isDown || this.wasd.up.isDown) vy = -1;
+    if (this.cursors.down.isDown || this.wasd.down.isDown) vy = 1;
+
+    const speed = 120;
+    let newDirection = this.marloDirection;
+    const isMoving = vx !== 0 || vy !== 0;
+
+    if (vy < 0) newDirection = 'north';
+    else if (vy > 0) newDirection = 'south';
+    else if (vx < 0) newDirection = 'west';
+    else if (vx > 0) newDirection = 'east';
+
+    if (isMoving) {
+      const animKey = `marlo_walk_${newDirection}`;
+      if (this.marlo.anims.currentAnim?.key !== animKey) {
+        this.marlo.play(animKey);
+      }
+      this.marloDirection = newDirection;
+
+      // Normalizar diagonal
+      if (vx !== 0 && vy !== 0) {
+        vx *= 0.707;
+        vy *= 0.707;
+      }
+
+      this.marlo.setVelocity(vx * speed, vy * speed);
+    } else {
+      this.marlo.setVelocity(0);
+      this.marlo.stop();
+      this.marlo.setTexture(`marlo_idle_${this.marloDirection}`);
+    }
   }
 }
