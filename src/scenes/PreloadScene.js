@@ -51,10 +51,11 @@ export default class PreloadScene extends Phaser.Scene {
     // ----- MARLO -----
     // Idle (4 direcciones)
     this.load.image('marlo_idle_south', `${charPath}/marlo1.png`);
-    this.load.image('marlo_idle_west', `${charPath}/marlo2.png`);
-    this.load.image('marlo_idle_east', `${charPath}/marlo3.png`);
-    this.load.image('marlo_idle_north', `${charPath}/marlo4.png`);
+    this.load.image('marlo_idle_east', `${charPath}/marlo2.png`);
+    this.load.image('marlo_idle_north', `${charPath}/marlo3.png`);
+    this.load.image('marlo_idle_west', `${charPath}/marlo4.png`);
     // Walk spritesheets (4 frames cada uno)
+    // Archivos rotados: North->West, East->North, West->East
     this.load.spritesheet('marlo_walk_north', `${charPath}/marloWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('marlo_walk_south', `${charPath}/marloWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('marlo_walk_east', `${charPath}/marloWalkEast.png`, { frameWidth: 64, frameHeight: 64 });
@@ -62,9 +63,9 @@ export default class PreloadScene extends Phaser.Scene {
 
     // ----- FATHER (Padre) -----
     this.load.image('father_idle_south', `${charPath}/father1.png`);
-    this.load.image('father_idle_west', `${charPath}/father2.png`);
-    this.load.image('father_idle_east', `${charPath}/father3.png`);
-    this.load.image('father_idle_north', `${charPath}/father4.png`);
+    this.load.image('father_idle_east', `${charPath}/father2.png`);
+    this.load.image('father_idle_north', `${charPath}/father3.png`);
+    this.load.image('father_idle_west', `${charPath}/father4.png`);
     this.load.spritesheet('father_walk_north', `${charPath}/fatherWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('father_walk_south', `${charPath}/fatherWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('father_walk_east', `${charPath}/fatherWalkEast.png`, { frameWidth: 64, frameHeight: 64 });
@@ -72,9 +73,9 @@ export default class PreloadScene extends Phaser.Scene {
 
     // ----- MOTHER (Madre) -----
     this.load.image('mother_idle_south', `${charPath}/mother1.png`);
-    this.load.image('mother_idle_west', `${charPath}/mother2.png`);
-    this.load.image('mother_idle_east', `${charPath}/mother3.png`);
-    this.load.image('mother_idle_north', `${charPath}/mother4.png`);
+    this.load.image('mother_idle_east', `${charPath}/mother2.png`);
+    this.load.image('mother_idle_north', `${charPath}/mother3.png`);
+    this.load.image('mother_idle_west', `${charPath}/mother4.png`);
     this.load.spritesheet('mother_walk_north', `${charPath}/motherWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('mother_walk_south', `${charPath}/motherWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('mother_walk_east', `${charPath}/motherWalkEast.png`, { frameWidth: 64, frameHeight: 64 });
@@ -85,9 +86,9 @@ export default class PreloadScene extends Phaser.Scene {
 
     // ----- VILLAIN (Strappavolti) -----
     this.load.image('villain_idle_south', `${charPath}/villain1.png`);
-    this.load.image('villain_idle_west', `${charPath}/villain2.png`);
-    this.load.image('villain_idle_east', `${charPath}/villain3.png`);
-    this.load.image('villain_idle_north', `${charPath}/villain4.png`);
+    this.load.image('villain_idle_east', `${charPath}/villain2.png`);
+    this.load.image('villain_idle_north', `${charPath}/villain3.png`);
+    this.load.image('villain_idle_west', `${charPath}/villain4.png`);
     this.load.spritesheet('villain_walk_north', `${charPath}/villainWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('villain_walk_south', `${charPath}/villainWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('villain_walk_east', `${charPath}/villainWalkEast.png`, { frameWidth: 64, frameHeight: 64 });

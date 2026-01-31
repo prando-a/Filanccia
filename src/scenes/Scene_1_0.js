@@ -119,11 +119,11 @@ export default class Scene_1_0 extends Phaser.Scene {
     // ZONA DE SALIDA (para gameplay)
     // ============================================
 
-    // Zona de salida cerca del mother_spawn (la puerta)
+    // Zona de salida en la puerta (mother_spawn)
     this.zonaSalida = this.add.rectangle(
-      motherSpawnX + 60,
+      motherSpawnX,
       motherSpawnY,
-      60, 80,
+      80, 60,
       0x00ff00, 0
     );
     this.physics.add.existing(this.zonaSalida, true);
@@ -321,35 +321,35 @@ export default class Scene_1_0 extends Phaser.Scene {
 
   madreAparece(callback) {
     this.madre.setVisible(true);
-    this.madre.setPosition(this.motherSpawnX + 80, this.motherSpawnY);
+    // Empieza en la puerta (spawn) y camina hacia arriba hacia Marlo
+    this.madre.setPosition(this.motherSpawnX, this.motherSpawnY);
 
-    // Madre entra caminando hacia la izquierda
-    this.madre.play('mother_walk_west');
+    this.madre.play('mother_walk_north');
 
     this.tweens.add({
       targets: this.madre,
-      x: this.motherSpawnX,
+      y: this.motherSpawnY - 80,
       duration: 800,
       ease: 'Linear',
       onComplete: () => {
         this.madre.stop();
-        this.madre.setTexture('mother_idle_west');
+        this.madre.setTexture('mother_idle_north');
         this.time.delayedCall(200, callback);
       }
     });
   }
 
   madreSale(callback) {
-    // Madre se da la vuelta y sale
-    this.madre.setTexture('mother_idle_east');
+    // Madre se da la vuelta y sale hacia la puerta (sur)
+    this.madre.setTexture('mother_idle_south');
 
     this.time.delayedCall(300, () => {
-      this.madre.play('mother_walk_east');
+      this.madre.play('mother_walk_south');
 
       this.tweens.add({
         targets: this.madre,
-        x: this.motherSpawnX + 100,
-        duration: 600,
+        y: this.motherSpawnY + 20,
+        duration: 800,
         ease: 'Linear',
         onComplete: () => {
           this.madre.setVisible(false);
@@ -362,23 +362,13 @@ export default class Scene_1_0 extends Phaser.Scene {
   marloTurn(direction, callback) {
     const newTexture = direction === 'espejo' ? 'marlo_idle_north' : 'marlo_idle_south';
 
-    this.tweens.add({
-      targets: this.marlo,
-      scaleX: 0,
-      duration: 150,
-      onComplete: () => {
-        this.marlo.setTexture(newTexture);
-        this.marloState = direction;
-        this.marloDirection = direction === 'espejo' ? 'north' : 'south';
+    // Cambio directo de textura sin animación de giro
+    this.marlo.setTexture(newTexture);
+    this.marloState = direction;
+    this.marloDirection = direction === 'espejo' ? 'north' : 'south';
 
-        this.tweens.add({
-          targets: this.marlo,
-          scaleX: 1,
-          duration: 150,
-          onComplete: callback
-        });
-      }
-    });
+    // Pequeña pausa para que se note el cambio
+    this.time.delayedCall(100, callback);
   }
 
   cinematicaMascara(callback) {
@@ -409,7 +399,7 @@ export default class Scene_1_0 extends Phaser.Scene {
           duration: 500
         });
 
-        this.mascara.setVisible(true);
+        this.mascara.setVisible(false);
         this.mascara.setAlpha(0);
         this.mascara.setPosition(this.marlo.x + 30, this.marlo.y);
 
@@ -476,9 +466,9 @@ export default class Scene_1_0 extends Phaser.Scene {
       }
     ).setOrigin(0.5).setScrollFactor(0).setDepth(1000);
 
-    // Marlo mira hacia la salida
-    this.marlo.setTexture('marlo_idle_east');
-    this.marloDirection = 'east';
+    // Marlo mira hacia la salida (sur)
+    this.marlo.setTexture('marlo_idle_south');
+    this.marloDirection = 'south';
 
     // Detector de salida
     this.physics.add.overlap(this.marlo, this.zonaSalida, () => {
@@ -494,13 +484,13 @@ export default class Scene_1_0 extends Phaser.Scene {
 
     if (this.instructionText) this.instructionText.destroy();
 
-    // Marlo camina hacia la salida (hacia la derecha, donde está la puerta)
+    // Marlo camina hacia la salida (hacia el sur, la puerta)
     this.marlo.setVelocity(0);
-    this.marlo.play('marlo_walk_east');
+    this.marlo.play('marlo_walk_south');
 
     this.tweens.add({
       targets: this.marlo,
-      x: this.motherSpawnX + 100,
+      y: this.motherSpawnY + 20,
       duration: 600,
       onComplete: () => {
         this.cameras.main.fadeOut(1000, 0, 0, 0);
