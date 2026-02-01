@@ -3,19 +3,36 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "palacio.tmx",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
+        "palacio.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 150,
+                "y": 339.33333333333337
+            }
+        },
+        "palacio.tmx#hall": {
+            "scaleInDock": 1
+        },
+        "palacio.tmx#interior1": {
+            "scaleInDock": 1
+        }
     },
     "last.exportedFilePath": "C:/Users/ismae/Desktop/MalagaJam2026/Filanccia/src/assets/map",
     "last.imagePath": "C:/Users/ismae/Desktop/MalagaJam2026/Filanccia/src/assets/map",
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
+        "palacio.tmx"
     ],
     "project": "palacio.tiled-project",
     "recentFiles": [
+        "palacio.tmx"
     ],
     "tileset.embedInMap": true
 }
