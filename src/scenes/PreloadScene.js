@@ -117,11 +117,21 @@ export default class PreloadScene extends Phaser.Scene {
 
     const mapPath = 'src/assets/map';
 
-    // Scene 1 (Baño de Marlo)
+    // Scene 1-0 (Baño de Marlo)
     this.load.tilemapTiledJSON('scene1_map', `${mapPath}/scene1.json`);
     this.load.image('tileset_interior1', `${mapPath}/interior1.png`);
     this.load.image('tileset_castleExterior', `${mapPath}/castleTilesExterior.png`);
     this.load.image('tileset_interiorTiles', `${mapPath}/InteriorTiles.png`);
+
+    // Scene 1-1 y 1-2 (Plaza)
+    this.load.tilemapTiledJSON('plaza_map', `${mapPath}/plaza.json`);
+    this.load.image('tileset_bodega', `${mapPath}/bodega.gif`);
+
+    // ============================================
+    // AUDIO
+    // ============================================
+
+    this.load.audio('bso_main', 'src/assets/bso/bso.mp3');
   }
 
   create() {

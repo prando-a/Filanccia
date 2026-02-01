@@ -1,6 +1,6 @@
 // src/scenes/Scene_1_1.js
 // Escena 1-1: Camino a la Plaza
-// Marlo camina con sus padres hacia la plaza (parallax vertical)
+// Parallax vertical - la familia camina hacia la plaza
 
 export default class Scene_1_1 extends Phaser.Scene {
   constructor() {
@@ -12,85 +12,87 @@ export default class Scene_1_1 extends Phaser.Scene {
     const centerX = width / 2;
 
     // ============================================
-    // CONFIGURACIÓN DEL PARALLAX
+    // CONFIGURACIÓN
     // ============================================
 
-    // Altura total del "recorrido" virtual
-    this.totalScrollHeight = 1200;
-    this.scrollProgress = 0;
-    this.scrollSpeed = 0.3; // Velocidad del scroll automático
+    this.totalDuration = 8000; // Duración total de la escena en ms
+    this.elapsedTime = 0;
 
     // ============================================
-    // CAPAS DE PARALLAX (de atrás hacia adelante)
+    // CAPA 1: CIELO (estático)
     // ============================================
 
-    // Capa 0: Cielo nocturno (fondo estático)
-    this.skyLayer = this.add.rectangle(centerX, height / 2, width, height, 0x0a0a1a);
+    // Fondo de cielo nocturno
+    this.add.rectangle(centerX, height * 0.15, width, height * 0.3, 0x0a0a1a).setDepth(0);
 
-    // Estrellas en el cielo
-    for (let i = 0; i < 30; i++) {
+    // Estrellas
+    for (let i = 0; i < 40; i++) {
       const star = this.add.circle(
         Phaser.Math.Between(0, width),
-        Phaser.Math.Between(0, height * 0.4),
+        Phaser.Math.Between(0, height * 0.28),
         Phaser.Math.Between(1, 2),
         0xffffff,
-        Phaser.Math.FloatBetween(0.3, 0.8)
-      );
-      // Parpadeo sutil
+        Phaser.Math.FloatBetween(0.3, 0.9)
+      ).setDepth(0);
+
       this.tweens.add({
         targets: star,
-        alpha: star.alpha * 0.5,
+        alpha: star.alpha * 0.3,
         duration: Phaser.Math.Between(1000, 3000),
         yoyo: true,
         repeat: -1
       });
     }
 
-    // Capa 1: Edificios lejanos (parallax lento)
-    this.farBuildings = this.add.container(0, 0);
-    this.createFarBuildings();
-
-    // Capa 2: Edificios cercanos (parallax medio)
-    this.nearBuildings = this.add.container(0, 0);
-    this.createNearBuildings();
-
-    // Capa 3: Calle/suelo (parallax rápido)
-    this.streetLayer = this.add.container(0, 0);
-    this.createStreet();
+    // Luna
+    this.add.circle(width - 80, 50, 20, 0xffffee, 0.9).setDepth(0);
 
     // ============================================
-    // PERSONAJES (se mueven con la calle)
+    // CAPA 2: SUELO CON ADOQUINES (parallax rápido)
     // ============================================
 
-    // Contenedor de la familia
-    this.familyContainer = this.add.container(centerX, height * 0.65);
+    // Contenedor para los adoquines que se mueven
+    this.groundContainer = this.add.container(0, 0).setDepth(1);
 
-    // Padres (adelante) - usando sprites reales con animación de caminar
-    this.padre = this.add.sprite(-30, -20, 'father_idle_north').setOrigin(0.5, 1).setScale(1.3);
-    this.madre = this.add.sprite(30, -20, 'mother_idle_north').setOrigin(0.5, 1).setScale(1);
+    // Crear filas de adoquines usando el tilemap
+    this.createScrollingGround();
 
-    // Marlo (detrás de los padres)
-    this.marlo = this.add.sprite(0, 30, 'marlo_idle_north').setOrigin(0.5, 1);
+    // ============================================
+    // CAPA 3: NPCs (se mueven con el suelo)
+    // ============================================
+
+    this.npcs = [];
+    this.createNPCs();
+
+    // ============================================
+    // CAPA 4: FAMILIA (estática en el centro)
+    // ============================================
+
+    this.familyContainer = this.add.container(centerX, height * 0.6).setDepth(100);
+
+    this.padre = this.add.sprite(-35, -15, 'father_idle_north').setOrigin(0.5, 1).setScale(1.3);
+    this.madre = this.add.sprite(35, -15, 'mother_idle_north').setOrigin(0.5, 1).setScale(1);
+    this.marlo = this.add.sprite(0, 25, 'marlo_idle_north').setOrigin(0.5, 1);
 
     this.familyContainer.add([this.padre, this.madre, this.marlo]);
 
-    // Iniciar animaciones de caminar
+    // Animaciones de caminar
     this.padre.play('father_walk_north');
     this.madre.play('mother_walk_north');
     this.marlo.play('marlo_walk_north');
 
-    // Animación de caminar (bobbing sutil)
+    // Bobbing sutil
     this.tweens.add({
       targets: this.familyContainer,
-      y: this.familyContainer.y - 3,
-      duration: 400,
+      y: this.familyContainer.y - 2,
+      duration: 350,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut'
     });
 
     // ============================================
-    // UI - Indicador de escena (debug)
+    // UI
     // ============================================
 
     this.add.text(10, 10, 'ESCENA 1-1: Camino a la Plaza', {
@@ -101,153 +103,83 @@ export default class Scene_1_1 extends Phaser.Scene {
     }).setDepth(1000);
 
     // ============================================
-    // ELEMENTOS AMBIENTALES
+    // SECUENCIA
     // ============================================
 
-    // Faroles que pasan (aparecen y desaparecen)
-    this.faroles = [];
-    this.nextFarolTime = 0;
-
-    // Otras personas caminando (siluetas)
-    this.crearTranseuntes();
-
-    // ============================================
-    // SECUENCIA DE LA ESCENA
-    // ============================================
-
-    this.scenePhase = 'scrolling'; // 'scrolling', 'arriving', 'transition'
-    this.autoScroll = true;
-
-    // Fade in
     this.cameras.main.fadeIn(1000, 0, 0, 0);
 
-    // Texto inicial
     this.time.delayedCall(1500, () => {
       this.showAmbientText('Las calles de Filanccia rebosan de gente...');
     });
 
-    // Input para saltar (debug)
+    // Saltar escena con SPACE
     this.input.keyboard.on('keydown-SPACE', () => {
-      if (this.scenePhase === 'scrolling') {
-        this.scrollProgress = this.totalScrollHeight; // Saltar al final
-      }
+      this.endScene();
     });
   }
 
-  createFarBuildings() {
+  createScrollingGround() {
     const { width, height } = this.scale;
 
-    // Siluetas de edificios lejanos (color más oscuro)
-    const buildingColor = 0x1a1a2a;
+    // Usar el tilemap para crear filas de adoquines
+    const plazaMap = this.make.tilemap({ key: 'plaza_map' });
+    const tileset = plazaMap.addTilesetImage('bodega', 'tileset_bodega');
 
-    for (let i = 0; i < 8; i++) {
-      const bw = Phaser.Math.Between(60, 120);
-      const bh = Phaser.Math.Between(100, 200);
-      const bx = i * 120 - 50;
-      const by = height * 0.35;
+    // Escalar para cubrir ancho
+    const actualTileWidth = 21 * 32;
+    const scaleX = width / actualTileWidth;
 
-      const building = this.add.rectangle(bx, by, bw, bh, buildingColor).setOrigin(0.5, 1);
+    // Crear múltiples copias del tilemap para scroll infinito
+    const mapHeight = plazaMap.heightInPixels;
+    const startY = height * 0.3; // Donde empieza el suelo
 
-      // Algunas ventanas iluminadas
-      const numWindows = Phaser.Math.Between(2, 5);
-      for (let w = 0; w < numWindows; w++) {
-        const wx = bx + Phaser.Math.Between(-bw / 3, bw / 3);
-        const wy = by - Phaser.Math.Between(20, bh - 20);
-        const windowLight = this.add.rectangle(wx, wy, 8, 10, 0xffdd88, 0.6);
-        this.farBuildings.add(windowLight);
-      }
+    // Necesitamos suficientes copias para cubrir desde startY hasta más allá de la pantalla
+    const numCopies = Math.ceil((height - startY + mapHeight) / mapHeight) + 1;
 
-      this.farBuildings.add(building);
+    this.groundTiles = [];
+    for (let i = 0; i < numCopies; i++) {
+      const tileMap = this.make.tilemap({ key: 'plaza_map' });
+      const ts = tileMap.addTilesetImage('bodega', 'tileset_bodega');
+      const layer = tileMap.createLayer('Capa de patrones 1', ts, 0, startY + i * mapHeight);
+      layer.setScale(scaleX, 1);
+      layer.setDepth(1);
+      this.groundTiles.push(layer);
     }
+
+    this.groundStartY = startY;
+    this.groundMapHeight = mapHeight;
+    this.groundScrollSpeed = 2;
   }
 
-  createNearBuildings() {
+  createNPCs() {
     const { width, height } = this.scale;
 
-    // Edificios más cercanos a los lados
-    const leftColor = 0x2a2a3a;
-    const rightColor = 0x2a2a3a;
+    // Crear NPCs distribuidos por el suelo
+    for (let i = 0; i < 25; i++) {
+      const x = Phaser.Math.Between(50, width - 50);
+      const y = Phaser.Math.Between(height * 0.35, height + 200);
+      const scale = Phaser.Math.FloatBetween(0.6, 0.95);
 
-    // Izquierda
-    const leftBuilding = this.add.rectangle(-20, height * 0.5, 150, height, leftColor).setOrigin(0, 0.5);
-    this.nearBuildings.add(leftBuilding);
+      const npcIndex = Phaser.Math.Between(1, 15);
+      const npcKey = i % 3 === 0 ? `crowd_npc_front_${npcIndex}` : `crowd_npc_back_${npcIndex}`;
 
-    // Detalles izquierda (ventanas, puertas)
-    for (let i = 0; i < 4; i++) {
-      const wy = height * 0.3 + i * 80;
-      const window = this.add.rectangle(50, wy, 30, 40, 0x0a0a1a);
-      window.setStrokeStyle(2, 0x4a4a5a);
-      this.nearBuildings.add(window);
-    }
+      const npc = this.add.sprite(x, y, npcKey)
+        .setOrigin(0.5, 1)
+        .setScale(scale)
+        .setDepth(10 + y);
 
-    // Derecha
-    const rightBuilding = this.add.rectangle(width + 20, height * 0.5, 150, height, rightColor).setOrigin(1, 0.5);
-    this.nearBuildings.add(rightBuilding);
-
-    // Detalles derecha
-    for (let i = 0; i < 4; i++) {
-      const wy = height * 0.3 + i * 80;
-      const window = this.add.rectangle(width - 50, wy, 30, 40, 0x0a0a1a);
-      window.setStrokeStyle(2, 0x4a4a5a);
-      this.nearBuildings.add(window);
-    }
-  }
-
-  createStreet() {
-    const { width, height } = this.scale;
-
-    // Suelo de adoquines
-    const street = this.add.rectangle(width / 2, height * 0.85, width, height * 0.35, 0x3a3a4a);
-    this.streetLayer.add(street);
-
-    // Líneas de adoquines (se moverán con parallax)
-    this.adoquines = [];
-    for (let i = 0; i < 8; i++) {
-      const lineY = height * 0.7 + i * 25;
-      const line = this.add.rectangle(width / 2, lineY, width - 100, 2, 0x2a2a3a);
-      this.adoquines.push(line);
-      this.streetLayer.add(line);
-    }
-  }
-
-  crearTranseuntes() {
-    // Siluetas de personas caminando en la misma dirección
-    this.transeuntes = [];
-
-    for (let i = 0; i < 5; i++) {
-      const tx = Phaser.Math.Between(100, 700);
-      const ty = Phaser.Math.Between(this.scale.height * 0.55, this.scale.height * 0.75);
-      const scale = Phaser.Math.FloatBetween(0.5, 0.8);
-
-      const transeunte = this.add.container(tx, ty);
-      const body = this.add.rectangle(0, 0, 20, 35, 0x1a1a2a, 0.7);
-      const head = this.add.circle(0, -22, 8, 0x2a2a3a, 0.7);
-      transeunte.add([body, head]);
-      transeunte.setScale(scale);
-      transeunte.setDepth(ty); // Y-sorting básico
-
-      // Bobbing
-      this.tweens.add({
-        targets: transeunte,
-        y: ty - 2,
-        duration: Phaser.Math.Between(350, 450),
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut'
-      });
-
-      this.transeuntes.push(transeunte);
+      this.npcs.push(npc);
     }
   }
 
   showAmbientText(text) {
     const { width } = this.scale;
 
-    const ambientText = this.add.text(width / 2, 80, text, {
+    const ambientText = this.add.text(width / 2, 70, text, {
       fontSize: '16px',
       color: '#cccccc',
       fontStyle: 'italic',
-      backgroundColor: '#00000066',
+      backgroundColor: '#00000088',
       padding: { x: 12, y: 6 }
     }).setOrigin(0.5).setAlpha(0).setDepth(1000);
 
@@ -269,57 +201,61 @@ export default class Scene_1_1 extends Phaser.Scene {
   }
 
   update(time, delta) {
-    if (this.scenePhase === 'scrolling' && this.autoScroll) {
-      // Incrementar progreso del scroll
-      this.scrollProgress += this.scrollSpeed * (delta / 16);
+    this.elapsedTime += delta;
 
-      // Aplicar parallax a las capas
-      this.applyParallax();
+    // Scroll del suelo
+    this.updateGround(delta);
 
-      // Mover líneas de adoquines para efecto de movimiento
-      this.updateAdoquines(delta);
+    // Scroll de NPCs
+    this.updateNPCs(delta);
 
-      // Verificar si llegamos al final
-      if (this.scrollProgress >= this.totalScrollHeight) {
-        this.scenePhase = 'arriving';
-        this.onArrival();
-      }
+    // Verificar fin de escena
+    if (this.elapsedTime >= this.totalDuration) {
+      this.endScene();
     }
   }
 
-  applyParallax() {
-    const progress = this.scrollProgress / this.totalScrollHeight;
-
-    // Capa lejana: se mueve poco
-    this.farBuildings.y = progress * 30;
-
-    // Capa cercana: se mueve más
-    this.nearBuildings.y = progress * 60;
-
-    // Los transeúntes se mueven ligeramente hacia abajo (nos "adelantan")
-    this.transeuntes.forEach((t, i) => {
-      t.y += 0.05 * (i + 1);
-    });
-  }
-
-  updateAdoquines(delta) {
+  updateGround(delta) {
     const { height } = this.scale;
 
-    this.adoquines.forEach((line, i) => {
-      line.y += 0.5;
+    // Mover todos los tiles hacia abajo
+    this.groundTiles.forEach(tile => {
+      tile.y += this.groundScrollSpeed;
 
-      // Reciclar líneas que salen de pantalla
-      if (line.y > height) {
-        line.y = height * 0.68;
+      // Reciclar cuando sale de pantalla
+      if (tile.y > height + 50) {
+        // Encontrar el tile más arriba
+        let minY = Infinity;
+        this.groundTiles.forEach(t => {
+          if (t.y < minY) minY = t.y;
+        });
+        // Posicionar este tile justo encima
+        tile.y = minY - this.groundMapHeight;
       }
     });
   }
 
-  onArrival() {
-    // Detener animación de caminar
-    this.tweens.killTweensOf(this.familyContainer);
+  updateNPCs(delta) {
+    const { width, height } = this.scale;
 
-    // Detener animaciones de sprites y mostrar idle
+    this.npcs.forEach(npc => {
+      npc.y += this.groundScrollSpeed;
+      npc.setDepth(10 + npc.y);
+
+      // Reciclar cuando sale de pantalla
+      if (npc.y > height + 100) {
+        npc.y = Phaser.Math.Between(-100, -50);
+        npc.x = Phaser.Math.Between(50, width - 50);
+      }
+    });
+  }
+
+  endScene() {
+    if (this.isEnding) return;
+    this.isEnding = true;
+
+    // Detener animaciones
+    this.tweens.killTweensOf(this.familyContainer);
     this.padre.stop();
     this.padre.setTexture('father_idle_north');
     this.madre.stop();
@@ -327,9 +263,6 @@ export default class Scene_1_1 extends Phaser.Scene {
     this.marlo.stop();
     this.marlo.setTexture('marlo_idle_north');
 
-    this.scenePhase = 'transition';
-
-    // Fade out directo
     this.cameras.main.fadeOut(1000, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start('Scene_1_2');

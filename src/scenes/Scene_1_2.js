@@ -77,18 +77,11 @@ export default class Scene_1_2 extends Phaser.Scene {
     this.add.rectangle(width, height * 0.5, 100, height, 0x252535).setOrigin(1, 0.5);
     this.add.rectangle(width - 90, height * 0.5, 10, height, 0x1a1a2a).setOrigin(1, 0.5); // Sombra
 
-    // Suelo de la plaza - adoquines
-    this.add.rectangle(centerX, height * 0.75, width, height * 0.55, 0x4a4a5a);
-
-    // Patrón de adoquines
-    for (let row = 0; row < 12; row++) {
-      const lineY = height * 0.48 + row * 25;
-      for (let col = 0; col < 20; col++) {
-        const offsetX = (row % 2) * 25;
-        const tileX = col * 50 + offsetX;
-        this.add.rectangle(tileX, lineY, 48, 23, 0x3a3a4a).setStrokeStyle(1, 0x2a2a3a);
-      }
-    }
+    // Suelo de la plaza - tilemap de adoquines
+    const plazaMap = this.make.tilemap({ key: 'plaza_map' });
+    const tilesetBodega = plazaMap.addTilesetImage('bodega', 'tileset_bodega');
+    const floorLayer = plazaMap.createLayer('Capa de patrones 1', tilesetBodega, 0, height * 0.42);
+    floorLayer.setDepth(0);
 
     // Decoraciones del carnaval - Banderines
     for (let i = 0; i < 12; i++) {

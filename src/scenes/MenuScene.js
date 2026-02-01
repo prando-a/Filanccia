@@ -16,6 +16,15 @@ export default class MenuScene extends Phaser.Scene {
     // Background
     this.add.rectangle(centerX, centerY, width, height, 0x1a1a2e);
 
+    // Música de fondo (si no está ya sonando)
+    if (!this.sound.get('bso_main')?.isPlaying) {
+      this.music = this.sound.add('bso_main', {
+        loop: true,
+        volume: 0.5
+      });
+      this.music.play();
+    }
+
     // Title
     const title = this.add.text(centerX, centerY - 100, 'FILANCCIA', {
       fontFamily: 'GameFont, Arial',
