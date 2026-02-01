@@ -18,8 +18,11 @@ export default class Scene_1_0 extends Phaser.Scene {
 
     const tilesetInterior = this.map.addTilesetImage('interior1', 'tileset_interior1');
     const tilesetExterior = this.map.addTilesetImage('castleTilesExterior', 'tileset_castleExterior');
+    const tilesetInteriorTiles = this.map.addTilesetImage('InteriorTiles', 'tileset_interiorTiles');
 
-    this.floorLayer = this.map.createLayer('floor', [tilesetInterior, tilesetExterior], 0, 0);
+    const allTilesets = [tilesetInterior, tilesetExterior, tilesetInteriorTiles];
+    this.floorLayer = this.map.createLayer('floor', allTilesets, 0, 0);
+    this.detailsLayer = this.map.createLayer('details', allTilesets, 0, 0);
 
     // ============================================
     // COLLIDERS

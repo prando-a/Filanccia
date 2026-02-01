@@ -111,6 +111,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.tilemapTiledJSON('scene1_map', `${mapPath}/scene1.json`);
     this.load.image('tileset_interior1', `${mapPath}/interior1.png`);
     this.load.image('tileset_castleExterior', `${mapPath}/castleTilesExterior.png`);
+    this.load.image('tileset_interiorTiles', `${mapPath}/InteriorTiles.png`);
   }
 
   create() {

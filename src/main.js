@@ -31,7 +31,7 @@ const config = {
     default: 'arcade',
     arcade: {
       gravity: { y: 0 },
-      debug: true // Set true for collision debugging
+      debug: false // Set true for collision debugging
     }
   },
   scale: {
