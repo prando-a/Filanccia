@@ -19,15 +19,15 @@ export default class Scene_1_2 extends Phaser.Scene {
     // Cielo con imagen de fondo
     const bg = this.add.image(centerX, 0, 'menu_bg')
       .setOrigin(0.5, 0)
-      .setDisplaySize(width, height * 0.45);
+      .setDisplaySize(width, height * 0.30);
 
     // Edificios a los lados de la plaza
-    this.add.image(0, (height * 0.45) + 50, 'plaza_lado_izq')
+    this.add.image(0, (height * 0.45) -30, 'plaza_lado_izq')
       .setOrigin(0, 1)
       .setDepth(2)
       .setScale(3);
 
-    this.add.image(width, (height * 0.45) + 80, 'plaza_lado_derecho')
+    this.add.image(width, (height * 0.45) -30, 'plaza_lado_derecho')
       .setOrigin(1, 1)
       .setDepth(2)
       .setScale(3);
@@ -35,7 +35,7 @@ export default class Scene_1_2 extends Phaser.Scene {
     // Suelo de la plaza - tilemap de adoquines (cubre todo el ancho)
     const plazaMap = this.make.tilemap({ key: 'plaza_map' });
     const tilesetBodega = plazaMap.addTilesetImage('bodega', 'tileset_bodega');
-    const floorLayer = plazaMap.createLayer('Capa de patrones 1', tilesetBodega, 0, height * 0.45);
+    const floorLayer = plazaMap.createLayer('Capa de patrones 1', tilesetBodega, 0, height * 0.25);
 
     // Escalar para cubrir el ancho completo
     const tileWidth = 21 * 32; // 21 columnas de 32px
@@ -54,7 +54,8 @@ export default class Scene_1_2 extends Phaser.Scene {
     // Estructura/tarima - su parte superior donde "pisa" el alcalde
     const estructura = this.add.image(centerX, alcaldeY -140, 'mayor_estructura')
       .setOrigin(0.5, 0)
-      .setDepth(10);
+      .setDepth(10)
+      .setScale(1.1);
 
     // El alcalde de pie (pies en alcaldeY)
     this.alcalde = this.add.image(centerX, alcaldeY, 'mayor_stand')
@@ -76,40 +77,60 @@ export default class Scene_1_2 extends Phaser.Scene {
     const avoidStage = (x) => x < centerX - 150 || x > centerX + 150;
 
     // Fila 2
-    for (let i = 0; i < 14; i++) {
-      const x = 55 + i * 55;
+    for (let i = 0; i < 24; i++) {
+      const x = 55 + i * 35;
       if (avoidStage(x)) {
-        this.createCiudadano(x, height * 0.58, 0.6);
+        this.createCiudadano(x, height * 0.58, 0.8);
       }
     }
 
     // Fila 3 - empieza a cerrarse
-    for (let i = 0; i < 12; i++) {
-      const x = 40 + i * 65;
+    for (let i = 0; i < 22; i++) {
+      const x = 40 + i * 45;
       const skipCenter = x > centerX - 100 && x < centerX + 100;
       if (!skipCenter) {
-        this.createCiudadano(x, height * 0.65, 0.7);
+        this.createCiudadano(x, height * 0.65, 0.8);
       }
     }
 
     // Fila 4 - más cerrada
-    for (let i = 0; i < 10; i++) {
-      const x = 60 + i * 75;
-      this.createCiudadano(x, height * 0.73, 0.8);
+    for (let i = 0; i < 20; i++) {
+      const x = 60 + i * 40;
+      this.createCiudadano(x, height * 0.73, 0.9);
     }
 
     // Fila 5 - delantera (más grandes)
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 20; i++) {
       const x = 40 + i * 80;
       this.createCiudadano(x, height * 0.82, 0.95);
     }
 
     // Fila 6 - muy adelante, en los bordes
-    for (let i = 0; i < 6; i++) {
-      const x = i < 3 ? 30 + i * 70 : width - 30 - (5 - i) * 70;
+    for (let i = 0; i < 20; i++) {
+      const x = i < 3 ? 30 + i * 40 : width - 30 - (5 - i) * 70;
       const y = height * 0.95;
       this.createCiudadano(x, y, 1.0);
     }
+
+    // ============================================
+    // FAMILIA (Marlo, Padre, Madre)
+    // ============================================
+
+    const familiaY = height * 0.65;
+    const familiaX = centerX + 65;
+
+    this.padre = this.add.sprite(familiaX - 30, familiaY, 'father_idle_north')
+      .setOrigin(0.5, 1)
+      .setDepth(familiaY);
+
+    this.madre = this.add.sprite(familiaX + 30, familiaY, 'mother_idle_north')
+      .setOrigin(0.5, 1)
+      .setDepth(familiaY)
+      .setScale(0.80);
+
+    this.marlo = this.add.sprite(familiaX, familiaY + 15, 'marlo_idle_north')
+      .setOrigin(0.5, 1)
+      .setDepth(familiaY + 15);
 
     // ============================================
     // CAJA DE DIÁLOGO
