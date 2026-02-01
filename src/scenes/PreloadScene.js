@@ -117,6 +117,11 @@ export default class PreloadScene extends Phaser.Scene {
       this.load.image(`crowd_npc_back_${i}`, `${charPath}/npcs/back/npc${i}.png`);
     }
 
+    // ----- MÚSICOS (Scene 1-3) -----
+    for (let i = 1; i <= 4; i++) {
+      this.load.image(`musician_${i}`, `${charPath}/npcs/musicians/musician${i}.png`);
+    }
+
     // ============================================
     // TILEMAPS AND TILESETS
     // ============================================

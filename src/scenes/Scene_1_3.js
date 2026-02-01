@@ -60,16 +60,20 @@ export default class Scene_1_3 extends Phaser.Scene {
     const salaY = height * 0.28;
     const salaX = width * 0.12;
 
-    // Músicos en la sala - usando NPCs variados
-    this.add.image(salaX - 30, salaY, 'crowd_npc_front_3')
+    // 4 Músicos en la sala
+    this.add.image(salaX - 40, salaY, 'musician_1')
       .setOrigin(0.5, 1)
       .setDepth(salaY);
 
-    this.add.image(salaX + 10, salaY - 5, 'crowd_npc_front_7')
+    this.add.image(salaX, salaY, 'musician_2')
       .setOrigin(0.5, 1)
       .setDepth(salaY);
 
-    this.add.image(salaX + 50, salaY, 'crowd_npc_front_11')
+    this.add.image(salaX + 40, salaY, 'musician_3')
+      .setOrigin(0.5, 1)
+      .setDepth(salaY);
+
+    this.add.image(salaX + 80, salaY, 'musician_4')
       .setOrigin(0.5, 1)
       .setDepth(salaY);
 

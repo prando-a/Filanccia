@@ -13,51 +13,58 @@ export default class Scene_1_4 extends Phaser.Scene {
     const centerY = height / 2;
 
     // ============================================
-    // PLACEHOLDERS - ESCENARIO (mismo Hall)
+    // TILEMAP - ESCENARIO (mismo Hall que Scene_1_3)
     // ============================================
 
-    // Fondo del hall (más oscuro, atmósfera tensa)
-    this.add.rectangle(centerX, centerY, width, height, 0x1a0a0a);
+    this.map = this.make.tilemap({ key: 'palacio_map' });
 
-    // Pared de fondo
-    this.add.rectangle(centerX, height * 0.25, width, height * 0.35, 0x2a1010);
+    const tilesetHall = this.map.addTilesetImage('hall', 'tileset_hall');
+    const tilesetInterior = this.map.addTilesetImage('interior1', 'tileset_interior1');
 
-    // Cortinas laterales
-    this.add.rectangle(50, height * 0.4, 80, height * 0.6, 0x5a0000).setOrigin(0.5, 0.5);
-    this.add.rectangle(width - 50, height * 0.4, 80, height * 0.6, 0x5a0000).setOrigin(0.5, 0.5);
+    const allTilesets = [tilesetHall, tilesetInterior];
 
-    // Candelabros (más tenues)
-    for (let i = 0; i < 3; i++) {
-      const cx = 200 + i * 200;
-      this.add.circle(cx, 80, 25, 0xaa8800, 0.5);
+    // Crear la capa del tilemap
+    const hallLayer = this.map.createLayer('Capa de patrones 1', allTilesets, 0, 0);
+
+    // Escalar el mapa para que cubra la pantalla
+    const mapWidth = this.map.widthInPixels;
+    const mapHeight = this.map.heightInPixels;
+    const scaleX = width / mapWidth;
+    const scaleY = height / mapHeight;
+    const mapScale = Math.max(scaleX, scaleY);
+
+    hallLayer.setScale(mapScale);
+    hallLayer.setDepth(0);
+
+    // Centrar el mapa si es necesario
+    if (scaleX > scaleY) {
+      hallLayer.setY((height - mapHeight * mapScale) / 2);
+    } else {
+      hallLayer.setX((width - mapWidth * mapScale) / 2);
     }
 
-    // Suelo
-    this.add.rectangle(centerX, height * 0.75, width, height * 0.5, 0x2a2a3a);
+    // Oscurecer la escena (atmósfera tensa)
+    const darkOverlay = this.add.rectangle(centerX, centerY, width, height, 0x000000, 0.3);
+    darkOverlay.setDepth(1);
 
     // ============================================
-    // PLACEHOLDER - CADÁVER
+    // CADÁVER (hijo del alcalde)
     // ============================================
 
     this.cadaver = this.add.container(centerX, height * 0.55);
 
-    // Cuerpo en el suelo
+    // Usar sprite del hijo del alcalde tumbado (o placeholder si no existe)
     const cuerpoBase = this.add.ellipse(0, 10, 80, 30, 0x3a0000);
     const cuerpo = this.add.rectangle(0, 0, 50, 25, 0x4a0000);
     // Cabeza SIN ROSTRO (círculo oscuro)
     const cabezaSinRostro = this.add.circle(-30, -5, 14, 0x1a0a0a);
     cabezaSinRostro.setStrokeStyle(2, 0x3a0000);
 
-    // Etiqueta
-    const cadaverLabel = this.add.text(0, 35, '[VÍCTIMA - SIN ROSTRO]', {
-      fontSize: '10px',
-      color: '#ff0000'
-    }).setOrigin(0.5);
-
-    this.cadaver.add([cuerpoBase, cuerpo, cabezaSinRostro, cadaverLabel]);
+    this.cadaver.add([cuerpoBase, cuerpo, cabezaSinRostro]);
+    this.cadaver.setDepth(height * 0.55);
 
     // ============================================
-    // PLACEHOLDER - MULTITUD HORRORIZADA
+    // MULTITUD HORRORIZADA (usando NPCs reales)
     // ============================================
 
     this.multitud = [];
@@ -69,7 +76,7 @@ export default class Scene_1_4 extends Phaser.Scene {
       const x = centerX + Math.cos(angulo) * radioCirculo;
       const y = height * 0.55 + Math.sin(angulo) * (radioCirculo * 0.5);
 
-      if (y > height * 0.4) { // Solo los que están "delante"
+      if (y > height * 0.4) {
         this.createCiudadanoHorrorizado(x, y);
       }
     }
@@ -78,7 +85,7 @@ export default class Scene_1_4 extends Phaser.Scene {
     for (let i = 0; i < 6; i++) {
       const x = 100 + i * 120;
       const y = height * 0.42;
-      this.createCiudadanoHorrorizado(x, y, 0.7);
+      this.createCiudadanoHorrorizado(x, y, 0.8);
     }
 
     // ============================================
@@ -98,25 +105,22 @@ export default class Scene_1_4 extends Phaser.Scene {
     // FAMILIA DE MARLO (sprites reales)
     // ============================================
 
+    const familiaY = height * 0.75;
+
     // Padres de Marlo (al borde de la escena)
-    this.padre = this.add.image(width - 175, height * 0.75, 'father_idle_west').setOrigin(0.5, 1);
-    this.madre = this.add.image(width - 125, height * 0.75, 'mother_idle_west').setOrigin(0.5, 1);
+    this.padre = this.add.image(width - 175, familiaY, 'father_idle_west')
+      .setOrigin(0.5, 1)
+      .setDepth(familiaY);
+    this.madre = this.add.image(width - 125, familiaY, 'mother_idle_west')
+      .setOrigin(0.5, 1)
+      .setDepth(familiaY)
+      .setScale(0.9);
 
     // Marlo (cerca de los padres, será controlable después)
-    this.marlo = this.add.sprite(width - 150, height * 0.8, 'marlo_idle_south').setOrigin(0.5, 1);
-    this.marlo.setDepth(height * 0.8);
+    this.marlo = this.add.sprite(width - 150, height * 0.8, 'marlo_idle_south')
+      .setOrigin(0.5, 1)
+      .setDepth(height * 0.8);
     this.marloDirection = 'south';
-
-    // ============================================
-    // UI - Indicador de escena (debug)
-    // ============================================
-
-    this.debugText = this.add.text(10, 10, 'ESCENA 1-4: El Asesinato', {
-      fontSize: '14px',
-      color: '#ffffff',
-      backgroundColor: '#00000088',
-      padding: { x: 8, y: 4 }
-    }).setDepth(1000);
 
     // ============================================
     // CAJA DE DIÁLOGO
@@ -190,26 +194,19 @@ export default class Scene_1_4 extends Phaser.Scene {
   }
 
   createCiudadanoHorrorizado(x, y, scale = 1) {
-    const colors = [0x2a3a4a, 0x3a2a4a, 0x4a3a2a, 0x2a4a3a];
-    const color = Phaser.Math.RND.pick(colors);
+    // Usar NPCs reales
+    const npcIndex = Phaser.Math.Between(1, 15);
+    const npcKey = `crowd_npc_front_${npcIndex}`;
 
-    const ciudadano = this.add.container(x, y);
-    const body = this.add.rectangle(0, 0, 25, 40, color);
-    const head = this.add.circle(0, -25, 10, 0xf5d0c5);
-    const mascara = this.add.ellipse(0, -25, 8, 6, 0xffd700, 0.8);
-
-    // Brazos levantados (horror)
-    const brazoIzq = this.add.rectangle(-15, -15, 6, 20, color).setAngle(-30);
-    const brazoDer = this.add.rectangle(15, -15, 6, 20, color).setAngle(30);
-
-    ciudadano.add([body, brazoIzq, brazoDer, head, mascara]);
-    ciudadano.setScale(scale);
-    ciudadano.setDepth(y);
+    const ciudadano = this.add.image(x, y, npcKey)
+      .setOrigin(0.5, 1)
+      .setScale(scale)
+      .setDepth(y + 10);
 
     // Temblor de horror
     this.tweens.add({
       targets: ciudadano,
-      x: x + Phaser.Math.Between(-2, 2),
+      x: x + Phaser.Math.Between(-3, 3),
       duration: 100,
       yoyo: true,
       repeat: -1
@@ -367,8 +364,6 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
-    // Actualizar debug text
-    this.debugText.setText('ESCENA 1-4: GAMEPLAY - Mueve a Marlo');
 
     // Instrucciones
     this.instructionText = this.add.text(width / 2, 50, 'Usa las flechas o WASD para mover a Marlo\nAcércate al cadáver para investigar', {
@@ -462,29 +457,48 @@ export default class Scene_1_4 extends Phaser.Scene {
     if (this.instructionText) this.instructionText.destroy();
     if (this.zonaInvestigar) this.zonaInvestigar.destroy();
 
-    this.debugText.setText('ESCENA 1-4: Investigación');
-
     // Secuencia de investigación
     this.time.delayedCall(500, () => {
       this.showThought('El hijo del Alcalde... sin rostro...');
       this.waitingForInput = true;
 
-      // Esperar input y luego terminar
-      const finishScene = () => {
+      // Esperar input y luego permitir movimiento libre
+      const continueExploring = () => {
         if (!this.waitingForInput) return;
         this.waitingForInput = false;
         this.thoughtBox.setVisible(false);
 
-        // Fade out - fin de la Parte 1
-        this.cameras.main.fadeOut(2000, 0, 0, 0);
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-          // Volver al menú (fin del contenido actual)
-          this.scene.start('MenuScene');
-        });
+        // Mostrar instrucciones de exploración
+        const { width } = this.scale;
+        this.exploreText = this.add.text(width / 2, 50, 'Explora el salón libremente\n[Pulsa ESC para terminar]', {
+          fontSize: '14px',
+          color: '#ffffff',
+          backgroundColor: '#00000088',
+          padding: { x: 10, y: 5 },
+          align: 'center'
+        }).setOrigin(0.5).setDepth(1000);
+
+        // Reactivar gameplay
+        this.gameplayMode = true;
+
+        // Listener para terminar la escena
+        this.input.keyboard.on('keydown-ESC', () => this.finalizarEscena());
       };
 
-      this.input.keyboard.once('keydown-SPACE', finishScene);
-      this.input.once('pointerdown', finishScene);
+      this.input.keyboard.once('keydown-SPACE', continueExploring);
+      this.input.once('pointerdown', continueExploring);
+    });
+  }
+
+  finalizarEscena() {
+    this.gameplayMode = false;
+
+    if (this.exploreText) this.exploreText.destroy();
+
+    // Fade out - fin de la Parte 1
+    this.cameras.main.fadeOut(2000, 0, 0, 0);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.start('MenuScene');
     });
   }
 }
