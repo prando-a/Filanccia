@@ -10,17 +10,20 @@
     "fileStates": {
         "scene1.tmx": {
             "scale": 1,
-            "selectedLayer": 0,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 463.5,
-                "y": 100.5
+                "x": 284.5,
+                "y": 288.5
             }
+        },
+        "scene1.tmx#InteriorTiles": {
+            "scaleInDock": 0.75
         },
         "scene1.tmx#castleTilesExterior": {
             "scaleInDock": 1
         },
         "scene1.tmx#interior1": {
-            "scaleInDock": 1
+            "scaleInDock": 1.5
         }
     },
     "last.exportedFilePath": "C:/Users/ismae/Desktop/MalagaJam2026/Filanccia/src/assets/map",
