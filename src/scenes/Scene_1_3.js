@@ -43,10 +43,10 @@ export default class Scene_1_3 extends Phaser.Scene {
       hallLayer.setX((width - mapWidth * mapScale) / 2);
     }
 
-    // Indicador de música (notas animadas)
+    // Indicador de música (notas animadas - sobre la sala de músicos)
     this.notasMusicales = [];
     for (let i = 0; i < 3; i++) {
-      const nota = this.add.text(centerX - 60 + i * 60, height * 0.08, '♪', {
+      const nota = this.add.text(width * 0.08 + i * 30, height * 0.18, '♪', {
         fontSize: '20px',
         color: '#ffd700'
       }).setOrigin(0.5).setAlpha(0).setDepth(200);
@@ -54,13 +54,30 @@ export default class Scene_1_3 extends Phaser.Scene {
     }
 
     // ============================================
-    // ALCALDE E HIJO (sala superior izquierda)
+    // MÚSICOS (sala superior izquierda)
     // ============================================
 
     const salaY = height * 0.28;
     const salaX = width * 0.12;
 
-    // Alcalde en la sala superior izquierda
+    // Músicos en la sala - usando NPCs variados
+    this.add.image(salaX - 30, salaY, 'crowd_npc_front_3')
+      .setOrigin(0.5, 1)
+      .setDepth(salaY);
+
+    this.add.image(salaX + 10, salaY - 5, 'crowd_npc_front_7')
+      .setOrigin(0.5, 1)
+      .setDepth(salaY);
+
+    this.add.image(salaX + 50, salaY, 'crowd_npc_front_11')
+      .setOrigin(0.5, 1)
+      .setDepth(salaY);
+
+    // ============================================
+    // ALCALDE E HIJO (frente a las escaleras)
+    // ============================================
+
+    // Alcalde frente a las escaleras
     this.alcalde = this.add.image(salaX, height * 0.42, 'mayor_stand')
       .setOrigin(0.5, 1)
       .setDepth(100);
@@ -106,7 +123,7 @@ export default class Scene_1_3 extends Phaser.Scene {
     // Parejas de baile distribuidas en la zona amplia (derecha y abajo)
     const posicionesBaile = [
       // Esquinas (referencia)
-      { x: 60, y: escalerasY + 60 },
+      { x: 60, y: escalerasY + 100 },
       { x: 400, y: escalerasY + 60 },
       { x: 60, y: escalerasY + 300 },
       { x: 400, y: escalerasY + 300 },
