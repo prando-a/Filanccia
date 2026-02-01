@@ -101,6 +101,11 @@ export default class PreloadScene extends Phaser.Scene {
     // ----- ALABARDIERI -----
     this.load.image('alabardiere', `${charPath}/alabardieriIdleSouth.png`);
 
+    // ----- NPCS MULTITUD (Scene 1-2) -----
+    for (let i = 1; i <= 6; i++) {
+      this.load.image(`crowd_npc${i}`, `${charPath}/scene2_npcs/npc${i}.png`);
+    }
+
     // ============================================
     // TILEMAPS AND TILESETS
     // ============================================
