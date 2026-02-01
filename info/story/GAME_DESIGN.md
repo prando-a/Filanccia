@@ -128,6 +128,7 @@
 <Parallax vertical hacia arriba>
 
 [Por definir: diálogos opcionales, ambientación]
+[NOTA: Los NPCs del fondo NO deben cruzarse con la familia de Marlo]
 
 </Fade out>
 ```

@@ -101,6 +101,12 @@ export default class PreloadScene extends Phaser.Scene {
     // ----- ALABARDIERI -----
     this.load.image('alabardiere', `${charPath}/alabardieriIdleSouth.png`);
 
+    // ----- ALCALDE (Mayor) -----
+    this.load.image('mayor_stand', `${charPath}/town_mayor/mayor-stand.png`);
+    this.load.image('mayor_son', `${charPath}/town_mayor/mayor-son.png`);
+    this.load.image('mayor_atril', `${charPath}/town_mayor/atril.png`);
+    this.load.image('mayor_estructura', `${charPath}/town_mayor/estructura.png`);
+
     // ----- NPCS MULTITUD (Scene 1-2) -----
     // Front-facing NPCs (facing camera)
     for (let i = 1; i <= 15; i++) {
@@ -126,6 +132,8 @@ export default class PreloadScene extends Phaser.Scene {
     // Scene 1-1 y 1-2 (Plaza)
     this.load.tilemapTiledJSON('plaza_map', `${mapPath}/plaza.json`);
     this.load.image('tileset_bodega', `${mapPath}/bodega.gif`);
+    this.load.image('plaza_lado_derecho', `${mapPath}/pzaLadoDerecho.png`);
+    this.load.image('plaza_lado_izq', `${mapPath}/pzaLadoIzq.png`);
 
     // ============================================
     // UI / BACKGROUNDS
