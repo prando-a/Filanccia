@@ -21,6 +21,17 @@ export default class Scene_1_2 extends Phaser.Scene {
       .setOrigin(0.5, 0)
       .setDisplaySize(width, height * 0.45);
 
+    // Edificios a los lados de la plaza
+    this.add.image(0, (height * 0.45) + 50, 'plaza_lado_izq')
+      .setOrigin(0, 1)
+      .setDepth(2)
+      .setScale(3);
+
+    this.add.image(width, (height * 0.45) + 80, 'plaza_lado_derecho')
+      .setOrigin(1, 1)
+      .setDepth(2)
+      .setScale(3);
+
     // Suelo de la plaza - tilemap de adoquines (cubre todo el ancho)
     const plazaMap = this.make.tilemap({ key: 'plaza_map' });
     const tilesetBodega = plazaMap.addTilesetImage('bodega', 'tileset_bodega');
@@ -32,21 +43,6 @@ export default class Scene_1_2 extends Phaser.Scene {
     floorLayer.setScale(scaleX, 1);
     floorLayer.setDepth(0);
 
-    // Decoraciones del carnaval - Banderines (en la línea del horizonte)
-    for (let i = 0; i < 12; i++) {
-      const bx = 50 + i * 70;
-      const by = height * 0.42;
-      const colors = [0xff4444, 0xffdd44, 0x44ff44, 0x4444ff, 0xff44ff];
-      const bannerColor = Phaser.Math.RND.pick(colors);
-
-      // Cuerda
-      if (i < 11) {
-        this.add.line(0, 0, bx, by, bx + 70, by + 3, 0x888888).setOrigin(0).setDepth(5);
-      }
-
-      // Banderín triangular
-      this.add.triangle(bx, by, bx - 6, by, bx + 6, by, bx, by + 15, bannerColor, 0.9).setDepth(5);
-    }
 
     // ============================================
     // ALCALDE Y TARIMA (antes de la multitud para depth correcto)
@@ -78,14 +74,6 @@ export default class Scene_1_2 extends Phaser.Scene {
 
     // Función helper para evitar el área de la tarima
     const avoidStage = (x) => x < centerX - 150 || x > centerX + 150;
-
-    // Fila 1 - a los lados de la tarima (más pequeños)
-    for (let i = 0; i < 16; i++) {
-      const x = 30 + i * 50;
-      if (avoidStage(x)) {
-        this.createCiudadano(x, height * 0.52, 0.5);
-      }
-    }
 
     // Fila 2
     for (let i = 0; i < 14; i++) {

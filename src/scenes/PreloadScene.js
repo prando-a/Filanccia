@@ -132,6 +132,8 @@ export default class PreloadScene extends Phaser.Scene {
     // Scene 1-1 y 1-2 (Plaza)
     this.load.tilemapTiledJSON('plaza_map', `${mapPath}/plaza.json`);
     this.load.image('tileset_bodega', `${mapPath}/bodega.gif`);
+    this.load.image('plaza_lado_derecho', `${mapPath}/pzaLadoDerecho.png`);
+    this.load.image('plaza_lado_izq', `${mapPath}/pzaLadoIzq.png`);
 
     // ============================================
     // UI / BACKGROUNDS
