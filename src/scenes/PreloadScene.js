@@ -101,6 +101,11 @@ export default class PreloadScene extends Phaser.Scene {
     // ----- ALABARDIERI -----
     this.load.image('alabardiere', `${charPath}/alabardieriIdleSouth.png`);
 
+    // ----- ALCALDE (Mayor) -----
+    this.load.image('mayor_stand', `${charPath}/town_mayor/mayor-stand.png`);
+    this.load.image('mayor_atril', `${charPath}/town_mayor/atril.png`);
+    this.load.image('mayor_estructura', `${charPath}/town_mayor/estructura.png`);
+
     // ----- NPCS MULTITUD (Scene 1-2) -----
     // Front-facing NPCs (facing camera)
     for (let i = 1; i <= 15; i++) {

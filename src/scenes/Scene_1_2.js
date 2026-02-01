@@ -121,10 +121,10 @@ export default class Scene_1_2 extends Phaser.Scene {
       });
     }
 
-    // Tarima del alcalde
-    this.add.rectangle(centerX, height * 0.46, 180, 15, 0x5a4a3a);
-    this.add.rectangle(centerX, height * 0.48, 200, 10, 0x4a3a2a);
-    this.add.rectangle(centerX, height * 0.50, 220, 8, 0x3a2a1a);
+    // Estructura/tarima del alcalde
+    const estructura = this.add.image(centerX, height * 0.52, 'mayor_estructura')
+      .setOrigin(0.5, 1)
+      .setScale(1.5);
 
     // ============================================
     // MULTITUD
@@ -181,16 +181,17 @@ export default class Scene_1_2 extends Phaser.Scene {
     // ALCALDE (en la tarima)
     // ============================================
 
-    this.alcalde = this.add.container(centerX, height * 0.44);
+    // El alcalde detrás del atril
+    this.alcalde = this.add.image(centerX, height * 0.38, 'mayor_stand')
+      .setOrigin(0.5, 1)
+      .setScale(1.5);
 
-    // Cuerpo del alcalde (más grande y distinguido)
-    const alcaldeCapa = this.add.triangle(0, 15, -35, 50, 35, 50, 0, -15, 0x6a1010);
-    const alcaldeBody = this.add.rectangle(0, 5, 45, 65, 0x8B0000).setOrigin(0.5, 0.5);
-    const alcaldeCollar = this.add.rectangle(0, -25, 35, 10, 0xffd700); // Collar dorado
-    const alcaldeHead = this.add.circle(0, -42, 20, 0xf5d0c5);
-    const alcaldeMask = this.add.ellipse(0, -42, 16, 12, 0xffd700, 0.9); // Máscara dorada
-    const alcaldeHat = this.add.triangle(0, -62, -18, -50, 18, -50, 0, -75, 0x4a0000);
+    // Atril delante del alcalde
+    const atril = this.add.image(centerX, height * 0.40, 'mayor_atril')
+      .setOrigin(0.5, 1)
+      .setScale(1.5);
 
+<<<<<<< Updated upstream
     // Brazos levantados (gesto de discurso)
     const armLeft = this.add.rectangle(-30, -5, 12, 35, 0x8B0000).setAngle(-30);
     const armRight = this.add.rectangle(30, -5, 12, 35, 0x8B0000).setAngle(30);
@@ -199,6 +200,11 @@ export default class Scene_1_2 extends Phaser.Scene {
 
     this.alcalde.add([alcaldeCapa, armLeft, armRight, alcaldeBody, alcaldeCollar, handLeft, handRight, alcaldeHead, alcaldeMask, alcaldeHat]);
     this.alcalde.setDepth(height * 0.44);
+=======
+    // Depth para que el atril esté delante del alcalde
+    this.alcalde.setDepth(height * 0.38);
+    atril.setDepth(height * 0.40);
+>>>>>>> Stashed changes
 
     // ============================================
     // CAJA DE DIÁLOGO
