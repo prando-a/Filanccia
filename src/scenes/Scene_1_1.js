@@ -142,10 +142,19 @@ export default class Scene_1_1 extends Phaser.Scene {
 
   createNPCs() {
     const { width, height } = this.scale;
+    const centerX = width / 2;
+    const familyZone = 80; // Ancho de la zona a evitar alrededor de la familia
 
-    // Crear NPCs distribuidos por el suelo
+    // Crear NPCs distribuidos por el suelo (evitando el centro)
     for (let i = 0; i < 25; i++) {
-      const x = Phaser.Math.Between(50, width - 50);
+      // Generar X evitando la zona central donde camina la familia
+      let x;
+      if (Phaser.Math.Between(0, 1) === 0) {
+        x = Phaser.Math.Between(50, centerX - familyZone);
+      } else {
+        x = Phaser.Math.Between(centerX + familyZone, width - 50);
+      }
+
       const y = Phaser.Math.Between(height * 0.35, height + 200);
       const scale = Phaser.Math.FloatBetween(0.6, 0.95);
 
@@ -226,15 +235,21 @@ export default class Scene_1_1 extends Phaser.Scene {
 
   updateNPCs(delta) {
     const { width, height } = this.scale;
+    const centerX = width / 2;
+    const familyZone = 80;
 
     this.npcs.forEach(npc => {
       npc.y += this.groundScrollSpeed;
       npc.setDepth(10 + npc.y);
 
-      // Reciclar cuando sale de pantalla
+      // Reciclar cuando sale de pantalla (evitando el centro)
       if (npc.y > height + 100) {
         npc.y = Phaser.Math.Between(-100, -50);
-        npc.x = Phaser.Math.Between(50, width - 50);
+        if (Phaser.Math.Between(0, 1) === 0) {
+          npc.x = Phaser.Math.Between(50, centerX - familyZone);
+        } else {
+          npc.x = Phaser.Math.Between(centerX + familyZone, width - 50);
+        }
       }
     });
   }

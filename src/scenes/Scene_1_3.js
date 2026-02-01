@@ -107,15 +107,46 @@ export default class Scene_1_3 extends Phaser.Scene {
     // ALCALDE E HIJO
     // ============================================
 
-    // Alcalde (a un lado, observando)
-    this.alcalde = this.add.image(width - 100, height * 0.55, 'mayor_stand')
+    // Guardias a los lados del escenario
+    // Alabarderos
+    this.add.image(centerX - 120, height * 0.38, 'alabardiere')
       .setOrigin(0.5, 1)
-      .setDepth(height * 0.55);
+      .setDepth(100);
+
+    this.add.image(centerX + 120, height * 0.38, 'alabardiere')
+      .setOrigin(0.5, 1)
+      .setDepth(100)
+      .setFlipX(true);
+
+    // Carabinieri izquierda
+    this.add.image(centerX - 170, height * 0.38, 'carabiniere')
+      .setOrigin(0.5, 1)
+      .setDepth(100);
+
+    this.add.image(centerX - 220, height * 0.38, 'carabiniere')
+      .setOrigin(0.5, 1)
+      .setDepth(100);
+
+    // Carabinieri derecha
+    this.add.image(centerX + 170, height * 0.38, 'carabiniere')
+      .setOrigin(0.5, 1)
+      .setDepth(100)
+      .setFlipX(true);
+
+    this.add.image(centerX + 220, height * 0.38, 'carabiniere')
+      .setOrigin(0.5, 1)
+      .setDepth(100)
+      .setFlipX(true);
+
+    // Alcalde (en el escenario, centrado)
+    this.alcalde = this.add.image(centerX + 30, height * 0.38, 'mayor_stand')
+      .setOrigin(0.5, 1)
+      .setDepth(100);
 
     // Hijo del Alcalde (al lado del alcalde, semi-oculto inicialmente)
-    this.hijoAlcalde = this.add.image(width - 160, height * 0.56, 'mayor_son')
+    this.hijoAlcalde = this.add.image(centerX - 30, height * 0.39, 'mayor_son')
       .setOrigin(0.5, 1)
-      .setDepth(height * 0.56)
+      .setDepth(100)
       .setAlpha(0.5);
 
     // ============================================
@@ -170,9 +201,10 @@ export default class Scene_1_3 extends Phaser.Scene {
   createParejaBaile(x, y, index) {
     const pareja = this.add.container(x, y);
 
-    // Usar NPCs reales (índices diferentes para variedad)
-    const npc1Index = (index * 2 % 15) + 1;
-    const npc2Index = ((index * 2 + 1) % 15) + 1;
+    // NPCs válidos para bailar (excluir guardias - npc12)
+    const validNPCs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15];
+    const npc1Index = validNPCs[(index * 2) % validNPCs.length];
+    const npc2Index = validNPCs[(index * 2 + 1) % validNPCs.length];
 
     // Persona 1
     const p1 = this.add.image(-20, 0, `crowd_npc_front_${npc1Index}`)
