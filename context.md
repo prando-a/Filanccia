@@ -438,6 +438,56 @@ this.anims.create({
 
 ---
 
+## Convención de Direcciones de Sprites
+
+Todos los sprites de personajes siguen este patrón de nomenclatura:
+
+### Sprites Idle
+
+| Archivo | Dirección | Descripción |
+|---------|-----------|-------------|
+| `characterIdleSouth.png` | south | Mirando hacia la cámara |
+| `characterIdleEast.png` | east | Mirando hacia la derecha |
+| `characterIdleNorth.png` | north | De espaldas a la cámara |
+| `characterIdleWest.png` | west | Mirando hacia la izquierda |
+
+### Spritesheets de Caminar
+
+| Archivo | Dirección |
+|---------|-----------|
+| `characterWalkNorth.png` | Caminando hacia arriba |
+| `characterWalkSouth.png` | Caminando hacia abajo |
+| `characterWalkEast.png` | Caminando hacia la derecha |
+| `characterWalkWest.png` | Caminando hacia la izquierda |
+
+### Ejemplo en PreloadScene.js
+
+```javascript
+// ----- MARLO -----
+// Idle (4 direcciones)
+this.load.image('marlo_idle_south', `${charPath}/marloIdleSouth.png`);
+this.load.image('marlo_idle_east', `${charPath}/marloIdleEast.png`);
+this.load.image('marlo_idle_north', `${charPath}/marloIdleNorth.png`);
+this.load.image('marlo_idle_west', `${charPath}/marloIdleWest.png`);
+
+// Walk spritesheets (4 frames, 64x64 cada uno)
+this.load.spritesheet('marlo_walk_north', `${charPath}/marloWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
+this.load.spritesheet('marlo_walk_south', `${charPath}/marloWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
+this.load.spritesheet('marlo_walk_east', `${charPath}/marloWalkEast.png`, { frameWidth: 64, frameHeight: 64 });
+this.load.spritesheet('marlo_walk_west', `${charPath}/marloWalkWest.png`, { frameWidth: 64, frameHeight: 64 });
+```
+
+### Personajes con este patrón
+
+- **marlo** (protagonista)
+- **father** (padre de Marlo)
+- **mother** (madre de Marlo)
+- **villain** (Strappavolti)
+- **alabardieri** (4 direcciones idle + walk south)
+- **carabinieri** (solo idle south)
+
+---
+
 ## Convenciones de Código
 
 - **Nombres de escenas:** PascalCase terminando en "Scene" (PlazaScene, CasaMarloScene)

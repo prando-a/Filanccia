@@ -95,29 +95,17 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.carabiniere2.setAlpha(0);
 
     // ============================================
-    // PLACEHOLDER - FAMILIA DE MARLO
+    // FAMILIA DE MARLO (sprites reales)
     // ============================================
 
     // Padres de Marlo (al borde de la escena)
-    this.padresMarlo = this.add.container(width - 150, height * 0.75);
-
-    const padre = this.createPersonaSimple(-25, 0, 0x3a5a7a, 'PADRE');
-    const madre = this.createPersonaSimple(25, 0, 0x7a3a5a, 'MADRE');
-
-    this.padresMarlo.add([padre, madre]);
+    this.padre = this.add.image(width - 175, height * 0.75, 'father_idle_west').setOrigin(0.5, 1);
+    this.madre = this.add.image(width - 125, height * 0.75, 'mother_idle_west').setOrigin(0.5, 1);
 
     // Marlo (cerca de los padres, será controlable después)
-    this.marlo = this.add.container(width - 150, height * 0.8);
-    const marloBody = this.add.rectangle(0, 0, 32, 48, 0x4a7c4e);
-    const marloHead = this.add.circle(0, -32, 14, 0xf5d0c5);
-    const marloMascara = this.add.ellipse(0, -32, 10, 8, 0xffd700);
-    const marloLabel = this.add.text(0, 38, 'MARLO', {
-      fontSize: '10px',
-      color: '#ffffff',
-      fontStyle: 'bold'
-    }).setOrigin(0.5);
-    this.marlo.add([marloBody, marloHead, marloMascara, marloLabel]);
+    this.marlo = this.add.sprite(width - 150, height * 0.8, 'marlo_idle_south').setOrigin(0.5, 1);
     this.marlo.setDepth(height * 0.8);
+    this.marloDirection = 'south';
 
     // ============================================
     // UI - Indicador de escena (debug)
@@ -232,35 +220,9 @@ export default class Scene_1_4 extends Phaser.Scene {
   }
 
   createCarabiniere(x, y) {
-    const carabiniere = this.add.container(x, y);
-
-    const body = this.add.rectangle(0, 0, 30, 50, 0x00008B); // Azul oscuro
-    const head = this.add.circle(0, -32, 12, 0xf5d0c5);
-    const sombrero = this.add.rectangle(0, -45, 25, 10, 0x000040);
-    const label = this.add.text(0, 40, '[CARABINIERE]', {
-      fontSize: '8px',
-      color: '#8888ff'
-    }).setOrigin(0.5);
-
-    carabiniere.add([body, head, sombrero, label]);
+    const carabiniere = this.add.image(x, y, 'carabiniere').setOrigin(0.5, 1);
     carabiniere.setDepth(y);
-
     return carabiniere;
-  }
-
-  createPersonaSimple(x, y, color, label) {
-    const container = this.add.container(x, y);
-
-    const body = this.add.rectangle(0, 0, 28, 45, color);
-    const head = this.add.circle(0, -28, 11, 0xf5d0c5);
-    const mascara = this.add.ellipse(0, -28, 8, 6, 0xcccccc, 0.8);
-    const labelText = this.add.text(0, 35, label, {
-      fontSize: '9px',
-      color: '#aaaaaa'
-    }).setOrigin(0.5);
-
-    container.add([body, head, mascara, labelText]);
-    return container;
   }
 
   handleInput() {
@@ -436,6 +398,29 @@ export default class Scene_1_4 extends Phaser.Scene {
     if (this.cursors.up.isDown || this.wasd.up.isDown) vy = -1;
     if (this.cursors.down.isDown || this.wasd.down.isDown) vy = 1;
 
+    // Determinar dirección y animación
+    let newDirection = this.marloDirection;
+    let isMoving = vx !== 0 || vy !== 0;
+
+    if (vy < 0) newDirection = 'north';
+    else if (vy > 0) newDirection = 'south';
+    else if (vx < 0) newDirection = 'west';
+    else if (vx > 0) newDirection = 'east';
+
+    // Actualizar animación si cambió dirección o estado de movimiento
+    if (isMoving) {
+      const animKey = `marlo_walk_${newDirection}`;
+      if (this.marlo.anims.currentAnim?.key !== animKey) {
+        this.marlo.play(animKey);
+      }
+    } else {
+      // Detener y mostrar idle
+      this.marlo.stop();
+      this.marlo.setTexture(`marlo_idle_${this.marloDirection}`);
+    }
+
+    this.marloDirection = newDirection;
+
     // Normalizar diagonal
     if (vx !== 0 && vy !== 0) {
       vx *= 0.707;
@@ -468,6 +453,10 @@ export default class Scene_1_4 extends Phaser.Scene {
 
   iniciarInvestigacion() {
     this.gameplayMode = false;
+
+    // Detener animación de Marlo y mostrar idle mirando al cadáver
+    this.marlo.stop();
+    this.marlo.setTexture('marlo_idle_north');
 
     // Ocultar instrucciones
     if (this.instructionText) this.instructionText.destroy();
