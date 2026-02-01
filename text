@@ -1,0 +1,27 @@
+Vamos a organizar los assets de characters:
+
+dir assets
+    dir characters
+        dir marlo
+            dir walk
+                no.png
+                so.png
+                we.png
+                ea.png
+            dir stand
+                no.png
+                so.png
+                we.png
+                ea.png
+            dir idle
+                ...
+            dir putOnMask
+                
+
+        dir mother
+            ...
+        dir father
+            ...
+    dir map (déjalo como está. más tarde lo cambiamos)
+        ...
+    ...

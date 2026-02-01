@@ -66,8 +66,8 @@ export default class Scene_1_1 extends Phaser.Scene {
     this.familyContainer = this.add.container(centerX, height * 0.65);
 
     // Padres (adelante) - usando sprites reales con animación de caminar
-    this.padre = this.add.sprite(-30, -20, 'father_idle_north').setOrigin(0.5, 1);
-    this.madre = this.add.sprite(30, -20, 'mother_idle_north').setOrigin(0.5, 1);
+    this.padre = this.add.sprite(-30, -20, 'father_idle_north').setOrigin(0.5, 1).setScale(1.3);
+    this.madre = this.add.sprite(30, -20, 'mother_idle_north').setOrigin(0.5, 1).setScale(1);
 
     // Marlo (detrás de los padres)
     this.marlo = this.add.sprite(0, 30, 'marlo_idle_north').setOrigin(0.5, 1);

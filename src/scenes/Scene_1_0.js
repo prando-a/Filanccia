@@ -96,9 +96,10 @@ export default class Scene_1_0 extends Phaser.Scene {
     this.motherSpawnX = motherSpawnX;
     this.motherSpawnY = motherSpawnY;
 
-    // La madre empieza fuera de pantalla (más a la derecha del spawn)
-    this.madre = this.add.sprite(motherSpawnX + 80, motherSpawnY, 'mother_idle_west')
+    // La madre empieza en el spawn (la puerta)
+    this.madre = this.add.sprite(motherSpawnX, motherSpawnY, 'mother_idle_south')
       .setOrigin(0.5, 0.5)
+      .setScale(0.9)  // Ajustar si es muy grande
       .setVisible(false);
 
     // ============================================
