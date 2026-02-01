@@ -61,10 +61,10 @@ export default class Scene_1_0 extends Phaser.Scene {
     this.spawnY = spawnY;
 
     // ============================================
-    // MARLO (sprite con física)
+    // MARLO (sprite con física) - empieza SIN máscara
     // ============================================
 
-    this.marlo = this.physics.add.sprite(spawnX, spawnY, 'marlo_idle_north')
+    this.marlo = this.physics.add.sprite(spawnX, spawnY, 'marlo_unmasked_north')
       .setOrigin(0.5, 0.5);
 
     // Ajustar el collider del jugador (más pequeño que el sprite)
@@ -101,20 +101,6 @@ export default class Scene_1_0 extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setScale(0.9)  // Ajustar si es muy grande
       .setVisible(false);
-
-    // ============================================
-    // PLACEHOLDER - MÁSCARA
-    // ============================================
-
-    this.mascara = this.add.container(spawnX + 50, spawnY);
-    const mascaraShape = this.add.ellipse(0, 0, 30, 40, 0xffd700);
-    const mascaraLabel = this.add.text(0, 30, '[MÁSCARA]', {
-      fontSize: '10px',
-      color: '#888888'
-    }).setOrigin(0.5);
-    this.mascara.add([mascaraShape, mascaraLabel]);
-    this.mascara.setVisible(false);
-    this.mascara.setDepth(10);
 
     // ============================================
     // ZONA DE SALIDA (para gameplay)
@@ -361,7 +347,8 @@ export default class Scene_1_0 extends Phaser.Scene {
   }
 
   marloTurn(direction, callback) {
-    const newTexture = direction === 'espejo' ? 'marlo_idle_north' : 'marlo_idle_south';
+    // Usa sprites SIN máscara durante la cinemática inicial
+    const newTexture = direction === 'espejo' ? 'marlo_unmasked_north' : 'marlo_unmasked_south';
 
     // Cambio directo de textura sin animación de giro
     this.marlo.setTexture(newTexture);
@@ -378,6 +365,7 @@ export default class Scene_1_0 extends Phaser.Scene {
     const focusX = this.marlo.x;
     const focusY = this.marlo.y - 30;
 
+    // Zoom hacia Marlo
     this.tweens.add({
       targets: this.cameras.main,
       zoom: 2,
@@ -386,64 +374,30 @@ export default class Scene_1_0 extends Phaser.Scene {
       duration: 1500,
       ease: 'Power2',
       onComplete: () => {
-        const cinText = this.add.text(focusX, focusY - 60, '[ Marlo se coloca su máscara ]', {
-          fontSize: '8px',
-          color: '#ffd700',
-          fontStyle: 'italic',
-          backgroundColor: '#00000088',
-          padding: { x: 4, y: 2 }
-        }).setOrigin(0.5).setAlpha(0).setDepth(100);
+        // Reproducir animación de ponerse la máscara
+        this.marlo.play('marlo_put_mask');
 
-        this.tweens.add({
-          targets: cinText,
-          alpha: 1,
-          duration: 500
-        });
+        // Cuando termina la animación, cambiar al sprite con máscara
+        this.marlo.once('animationcomplete', () => {
+          this.marlo.setTexture('marlo_idle_south');
 
-        this.mascara.setVisible(false);
-        this.mascara.setAlpha(0);
-        this.mascara.setPosition(this.marlo.x + 30, this.marlo.y);
+          // Pausa breve y luego zoom out
+          this.time.delayedCall(500, () => {
+            const mapCenterX = this.map.widthInPixels / 2;
+            const mapCenterY = this.map.heightInPixels / 2;
 
-        this.tweens.add({
-          targets: this.mascara,
-          alpha: 1,
-          duration: 500,
-          delay: 500
-        });
-
-        this.tweens.add({
-          targets: this.mascara,
-          x: this.marlo.x,
-          y: this.marlo.y - 20,
-          duration: 1000,
-          delay: 1200,
-          ease: 'Power2',
-          onComplete: () => {
-            this.mascara.setVisible(false);
-
-            this.time.delayedCall(1000, () => {
-              this.tweens.add({
-                targets: cinText,
-                alpha: 0,
-                duration: 400
-              });
-
-              const mapCenterX = this.map.widthInPixels / 2;
-              const mapCenterY = this.map.heightInPixels / 2;
-
-              this.tweens.add({
-                targets: this.cameras.main,
-                zoom: 1,
-                scrollX: mapCenterX - width / 2,
-                scrollY: mapCenterY - height / 2,
-                duration: 1000,
-                ease: 'Power2',
-                onComplete: () => {
-                  this.time.delayedCall(500, callback);
-                }
-              });
+            this.tweens.add({
+              targets: this.cameras.main,
+              zoom: 1,
+              scrollX: mapCenterX - width / 2,
+              scrollY: mapCenterY - height / 2,
+              duration: 1000,
+              ease: 'Power2',
+              onComplete: () => {
+                this.time.delayedCall(500, callback);
+              }
             });
-          }
+          });
         });
       }
     });

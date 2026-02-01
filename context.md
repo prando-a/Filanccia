@@ -442,33 +442,33 @@ this.anims.create({
 
 Todos los sprites de personajes siguen este patrón de nomenclatura:
 
-### Sprites Idle (archivos 1-4)
+### Sprites Idle
 
 | Archivo | Dirección | Descripción |
 |---------|-----------|-------------|
-| `character1.png` | south | Mirando hacia la cámara |
-| `character2.png` | east | Mirando hacia la derecha |
-| `character3.png` | north | De espaldas a la cámara |
-| `character4.png` | west | Mirando hacia la izquierda |
+| `characterIdleSouth.png` | south | Mirando hacia la cámara |
+| `characterIdleEast.png` | east | Mirando hacia la derecha |
+| `characterIdleNorth.png` | north | De espaldas a la cámara |
+| `characterIdleWest.png` | west | Mirando hacia la izquierda |
 
 ### Spritesheets de Caminar
 
-Los archivos de animación de caminar usan sus nombres originales directamente:
-
-- `characterWalkNorth.png` → animación caminando hacia arriba
-- `characterWalkSouth.png` → animación caminando hacia abajo
-- `characterWalkEast.png` → animación caminando hacia la derecha
-- `characterWalkWest.png` → animación caminando hacia la izquierda
+| Archivo | Dirección |
+|---------|-----------|
+| `characterWalkNorth.png` | Caminando hacia arriba |
+| `characterWalkSouth.png` | Caminando hacia abajo |
+| `characterWalkEast.png` | Caminando hacia la derecha |
+| `characterWalkWest.png` | Caminando hacia la izquierda |
 
 ### Ejemplo en PreloadScene.js
 
 ```javascript
 // ----- MARLO -----
 // Idle (4 direcciones)
-this.load.image('marlo_idle_south', `${charPath}/marlo1.png`);
-this.load.image('marlo_idle_east', `${charPath}/marlo2.png`);
-this.load.image('marlo_idle_north', `${charPath}/marlo3.png`);
-this.load.image('marlo_idle_west', `${charPath}/marlo4.png`);
+this.load.image('marlo_idle_south', `${charPath}/marloIdleSouth.png`);
+this.load.image('marlo_idle_east', `${charPath}/marloIdleEast.png`);
+this.load.image('marlo_idle_north', `${charPath}/marloIdleNorth.png`);
+this.load.image('marlo_idle_west', `${charPath}/marloIdleWest.png`);
 
 // Walk spritesheets (4 frames, 64x64 cada uno)
 this.load.spritesheet('marlo_walk_north', `${charPath}/marloWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
@@ -483,8 +483,8 @@ this.load.spritesheet('marlo_walk_west', `${charPath}/marloWalkWest.png`, { fram
 - **father** (padre de Marlo)
 - **mother** (madre de Marlo)
 - **villain** (Strappavolti)
-
-**Nota:** Carabiniere y Alabardiere solo tienen un sprite idle (`carabinieri1.png`, `alabardieri1.png`).
+- **alabardieri** (4 direcciones idle + walk south)
+- **carabinieri** (solo idle south)
 
 ---
 

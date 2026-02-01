@@ -49,53 +49,57 @@ export default class PreloadScene extends Phaser.Scene {
     const charPath = 'src/assets/characters';
 
     // ----- MARLO -----
-    // Idle (4 direcciones)
-    this.load.image('marlo_idle_south', `${charPath}/marlo1.png`);
-    this.load.image('marlo_idle_east', `${charPath}/marlo2.png`);
-    this.load.image('marlo_idle_north', `${charPath}/marlo3.png`);
-    this.load.image('marlo_idle_west', `${charPath}/marlo4.png`);
+    // Idle (4 direcciones) - con máscara (por defecto)
+    this.load.image('marlo_idle_south', `${charPath}/marloIdleSouth.png`);
+    this.load.image('marlo_idle_east', `${charPath}/marloIdleEast.png`);
+    this.load.image('marlo_idle_north', `${charPath}/marloIdleNorth.png`);
+    this.load.image('marlo_idle_west', `${charPath}/marloIdleWest.png`);
     // Walk spritesheets (4 frames cada uno)
-    // Archivos rotados: North->West, East->North, West->East
     this.load.spritesheet('marlo_walk_north', `${charPath}/marloWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('marlo_walk_south', `${charPath}/marloWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('marlo_walk_east', `${charPath}/marloWalkEast.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('marlo_walk_west', `${charPath}/marloWalkWest.png`, { frameWidth: 64, frameHeight: 64 });
+    // Sin máscara (solo Scene_1_0)
+    this.load.image('marlo_unmasked_north', `${charPath}/marloWithoutMaskNorth.png`);
+    this.load.image('marlo_unmasked_south', `${charPath}/marloWithoutMaskSouth.png`);
+    // Animación de ponerse la máscara (16 frames)
+    this.load.spritesheet('marlo_put_mask', `${charPath}/marloWearingMask.png`, { frameWidth: 64, frameHeight: 64 });
 
     // ----- FATHER (Padre) -----
-    this.load.image('father_idle_south', `${charPath}/father1.png`);
-    this.load.image('father_idle_east', `${charPath}/father2.png`);
-    this.load.image('father_idle_north', `${charPath}/father3.png`);
-    this.load.image('father_idle_west', `${charPath}/father4.png`);
+    this.load.image('father_idle_south', `${charPath}/fatherIdleSouth.png`);
+    this.load.image('father_idle_east', `${charPath}/fatherIdleEast.png`);
+    this.load.image('father_idle_north', `${charPath}/fatherIdleNorth.png`);
+    this.load.image('father_idle_west', `${charPath}/fatherIdleWest.png`);
     this.load.spritesheet('father_walk_north', `${charPath}/fatherWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('father_walk_south', `${charPath}/fatherWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('father_walk_east', `${charPath}/fatherWalkEast.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('father_walk_west', `${charPath}/fatherWalkWest.png`, { frameWidth: 64, frameHeight: 64 });
 
     // ----- MOTHER (Madre) -----
-    this.load.image('mother_idle_south', `${charPath}/mother1.png`);
-    this.load.image('mother_idle_east', `${charPath}/mother2.png`);
-    this.load.image('mother_idle_north', `${charPath}/mother3.png`);
-    this.load.image('mother_idle_west', `${charPath}/mother4.png`);
+    this.load.image('mother_idle_south', `${charPath}/motherIdleSouth.png`);
+    this.load.image('mother_idle_east', `${charPath}/motherIdleEast.png`);
+    this.load.image('mother_idle_north', `${charPath}/motherIdleNorth.png`);
+    this.load.image('mother_idle_west', `${charPath}/motherIdleWest.png`);
     this.load.spritesheet('mother_walk_north', `${charPath}/motherWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('mother_walk_south', `${charPath}/motherWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('mother_walk_east', `${charPath}/motherWalkEast.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('mother_walk_west', `${charPath}/motherWalkWest.png`, { frameWidth: 64, frameHeight: 64 });
 
     // ----- CARABINIERI -----
-    this.load.image('carabiniere', `${charPath}/carabinieri1.png`);
+    this.load.image('carabiniere', `${charPath}/carabinieriIdleSouth.png`);
 
     // ----- VILLAIN (Strappavolti) -----
-    this.load.image('villain_idle_south', `${charPath}/villain1.png`);
-    this.load.image('villain_idle_east', `${charPath}/villain2.png`);
-    this.load.image('villain_idle_north', `${charPath}/villain3.png`);
-    this.load.image('villain_idle_west', `${charPath}/villain4.png`);
+    this.load.image('villain_idle_south', `${charPath}/villainIdleSouth.png`);
+    this.load.image('villain_idle_east', `${charPath}/villainIdleEast.png`);
+    this.load.image('villain_idle_north', `${charPath}/villainIdleNorth.png`);
+    this.load.image('villain_idle_west', `${charPath}/villainIdleWest.png`);
     this.load.spritesheet('villain_walk_north', `${charPath}/villainWalkNorth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('villain_walk_south', `${charPath}/villainWalkSouth.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('villain_walk_east', `${charPath}/villainWalkEast.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.spritesheet('villain_walk_west', `${charPath}/villainWalkWest.png`, { frameWidth: 64, frameHeight: 64 });
 
     // ----- ALABARDIERI -----
-    this.load.image('alabardiere', `${charPath}/alabardieri1.png`);
+    this.load.image('alabardiere', `${charPath}/alabardieriIdleSouth.png`);
 
     // ============================================
     // TILEMAPS AND TILESETS
@@ -138,6 +142,13 @@ export default class PreloadScene extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers('marlo_walk_west', { start: 0, end: 3 }),
       frameRate: 8,
       repeat: -1
+    });
+    // Animación de ponerse la máscara (solo se reproduce una vez)
+    this.anims.create({
+      key: 'marlo_put_mask',
+      frames: this.anims.generateFrameNumbers('marlo_put_mask', { start: 0, end: 15 }),
+      frameRate: 8,
+      repeat: 0
     });
 
     // ----- FATHER ANIMATIONS -----
