@@ -1,12 +1,32 @@
 {
-    "activeFile": "",
+    "activeFile": "scene1.json",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
+        "scene1.json": {
+            "scale": 1.2417119565217392,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 367.63759711128125,
+                "y": 192.07353102089942
+            }
+        },
+        "scene1.json#InteriorTiles": {
+            "scaleInDock": 1
+        },
+        "scene1.json#castleTilesExterior": {
+            "scaleInDock": 1
+        },
+        "scene1.json#interior1": {
+            "scaleInDock": 1
+        }
     },
     "openFiles": [
+        "scene1.json"
     ],
     "project": "escena2.tiled-project",
     "recentFiles": [
+        "scene1.json"
     ]
 }
