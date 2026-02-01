@@ -82,13 +82,13 @@ export default class Scene_1_3 extends Phaser.Scene {
     }
 
     // ============================================
-    // PLACEHOLDER - BAILARINES
+    // BAILARINES (usando NPCs reales)
     // ============================================
 
     this.bailarines = [];
     this.bailando = true;
 
-    // Crear parejas de baile
+    // Crear parejas de baile con NPCs reales
     const posicionesBaile = [
       { x: 150, y: height * 0.55 },
       { x: 300, y: height * 0.6 },
@@ -104,42 +104,19 @@ export default class Scene_1_3 extends Phaser.Scene {
     });
 
     // ============================================
-    // PLACEHOLDER - ALCALDE E HIJO
+    // ALCALDE E HIJO
     // ============================================
 
     // Alcalde (a un lado, observando)
-    this.alcalde = this.add.container(width - 120, height * 0.5);
-    const alcaldeBody = this.add.rectangle(0, 0, 45, 65, 0x8B0000);
-    const alcaldeHead = this.add.circle(0, -42, 18, 0xf5d0c5);
-    const alcaldeCapa = this.add.triangle(0, 8, -25, 35, 25, 35, 0, -15, 0x4a0000);
-    const alcaldeLabel = this.add.text(0, 50, 'ALCALDE', {
-      fontSize: '10px',
-      color: '#ffd700'
-    }).setOrigin(0.5);
-    this.alcalde.add([alcaldeCapa, alcaldeBody, alcaldeHead, alcaldeLabel]);
+    this.alcalde = this.add.image(width - 100, height * 0.55, 'mayor_stand')
+      .setOrigin(0.5, 1)
+      .setDepth(height * 0.55);
 
-    // Hijo del Alcalde (oculto inicialmente)
-    this.hijoAlcalde = this.add.container(width - 180, height * 0.52);
-    const hijoBody = this.add.rectangle(0, 0, 35, 50, 0x4a0000);
-    const hijoHead = this.add.circle(0, -32, 14, 0xf5d0c5);
-    const hijoMascara = this.add.ellipse(0, -32, 10, 8, 0xffd700);
-    const hijoLabel = this.add.text(0, 40, 'HIJO', {
-      fontSize: '10px',
-      color: '#ffd700'
-    }).setOrigin(0.5);
-    this.hijoAlcalde.add([hijoBody, hijoHead, hijoMascara, hijoLabel]);
-    this.hijoAlcalde.setAlpha(0.3); // Visible pero no destacado
-
-    // ============================================
-    // UI - Indicador de escena (debug)
-    // ============================================
-
-    this.add.text(10, 10, 'ESCENA 1-3: Palacio - Hall', {
-      fontSize: '14px',
-      color: '#ffffff',
-      backgroundColor: '#00000088',
-      padding: { x: 8, y: 4 }
-    }).setDepth(1000);
+    // Hijo del Alcalde (al lado del alcalde, semi-oculto inicialmente)
+    this.hijoAlcalde = this.add.image(width - 160, height * 0.56, 'mayor_son')
+      .setOrigin(0.5, 1)
+      .setDepth(height * 0.56)
+      .setAlpha(0.5);
 
     // ============================================
     // CAJA DE DIÁLOGO
@@ -193,41 +170,37 @@ export default class Scene_1_3 extends Phaser.Scene {
   createParejaBaile(x, y, index) {
     const pareja = this.add.container(x, y);
 
-    // Colores variados para las parejas
-    const colores = [0x2a3a6a, 0x6a2a3a, 0x3a6a2a, 0x5a3a5a, 0x3a5a5a, 0x6a5a2a, 0x4a4a6a];
-    const color1 = colores[index % colores.length];
-    const color2 = colores[(index + 3) % colores.length];
+    // Usar NPCs reales (índices diferentes para variedad)
+    const npc1Index = (index * 2 % 15) + 1;
+    const npc2Index = ((index * 2 + 1) % 15) + 1;
 
     // Persona 1
-    const p1 = this.add.container(-15, 0);
-    const body1 = this.add.rectangle(0, 0, 22, 38, color1);
-    const head1 = this.add.circle(0, -24, 9, 0xf5d0c5);
-    const mascara1 = this.add.ellipse(0, -24, 7, 5, 0xffd700, 0.8);
-    p1.add([body1, head1, mascara1]);
+    const p1 = this.add.image(-20, 0, `crowd_npc_front_${npc1Index}`)
+      .setOrigin(0.5, 1)
+      .setScale(0.9);
 
     // Persona 2
-    const p2 = this.add.container(15, 0);
-    const body2 = this.add.rectangle(0, 0, 22, 38, color2);
-    const head2 = this.add.circle(0, -24, 9, 0xf5d0c5);
-    const mascara2 = this.add.ellipse(0, -24, 7, 5, 0xc0c0c0, 0.8);
-    p2.add([body2, head2, mascara2]);
+    const p2 = this.add.image(20, 0, `crowd_npc_front_${npc2Index}`)
+      .setOrigin(0.5, 1)
+      .setScale(0.9);
 
     pareja.add([p1, p2]);
     pareja.setDepth(y);
 
-    // Animación de baile
+    // Animación de baile (rotación sutil)
     this.tweens.add({
       targets: pareja,
-      angle: 5,
+      angle: 3,
       duration: 600 + index * 50,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut'
     });
 
+    // Movimiento lateral
     this.tweens.add({
       targets: pareja,
-      x: x + 10,
+      x: x + 15,
       duration: 1200 + index * 100,
       yoyo: true,
       repeat: -1,

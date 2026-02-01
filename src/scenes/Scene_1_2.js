@@ -16,115 +16,59 @@ export default class Scene_1_2 extends Phaser.Scene {
     // ESCENARIO - PLAZA CENTRAL DE FILANCCIA
     // ============================================
 
-    // Cielo nocturno con degradado
-    const skyGradient = this.add.graphics();
-    skyGradient.fillGradientStyle(0x0a0a1a, 0x0a0a1a, 0x1a1a3a, 0x1a1a3a, 1);
-    skyGradient.fillRect(0, 0, width, height * 0.45);
+    // Cielo con imagen de fondo
+    const bg = this.add.image(centerX, 0, 'menu_bg')
+      .setOrigin(0.5, 0)
+      .setDisplaySize(width, height * 0.45);
 
-    // Estrellas
-    for (let i = 0; i < 50; i++) {
-      const star = this.add.circle(
-        Phaser.Math.Between(0, width),
-        Phaser.Math.Between(0, height * 0.3),
-        Phaser.Math.Between(1, 2),
-        0xffffff,
-        Phaser.Math.FloatBetween(0.3, 0.9)
-      );
-      // Parpadeo
-      this.tweens.add({
-        targets: star,
-        alpha: star.alpha * 0.3,
-        duration: Phaser.Math.Between(1000, 3000),
-        yoyo: true,
-        repeat: -1
-      });
-    }
-
-    // Luna
-    this.add.circle(width - 80, 60, 25, 0xffffee, 0.9);
-    this.add.circle(width - 70, 55, 25, 0x0a0a1a, 1); // Sombra para media luna
-
-    // Edificios de fondo (capa lejana)
-    const buildingColors = [0x1a1a2a, 0x1e1e2e, 0x222232, 0x181828];
-    for (let i = 0; i < 8; i++) {
-      const bx = i * 110 + 30;
-      const bh = Phaser.Math.Between(120, 200);
-      const color = Phaser.Math.RND.pick(buildingColors);
-
-      // Edificio principal
-      this.add.rectangle(bx, height * 0.42, 90, bh, color).setOrigin(0.5, 1);
-
-      // Techo
-      this.add.triangle(bx, height * 0.42 - bh, bx - 50, height * 0.42 - bh, bx + 50, height * 0.42 - bh, bx, height * 0.42 - bh - 30, 0x2a2a3a);
-
-      // Ventanas iluminadas
-      for (let row = 0; row < 3; row++) {
-        for (let col = 0; col < 2; col++) {
-          const wx = bx - 20 + col * 40;
-          const wy = height * 0.42 - 40 - row * 45;
-          const lit = Math.random() > 0.3;
-          this.add.rectangle(wx, wy, 14, 20, lit ? 0xffdd88 : 0x0a0a1a, lit ? 0.8 : 0.5);
-        }
-      }
-    }
-
-    // Edificios cercanos (laterales)
-    // Izquierda
-    this.add.rectangle(0, height * 0.5, 100, height, 0x252535).setOrigin(0, 0.5);
-    this.add.rectangle(90, height * 0.5, 10, height, 0x1a1a2a).setOrigin(0, 0.5); // Sombra
-
-    // Derecha
-    this.add.rectangle(width, height * 0.5, 100, height, 0x252535).setOrigin(1, 0.5);
-    this.add.rectangle(width - 90, height * 0.5, 10, height, 0x1a1a2a).setOrigin(1, 0.5); // Sombra
-
-    // Suelo de la plaza - tilemap de adoquines
+    // Suelo de la plaza - tilemap de adoquines (cubre todo el ancho)
     const plazaMap = this.make.tilemap({ key: 'plaza_map' });
     const tilesetBodega = plazaMap.addTilesetImage('bodega', 'tileset_bodega');
-    const floorLayer = plazaMap.createLayer('Capa de patrones 1', tilesetBodega, 0, height * 0.42);
+    const floorLayer = plazaMap.createLayer('Capa de patrones 1', tilesetBodega, 0, height * 0.45);
+
+    // Escalar para cubrir el ancho completo
+    const tileWidth = 21 * 32; // 21 columnas de 32px
+    const scaleX = width / tileWidth;
+    floorLayer.setScale(scaleX, 1);
     floorLayer.setDepth(0);
 
-    // Decoraciones del carnaval - Banderines
+    // Decoraciones del carnaval - Banderines (en la línea del horizonte)
     for (let i = 0; i < 12; i++) {
-      const bx = 80 + i * 60;
+      const bx = 50 + i * 70;
+      const by = height * 0.42;
       const colors = [0xff4444, 0xffdd44, 0x44ff44, 0x4444ff, 0xff44ff];
       const bannerColor = Phaser.Math.RND.pick(colors);
 
       // Cuerda
       if (i < 11) {
-        this.add.line(0, 0, bx, height * 0.32, bx + 60, height * 0.34, 0x888888).setOrigin(0);
+        this.add.line(0, 0, bx, by, bx + 70, by + 3, 0x888888).setOrigin(0).setDepth(5);
       }
 
       // Banderín triangular
-      this.add.triangle(bx, height * 0.32, bx - 8, height * 0.32, bx + 8, height * 0.32, bx, height * 0.38, bannerColor, 0.9);
+      this.add.triangle(bx, by, bx - 6, by, bx + 6, by, bx, by + 15, bannerColor, 0.9).setDepth(5);
     }
 
-    // Faroles encendidos
-    for (let i = 0; i < 4; i++) {
-      const fx = 150 + i * 180;
-      // Poste
-      this.add.rectangle(fx, height * 0.5, 6, 80, 0x3a3a3a).setOrigin(0.5, 1);
-      // Farol
-      this.add.rectangle(fx, height * 0.5 - 80, 20, 25, 0x4a4a4a);
-      // Luz
-      const light = this.add.circle(fx, height * 0.5 - 75, 8, 0xffaa44);
-      // Resplandor
-      this.add.circle(fx, height * 0.5 - 75, 30, 0xffaa44, 0.15);
+    // ============================================
+    // ALCALDE Y TARIMA (antes de la multitud para depth correcto)
+    // ============================================
 
-      // Parpadeo de la luz
-      this.tweens.add({
-        targets: light,
-        alpha: 0.6,
-        duration: Phaser.Math.Between(100, 300),
-        yoyo: true,
-        repeat: -1,
-        repeatDelay: Phaser.Math.Between(2000, 5000)
-      });
-    }
+    // Posición donde el alcalde está de pie (sobre los adoquines)
+    const alcaldeY = height * 0.46;
 
-    // Estructura/tarima del alcalde
-    const estructura = this.add.image(centerX, height * 0.52, 'mayor_estructura')
+    // Estructura/tarima - su parte superior donde "pisa" el alcalde
+    const estructura = this.add.image(centerX, alcaldeY -140, 'mayor_estructura')
+      .setOrigin(0.5, 0)
+      .setDepth(10);
+
+    // El alcalde de pie (pies en alcaldeY)
+    this.alcalde = this.add.image(centerX, alcaldeY, 'mayor_stand')
       .setOrigin(0.5, 1)
-      .setScale(1.5);
+      .setDepth(20);
+
+    // Atril delante del alcalde
+    const atril = this.add.image(centerX, alcaldeY, 'mayor_atril')
+      .setOrigin(0.5, 1)
+      .setDepth(30);
 
     // ============================================
     // MULTITUD
@@ -132,42 +76,44 @@ export default class Scene_1_2 extends Phaser.Scene {
 
     this.multitud = [];
 
-    // Fila 1 - muy atrás (más pequeños)
+    // Función helper para evitar el área de la tarima
+    const avoidStage = (x) => x < centerX - 150 || x > centerX + 150;
+
+    // Fila 1 - a los lados de la tarima (más pequeños)
     for (let i = 0; i < 16; i++) {
       const x = 30 + i * 50;
-      const y = height * 0.48;
-      this.createCiudadano(x, y, 0.5);
+      if (avoidStage(x)) {
+        this.createCiudadano(x, height * 0.52, 0.5);
+      }
     }
 
     // Fila 2
     for (let i = 0; i < 14; i++) {
       const x = 55 + i * 55;
-      const y = height * 0.54;
-      this.createCiudadano(x, y, 0.6);
+      if (avoidStage(x)) {
+        this.createCiudadano(x, height * 0.58, 0.6);
+      }
     }
 
-    // Fila 3
+    // Fila 3 - empieza a cerrarse
     for (let i = 0; i < 12; i++) {
       const x = 40 + i * 65;
-      const y = height * 0.62;
-      this.createCiudadano(x, y, 0.7);
+      const skipCenter = x > centerX - 100 && x < centerX + 100;
+      if (!skipCenter) {
+        this.createCiudadano(x, height * 0.65, 0.7);
+      }
     }
 
-    // Fila 4
+    // Fila 4 - más cerrada
     for (let i = 0; i < 10; i++) {
       const x = 60 + i * 75;
-      const y = height * 0.72;
-      this.createCiudadano(x, y, 0.8);
+      this.createCiudadano(x, height * 0.73, 0.8);
     }
 
-    // Fila 5 - delantera (más grandes) - con hueco en el centro para el alcalde
+    // Fila 5 - delantera (más grandes)
     for (let i = 0; i < 10; i++) {
       const x = 40 + i * 80;
-      // Dejar hueco en el centro para el alcalde
-      if (x < centerX - 120 || x > centerX + 120) {
-        const y = height * 0.84;
-        this.createCiudadano(x, y, 0.95);
-      }
+      this.createCiudadano(x, height * 0.82, 0.95);
     }
 
     // Fila 6 - muy adelante, en los bordes
@@ -176,35 +122,6 @@ export default class Scene_1_2 extends Phaser.Scene {
       const y = height * 0.95;
       this.createCiudadano(x, y, 1.0);
     }
-
-    // ============================================
-    // ALCALDE (en la tarima)
-    // ============================================
-
-    // El alcalde detrás del atril
-    this.alcalde = this.add.image(centerX, height * 0.38, 'mayor_stand')
-      .setOrigin(0.5, 1)
-      .setScale(1.5);
-
-    // Atril delante del alcalde
-    const atril = this.add.image(centerX, height * 0.40, 'mayor_atril')
-      .setOrigin(0.5, 1)
-      .setScale(1.5);
-
-<<<<<<< Updated upstream
-    // Brazos levantados (gesto de discurso)
-    const armLeft = this.add.rectangle(-30, -5, 12, 35, 0x8B0000).setAngle(-30);
-    const armRight = this.add.rectangle(30, -5, 12, 35, 0x8B0000).setAngle(30);
-    const handLeft = this.add.circle(-38, -20, 8, 0xf5d0c5);
-    const handRight = this.add.circle(38, -20, 8, 0xf5d0c5);
-
-    this.alcalde.add([alcaldeCapa, armLeft, armRight, alcaldeBody, alcaldeCollar, handLeft, handRight, alcaldeHead, alcaldeMask, alcaldeHat]);
-    this.alcalde.setDepth(height * 0.44);
-=======
-    // Depth para que el atril esté delante del alcalde
-    this.alcalde.setDepth(height * 0.38);
-    atril.setDepth(height * 0.40);
->>>>>>> Stashed changes
 
     // ============================================
     // CAJA DE DIÁLOGO
