@@ -37,16 +37,27 @@ export default class Scene_1_3 extends Phaser.Scene {
     floorLayer.setPosition((width - scaledWidth) / 2, (height - scaledHeight) / 2);
 
     // ============================================
-    // MÚSICOS (sala superior izquierda)
+    // MÚSICOS (sala superior izquierda) - con animación
     // ============================================
 
     const salaX = 120;
     const salaY = height * 0.22;
 
-    this.add.image(salaX - 40, salaY, 'musician_1').setOrigin(0.5, 1).setDepth(salaY);
-    this.add.image(salaX, salaY, 'musician_2').setOrigin(0.5, 1).setDepth(salaY);
-    this.add.image(salaX + 40, salaY, 'musician_3').setOrigin(0.5, 1).setDepth(salaY);
-    this.add.image(salaX + 80, salaY, 'musician_4').setOrigin(0.5, 1).setDepth(salaY);
+    this.musicians = [];
+    const musicianPositions = [
+      { x: salaX - 80, y: salaY + 20 },
+      { x: salaX - 40, y: salaY + 20 },
+      { x: salaX + 0, y: salaY + 20 },
+      { x: salaX + 40, y: salaY + 20 }
+    ];
+
+    for (let i = 0; i < 4; i++) {
+      const musician = this.add.sprite(musicianPositions[i].x, musicianPositions[i].y, `musician_${i + 1}`)
+        .setOrigin(0.5, 1)
+        .setDepth(salaY);
+      musician.play(`musician_${i + 1}_play`);
+      this.musicians.push(musician);
+    }
 
     // Indicador de música (notas animadas)
     this.notasMusicales = [];

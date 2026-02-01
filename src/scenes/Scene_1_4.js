@@ -47,7 +47,10 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.bodegaZone = null;
 
     const objectLayer = this.palacioMap.getObjectLayer('colliders');
+    console.log('Object layer found:', objectLayer ? 'YES' : 'NO');
+
     if (objectLayer) {
+      console.log('Number of objects:', objectLayer.objects.length);
       objectLayer.objects.forEach(obj => {
         // Escalar posiciones según el mapa
         const scaledX = this.mapOffsetX + obj.x * this.mapScale;
@@ -63,6 +66,7 @@ export default class Scene_1_4 extends Phaser.Scene {
             width: scaledW,
             height: scaledH
           };
+          console.log('Bodega zone found:', this.bodegaZone);
         } else {
           // Collider normal
           this.colliders.push({
@@ -73,23 +77,19 @@ export default class Scene_1_4 extends Phaser.Scene {
           });
         }
       });
+      console.log('Total colliders:', this.colliders.length);
+    } else {
+      console.error('No colliders layer found in palacio_map!');
     }
 
     // ============================================
     // CADÁVER (donde estaba el hijo del alcalde)
     // ============================================
 
-    this.cadaver = this.add.container(centerX, height * 0.35);
-
-    // Cuerpo en el suelo (sprite del hijo pero rotado/en el suelo)
-    const cuerpoBase = this.add.ellipse(0, 10, 80, 30, 0x3a0000, 0.5);
-    const cuerpo = this.add.image(0, 0, 'mayor_son')
+    // Usar el sprite específico del cadáver
+    this.cadaver = this.add.image(centerX, height * 0.35, 'mayor_son_dead')
       .setOrigin(0.5, 0.5)
-      .setAngle(90)
-      .setTint(0x666666);
-
-    this.cadaver.add([cuerpoBase, cuerpo]);
-    this.cadaver.setDepth(height * 0.35);
+      .setDepth(height * 0.35);
 
     // ============================================
     // MULTITUD HORRORIZADA
@@ -410,11 +410,15 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.marloSpeed = 150;
   }
 
-  checkCollision(x, y, radius = 16) {
+  checkCollision(x, y, radius = 20) {
     // Verificar colisión con los colliders del mapa
+    // Usamos el punto de los pies del personaje (y) y un poco más arriba para el cuerpo
+    const bodyTop = y - 40; // Aproximadamente la altura del sprite
+
     for (const col of this.colliders) {
+      // Verificar si el cuerpo del personaje colisiona con el collider
       if (x + radius > col.x && x - radius < col.x + col.width &&
-          y + radius > col.y && y - radius < col.y + col.height) {
+          y > col.y && bodyTop < col.y + col.height) {
         return true;
       }
     }
@@ -422,10 +426,18 @@ export default class Scene_1_4 extends Phaser.Scene {
   }
 
   checkBodegaZone(x, y) {
-    if (!this.bodegaZone) return false;
+    if (!this.bodegaZone) {
+      console.log('No bodega zone defined');
+      return false;
+    }
     const col = this.bodegaZone;
-    return x > col.x && x < col.x + col.width &&
-           y > col.y && y < col.y + col.height;
+    // Usar un área más generosa para detectar entrada
+    const inZone = x > col.x - 10 && x < col.x + col.width + 10 &&
+                   y > col.y - 10 && y < col.y + col.height + 30;
+    if (inZone) {
+      console.log('Player in bodega zone!', { x, y, zone: col });
+    }
+    return inZone;
   }
 
   update() {
@@ -473,25 +485,17 @@ export default class Scene_1_4 extends Phaser.Scene {
     const newX = this.marlo.x + vx * this.marloSpeed * delta;
     const newY = this.marlo.y + vy * this.marloSpeed * delta;
 
-    // Solo verificar colisiones durante exploración libre
-    // Durante la fase inicial (ir al cadáver), permitir movimiento libre
-    if (this.freeExploration) {
-      // Verificar colisiones antes de mover
-      if (!this.checkCollision(newX, newY)) {
-        this.marlo.x = newX;
-        this.marlo.y = newY;
-      } else {
-        // Intentar deslizar por paredes
-        if (!this.checkCollision(newX, this.marlo.y)) {
-          this.marlo.x = newX;
-        } else if (!this.checkCollision(this.marlo.x, newY)) {
-          this.marlo.y = newY;
-        }
-      }
-    } else {
-      // Sin colisiones durante la fase inicial
+    // Verificar colisiones en ambas fases (gameplayMode y freeExploration)
+    if (!this.checkCollision(newX, newY)) {
       this.marlo.x = newX;
       this.marlo.y = newY;
+    } else {
+      // Intentar deslizar por paredes
+      if (!this.checkCollision(newX, this.marlo.y)) {
+        this.marlo.x = newX;
+      } else if (!this.checkCollision(this.marlo.x, newY)) {
+        this.marlo.y = newY;
+      }
     }
 
     // Limitar a los bordes de la pantalla
@@ -564,24 +568,37 @@ export default class Scene_1_4 extends Phaser.Scene {
       align: 'center'
     }).setOrigin(0.5).setDepth(1000);
 
-    // Indicador de la zona de la bodega (opcional, visual)
+    // Indicador de la zona de la bodega (más visible)
     if (this.bodegaZone) {
+      // Hacer el indicador más grande para que sea más fácil de encontrar
       this.bodegaIndicator = this.add.rectangle(
         this.bodegaZone.x + this.bodegaZone.width / 2,
-        this.bodegaZone.y + this.bodegaZone.height / 2,
-        this.bodegaZone.width,
-        this.bodegaZone.height,
-        0x00ff00, 0.2
-      ).setDepth(1);
+        this.bodegaZone.y + this.bodegaZone.height / 2 + 10,
+        this.bodegaZone.width + 20,
+        this.bodegaZone.height + 40,
+        0x00ff00, 0.4
+      ).setDepth(999);
 
-      // Parpadeo sutil
+      // Añadir texto indicador
+      this.bodegaText = this.add.text(
+        this.bodegaZone.x + this.bodegaZone.width / 2,
+        this.bodegaZone.y - 10,
+        '↓ BODEGA',
+        { fontSize: '12px', color: '#00ff00', backgroundColor: '#000000aa', padding: { x: 4, y: 2 } }
+      ).setOrigin(0.5).setDepth(1000);
+
+      // Parpadeo más notable
       this.tweens.add({
-        targets: this.bodegaIndicator,
-        alpha: 0.1,
-        duration: 1000,
+        targets: [this.bodegaIndicator, this.bodegaText],
+        alpha: 0.2,
+        duration: 800,
         yoyo: true,
         repeat: -1
       });
+
+      console.log('Bodega indicator created at:', this.bodegaZone);
+    } else {
+      console.error('Cannot create bodega indicator - bodegaZone is null!');
     }
   }
 

@@ -104,6 +104,7 @@ export default class PreloadScene extends Phaser.Scene {
     // ----- ALCALDE (Mayor) -----
     this.load.image('mayor_stand', `${charPath}/town_mayor/mayor-stand.png`);
     this.load.image('mayor_son', `${charPath}/town_mayor/mayor-son.png`);
+    this.load.image('mayor_son_dead', `${charPath}/town_mayor/mayor-son-dead.png`);
     this.load.image('mayor_atril', `${charPath}/town_mayor/atril.png`);
     this.load.image('mayor_estructura', `${charPath}/town_mayor/estructura.png`);
 
@@ -117,9 +118,9 @@ export default class PreloadScene extends Phaser.Scene {
       this.load.image(`crowd_npc_back_${i}`, `${charPath}/npcs/back/npc${i}.png`);
     }
 
-    // ----- MÚSICOS (Scene 1-3) -----
+    // ----- MÚSICOS (Scene 1-3) - Spritesheets con 4 frames de animación -----
     for (let i = 1; i <= 4; i++) {
-      this.load.image(`musician_${i}`, `${charPath}/npcs/musicians/musician${i}.png`);
+      this.load.spritesheet(`musician_${i}`, `${charPath}/npcs/musicians/musician${i}.png`, { frameWidth: 64, frameHeight: 64 });
     }
 
     // ============================================
@@ -276,6 +277,16 @@ export default class PreloadScene extends Phaser.Scene {
       frameRate: 8,
       repeat: -1
     });
+
+    // ----- MUSICIAN ANIMATIONS -----
+    for (let i = 1; i <= 4; i++) {
+      this.anims.create({
+        key: `musician_${i}_play`,
+        frames: this.anims.generateFrameNumbers(`musician_${i}`, { start: 0, end: 3 }),
+        frameRate: 6,
+        repeat: -1
+      });
+    }
 
     // Short delay then go to menu
     this.time.delayedCall(500, () => {
