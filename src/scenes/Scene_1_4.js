@@ -13,110 +13,135 @@ export default class Scene_1_4 extends Phaser.Scene {
     const centerY = height / 2;
 
     // ============================================
-    // PLACEHOLDERS - ESCENARIO (mismo Hall)
+    // TILEMAP DEL PALACIO (mismo que Scene 1-3)
     // ============================================
 
-    // Fondo del hall (más oscuro, atmósfera tensa)
-    this.add.rectangle(centerX, centerY, width, height, 0x1a0a0a);
+    this.palacioMap = this.make.tilemap({ key: 'palacio_map' });
+    const tilesetHall = this.palacioMap.addTilesetImage('hall', 'tileset_hall');
+    const tilesetInterior = this.palacioMap.addTilesetImage('interior1', 'tileset_interior1');
 
-    // Pared de fondo
-    this.add.rectangle(centerX, height * 0.25, width, height * 0.35, 0x2a1010);
+    // Crear capa de tiles
+    this.floorLayer = this.palacioMap.createLayer('Capa de patrones 1', [tilesetHall, tilesetInterior], 0, 0);
 
-    // Cortinas laterales
-    this.add.rectangle(50, height * 0.4, 80, height * 0.6, 0x5a0000).setOrigin(0.5, 0.5);
-    this.add.rectangle(width - 50, height * 0.4, 80, height * 0.6, 0x5a0000).setOrigin(0.5, 0.5);
+    // Escalar para cubrir pantalla
+    const mapWidth = this.palacioMap.widthInPixels;
+    const mapHeight = this.palacioMap.heightInPixels;
+    const scaleX = width / mapWidth;
+    const scaleY = height / mapHeight;
+    this.mapScale = Math.max(scaleX, scaleY);
+    this.floorLayer.setScale(this.mapScale);
 
-    // Candelabros (más tenues)
-    for (let i = 0; i < 3; i++) {
-      const cx = 200 + i * 200;
-      this.add.circle(cx, 80, 25, 0xaa8800, 0.5);
+    // Centrar el mapa
+    const scaledWidth = mapWidth * this.mapScale;
+    const scaledHeight = mapHeight * this.mapScale;
+    this.mapOffsetX = (width - scaledWidth) / 2;
+    this.mapOffsetY = (height - scaledHeight) / 2;
+    this.floorLayer.setPosition(this.mapOffsetX, this.mapOffsetY);
+
+
+    // ============================================
+    // COLLIDERS (desde el tilemap)
+    // ============================================
+
+    this.colliders = [];
+    this.bodegaZone = null;
+
+    const objectLayer = this.palacioMap.getObjectLayer('colliders');
+    if (objectLayer) {
+      objectLayer.objects.forEach(obj => {
+        // Escalar posiciones según el mapa
+        const scaledX = this.mapOffsetX + obj.x * this.mapScale;
+        const scaledY = this.mapOffsetY + obj.y * this.mapScale;
+        const scaledW = obj.width * this.mapScale;
+        const scaledH = obj.height * this.mapScale;
+
+        if (obj.name === 'bodega') {
+          // Zona de transición a la bodega
+          this.bodegaZone = {
+            x: scaledX,
+            y: scaledY,
+            width: scaledW,
+            height: scaledH
+          };
+        } else {
+          // Collider normal
+          this.colliders.push({
+            x: scaledX,
+            y: scaledY,
+            width: scaledW,
+            height: scaledH
+          });
+        }
+      });
     }
 
-    // Suelo
-    this.add.rectangle(centerX, height * 0.75, width, height * 0.5, 0x2a2a3a);
-
     // ============================================
-    // PLACEHOLDER - CADÁVER
+    // CADÁVER (donde estaba el hijo del alcalde)
     // ============================================
 
-    this.cadaver = this.add.container(centerX, height * 0.55);
+    this.cadaver = this.add.container(centerX, height * 0.35);
 
-    // Cuerpo en el suelo
-    const cuerpoBase = this.add.ellipse(0, 10, 80, 30, 0x3a0000);
-    const cuerpo = this.add.rectangle(0, 0, 50, 25, 0x4a0000);
-    // Cabeza SIN ROSTRO (círculo oscuro)
-    const cabezaSinRostro = this.add.circle(-30, -5, 14, 0x1a0a0a);
-    cabezaSinRostro.setStrokeStyle(2, 0x3a0000);
+    // Cuerpo en el suelo (sprite del hijo pero rotado/en el suelo)
+    const cuerpoBase = this.add.ellipse(0, 10, 80, 30, 0x3a0000, 0.5);
+    const cuerpo = this.add.image(0, 0, 'mayor_son')
+      .setOrigin(0.5, 0.5)
+      .setAngle(90)
+      .setTint(0x666666);
 
-    // Etiqueta
-    const cadaverLabel = this.add.text(0, 35, '[VÍCTIMA - SIN ROSTRO]', {
-      fontSize: '10px',
-      color: '#ff0000'
-    }).setOrigin(0.5);
-
-    this.cadaver.add([cuerpoBase, cuerpo, cabezaSinRostro, cadaverLabel]);
+    this.cadaver.add([cuerpoBase, cuerpo]);
+    this.cadaver.setDepth(height * 0.35);
 
     // ============================================
-    // PLACEHOLDER - MULTITUD HORRORIZADA
+    // MULTITUD HORRORIZADA
     // ============================================
 
     this.multitud = [];
 
     // Círculo de personas alrededor del cadáver
-    const radioCirculo = 120;
-    for (let i = 0; i < 10; i++) {
-      const angulo = (i / 10) * Math.PI * 2 - Math.PI / 2;
+    const radioCirculo = 100;
+    for (let i = 0; i < 8; i++) {
+      const angulo = (i / 8) * Math.PI * 2 - Math.PI / 2;
       const x = centerX + Math.cos(angulo) * radioCirculo;
-      const y = height * 0.55 + Math.sin(angulo) * (radioCirculo * 0.5);
+      const y = height * 0.35 + Math.sin(angulo) * (radioCirculo * 0.6) + 50;
 
-      if (y > height * 0.4) { // Solo los que están "delante"
+      if (y > height * 0.3) {
         this.createCiudadanoHorrorizado(x, y);
       }
     }
 
-    // Más gente atrás
-    for (let i = 0; i < 6; i++) {
-      const x = 100 + i * 120;
-      const y = height * 0.42;
-      this.createCiudadanoHorrorizado(x, y, 0.7);
-    }
-
     // ============================================
-    // PLACEHOLDER - CARABINIERI
+    // CARABINIERI
     // ============================================
 
-    this.carabinieri = [];
+    this.carabiniere1 = this.add.image(centerX - 80, height * 0.5, 'carabiniere')
+      .setOrigin(0.5, 1)
+      .setDepth(height * 0.5)
+      .setAlpha(0);
 
-    // Dos carabinieri a los lados (aparecerán después)
-    this.carabiniere1 = this.createCarabiniere(100, height * 0.6);
-    this.carabiniere1.setAlpha(0);
-
-    this.carabiniere2 = this.createCarabiniere(width - 100, height * 0.6);
-    this.carabiniere2.setAlpha(0);
+    this.carabiniere2 = this.add.image(centerX + 80, height * 0.5, 'carabiniere')
+      .setOrigin(0.5, 1)
+      .setDepth(height * 0.5)
+      .setFlipX(true)
+      .setAlpha(0);
 
     // ============================================
-    // FAMILIA DE MARLO (sprites reales)
+    // FAMILIA DE MARLO
     // ============================================
 
-    // Padres de Marlo (al borde de la escena)
-    this.padre = this.add.image(width - 175, height * 0.75, 'father_idle_west').setOrigin(0.5, 1);
-    this.madre = this.add.image(width - 125, height * 0.75, 'mother_idle_west').setOrigin(0.5, 1);
+    this.padre = this.add.image(width - 200, height * 0.7, 'father_idle_west')
+      .setOrigin(0.5, 1)
+      .setDepth(height * 0.7);
 
-    // Marlo (cerca de los padres, será controlable después)
-    this.marlo = this.add.sprite(width - 150, height * 0.8, 'marlo_idle_south').setOrigin(0.5, 1);
-    this.marlo.setDepth(height * 0.8);
+    this.madre = this.add.image(width - 220, height * 0.7, 'mother_idle_west')
+      .setOrigin(0.5, 1)
+      .setDepth(height * 0.7)
+      .setScale(0.80);
+
+    // Marlo (será controlable después)
+    this.marlo = this.add.sprite(width - 200, height * 0.75, 'marlo_idle_south')
+      .setOrigin(0.5, 1)
+      .setDepth(height * 0.75);
     this.marloDirection = 'south';
-
-    // ============================================
-    // UI - Indicador de escena (debug)
-    // ============================================
-
-    this.debugText = this.add.text(10, 10, 'ESCENA 1-4: El Asesinato', {
-      fontSize: '14px',
-      color: '#ffffff',
-      backgroundColor: '#00000088',
-      padding: { x: 8, y: 4 }
-    }).setDepth(1000);
 
     // ============================================
     // CAJA DE DIÁLOGO
@@ -147,7 +172,7 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     this.dialogueBox.add([boxBg, this.speakerText, this.dialogueText, this.continueHint]);
 
-    // Caja de pensamiento (diferente estilo)
+    // Caja de pensamiento
     this.thoughtBox = this.add.container(centerX, height - 80);
     this.thoughtBox.setVisible(false).setDepth(1000);
 
@@ -164,47 +189,62 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.thoughtBox.add([thoughtBg, this.thoughtText]);
 
     // ============================================
-    // SECUENCIA DE LA ESCENA
+    // ESTADO DE LA ESCENA
     // ============================================
 
     this.currentStep = 0;
     this.isAnimating = false;
     this.waitingForInput = false;
     this.gameplayMode = false;
+    this.investigando = false;
+    this.freeExploration = false;
 
-    // Input para avanzar diálogos
+    // Input para diálogos
     this.input.keyboard.on('keydown-SPACE', () => this.handleInput());
     this.input.on('pointerdown', () => this.handleInput());
 
-    // Controles de movimiento (para gameplay)
+    // Controles de movimiento
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = this.input.keyboard.addKeys({
       up: 'W', down: 'S', left: 'A', right: 'D'
     });
 
-    // Iniciar secuencia con fade in
-    this.cameras.main.fadeIn(1000, 0, 0, 0);
-    this.cameras.main.once('camerafadeincomplete', () => {
-      this.time.delayedCall(500, () => this.runSequence());
+    // ESC para finalizar (solo en exploración libre)
+    this.input.keyboard.on('keydown-ESC', () => {
+      if (this.freeExploration) {
+        this.finalizarEscena();
+      }
     });
+
+    // Verificar si venimos de la bodega
+    const data = this.scene.settings.data || {};
+
+    if (data.fromBodega) {
+      // Volver directamente a exploración libre
+      this.cameras.main.fadeIn(1000, 0, 0, 0);
+      this.cameras.main.once('camerafadeincomplete', () => {
+        // Posicionar a Marlo cerca de la zona de la bodega
+        if (this.bodegaZone) {
+          this.marlo.x = this.bodegaZone.x + this.bodegaZone.width / 2;
+          this.marlo.y = this.bodegaZone.y + this.bodegaZone.height + 30;
+        }
+        this.investigando = true;
+        this.startFreeExploration();
+      });
+    } else {
+      // Iniciar con fade in y secuencia normal
+      this.cameras.main.fadeIn(1000, 0, 0, 0);
+      this.cameras.main.once('camerafadeincomplete', () => {
+        this.time.delayedCall(500, () => this.runSequence());
+      });
+    }
   }
 
-  createCiudadanoHorrorizado(x, y, scale = 1) {
-    const colors = [0x2a3a4a, 0x3a2a4a, 0x4a3a2a, 0x2a4a3a];
-    const color = Phaser.Math.RND.pick(colors);
-
-    const ciudadano = this.add.container(x, y);
-    const body = this.add.rectangle(0, 0, 25, 40, color);
-    const head = this.add.circle(0, -25, 10, 0xf5d0c5);
-    const mascara = this.add.ellipse(0, -25, 8, 6, 0xffd700, 0.8);
-
-    // Brazos levantados (horror)
-    const brazoIzq = this.add.rectangle(-15, -15, 6, 20, color).setAngle(-30);
-    const brazoDer = this.add.rectangle(15, -15, 6, 20, color).setAngle(30);
-
-    ciudadano.add([body, brazoIzq, brazoDer, head, mascara]);
-    ciudadano.setScale(scale);
-    ciudadano.setDepth(y);
+  createCiudadanoHorrorizado(x, y) {
+    const npcIndex = Phaser.Math.Between(1, 15);
+    const ciudadano = this.add.image(x, y, `crowd_npc_front_${npcIndex}`)
+      .setOrigin(0.5, 1)
+      .setDepth(y);
 
     // Temblor de horror
     this.tweens.add({
@@ -219,14 +259,8 @@ export default class Scene_1_4 extends Phaser.Scene {
     return ciudadano;
   }
 
-  createCarabiniere(x, y) {
-    const carabiniere = this.add.image(x, y, 'carabiniere').setOrigin(0.5, 1);
-    carabiniere.setDepth(y);
-    return carabiniere;
-  }
-
   handleInput() {
-    if (this.gameplayMode) return;
+    if (this.gameplayMode || this.freeExploration) return;
 
     if (this.waitingForInput && !this.isAnimating) {
       this.waitingForInput = false;
@@ -255,7 +289,7 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     switch (this.currentStep) {
       case 0:
-        // Pausa inicial - escena del horror
+        // Pausa inicial
         this.isAnimating = true;
         this.time.delayedCall(1500, () => {
           this.isAnimating = false;
@@ -291,22 +325,18 @@ export default class Scene_1_4 extends Phaser.Scene {
         break;
 
       case 6:
-        // Padres de Marlo
         this.showDialogue('Madre de Marlo', 'Tenemos que movernos, Marlo. Vamos a irnos.');
         break;
 
       case 7:
-        // Marlo responde
         this.showDialogue('Marlo', 'Vale, pero dame un segundo, tengo que coger una cosa.');
         break;
 
       case 8:
-        // Pensamiento de Marlo
         this.showThought('No... necesito ver eso.');
         break;
 
       case 9:
-        // Iniciar gameplay
         this.startGameplay();
         break;
     }
@@ -315,8 +345,7 @@ export default class Scene_1_4 extends Phaser.Scene {
   carabinieriIntervienen(callback) {
     const { width, height } = this.scale;
 
-    // Texto indicador
-    const interventionText = this.add.text(width / 2, height * 0.3, '[ Los carabinieri intervienen ]', {
+    const interventionText = this.add.text(width / 2, height * 0.2, '[ Los carabinieri intervienen ]', {
       fontSize: '14px',
       color: '#8888ff',
       fontStyle: 'italic',
@@ -338,9 +367,9 @@ export default class Scene_1_4 extends Phaser.Scene {
       delay: 500
     });
 
-    // Dispersar multitud (mover hacia los lados)
+    // Dispersar multitud
     this.multitud.forEach((ciudadano, i) => {
-      const direccion = ciudadano.x < width / 2 ? -1 : 1;
+      const direccion = ciudadano.x < this.scale.width / 2 ? -1 : 1;
       this.tweens.add({
         targets: ciudadano,
         x: ciudadano.x + direccion * 50,
@@ -351,7 +380,6 @@ export default class Scene_1_4 extends Phaser.Scene {
       });
     });
 
-    // Finalizar
     this.time.delayedCall(2500, () => {
       this.tweens.add({
         targets: interventionText,
@@ -367,11 +395,8 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
-    // Actualizar debug text
-    this.debugText.setText('ESCENA 1-4: GAMEPLAY - Mueve a Marlo');
-
     // Instrucciones
-    this.instructionText = this.add.text(width / 2, 50, 'Usa las flechas o WASD para mover a Marlo\nAcércate al cadáver para investigar', {
+    this.instructionText = this.add.text(width / 2, 30, 'Usa las flechas o WASD para moverte\nAcércate al cadáver para investigar', {
       fontSize: '14px',
       color: '#ffffff',
       backgroundColor: '#00000088',
@@ -380,14 +405,31 @@ export default class Scene_1_4 extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(1000);
 
     // Zona de interacción cerca del cadáver
-    this.zonaInvestigar = this.add.circle(width / 2, height * 0.55, 60, 0xff0000, 0.1);
+    this.zonaInvestigar = this.add.circle(this.cadaver.x, this.cadaver.y + 30, 50, 0xff0000, 0.1);
 
-    // Habilitar física simple para Marlo
     this.marloSpeed = 150;
   }
 
+  checkCollision(x, y, radius = 16) {
+    // Verificar colisión con los colliders del mapa
+    for (const col of this.colliders) {
+      if (x + radius > col.x && x - radius < col.x + col.width &&
+          y + radius > col.y && y - radius < col.y + col.height) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  checkBodegaZone(x, y) {
+    if (!this.bodegaZone) return false;
+    const col = this.bodegaZone;
+    return x > col.x && x < col.x + col.width &&
+           y > col.y && y < col.y + col.height;
+  }
+
   update() {
-    if (!this.gameplayMode) return;
+    if (!this.gameplayMode && !this.freeExploration) return;
 
     // Movimiento de Marlo
     let vx = 0;
@@ -398,7 +440,7 @@ export default class Scene_1_4 extends Phaser.Scene {
     if (this.cursors.up.isDown || this.wasd.up.isDown) vy = -1;
     if (this.cursors.down.isDown || this.wasd.down.isDown) vy = 1;
 
-    // Determinar dirección y animación
+    // Determinar dirección
     let newDirection = this.marloDirection;
     let isMoving = vx !== 0 || vy !== 0;
 
@@ -407,14 +449,13 @@ export default class Scene_1_4 extends Phaser.Scene {
     else if (vx < 0) newDirection = 'west';
     else if (vx > 0) newDirection = 'east';
 
-    // Actualizar animación si cambió dirección o estado de movimiento
+    // Actualizar animación
     if (isMoving) {
       const animKey = `marlo_walk_${newDirection}`;
       if (this.marlo.anims.currentAnim?.key !== animKey) {
         this.marlo.play(animKey);
       }
     } else {
-      // Detener y mostrar idle
       this.marlo.stop();
       this.marlo.setTexture(`marlo_idle_${this.marloDirection}`);
     }
@@ -427,64 +468,143 @@ export default class Scene_1_4 extends Phaser.Scene {
       vy *= 0.707;
     }
 
-    // Aplicar movimiento
+    // Calcular nueva posición
     const delta = this.game.loop.delta / 1000;
-    this.marlo.x += vx * this.marloSpeed * delta;
-    this.marlo.y += vy * this.marloSpeed * delta;
+    const newX = this.marlo.x + vx * this.marloSpeed * delta;
+    const newY = this.marlo.y + vy * this.marloSpeed * delta;
 
-    // Limitar a los bordes
+    // Solo verificar colisiones durante exploración libre
+    // Durante la fase inicial (ir al cadáver), permitir movimiento libre
+    if (this.freeExploration) {
+      // Verificar colisiones antes de mover
+      if (!this.checkCollision(newX, newY)) {
+        this.marlo.x = newX;
+        this.marlo.y = newY;
+      } else {
+        // Intentar deslizar por paredes
+        if (!this.checkCollision(newX, this.marlo.y)) {
+          this.marlo.x = newX;
+        } else if (!this.checkCollision(this.marlo.x, newY)) {
+          this.marlo.y = newY;
+        }
+      }
+    } else {
+      // Sin colisiones durante la fase inicial
+      this.marlo.x = newX;
+      this.marlo.y = newY;
+    }
+
+    // Limitar a los bordes de la pantalla
     this.marlo.x = Phaser.Math.Clamp(this.marlo.x, 50, 750);
-    this.marlo.y = Phaser.Math.Clamp(this.marlo.y, 200, 550);
+    this.marlo.y = Phaser.Math.Clamp(this.marlo.y, 100, 580);
 
     // Actualizar depth para y-sorting
     this.marlo.setDepth(this.marlo.y);
 
-    // Verificar si Marlo llegó al cadáver
-    const dist = Phaser.Math.Distance.Between(
-      this.marlo.x, this.marlo.y,
-      this.cadaver.x, this.cadaver.y + 30
-    );
+    // En modo gameplay inicial, verificar si llegó al cadáver
+    if (this.gameplayMode && !this.investigando) {
+      const dist = Phaser.Math.Distance.Between(
+        this.marlo.x, this.marlo.y,
+        this.cadaver.x, this.cadaver.y + 30
+      );
 
-    if (dist < 70 && !this.investigando) {
-      this.investigando = true;
-      this.iniciarInvestigacion();
+      if (dist < 60) {
+        this.investigando = true;
+        this.iniciarInvestigacion();
+      }
+    }
+
+    // En exploración libre, verificar zona de la bodega
+    if (this.freeExploration && this.checkBodegaZone(this.marlo.x, this.marlo.y)) {
+      this.entrarBodega();
     }
   }
 
   iniciarInvestigacion() {
     this.gameplayMode = false;
 
-    // Detener animación de Marlo y mostrar idle mirando al cadáver
+    // Detener animación
     this.marlo.stop();
     this.marlo.setTexture('marlo_idle_north');
 
-    // Ocultar instrucciones
+    // Ocultar UI de gameplay
     if (this.instructionText) this.instructionText.destroy();
     if (this.zonaInvestigar) this.zonaInvestigar.destroy();
-
-    this.debugText.setText('ESCENA 1-4: Investigación');
 
     // Secuencia de investigación
     this.time.delayedCall(500, () => {
       this.showThought('El hijo del Alcalde... sin rostro...');
       this.waitingForInput = true;
 
-      // Esperar input y luego terminar
-      const finishScene = () => {
+      const continueExploring = () => {
         if (!this.waitingForInput) return;
         this.waitingForInput = false;
         this.thoughtBox.setVisible(false);
 
-        // Fade out - fin de la Parte 1
-        this.cameras.main.fadeOut(2000, 0, 0, 0);
-        this.cameras.main.once('camerafadeoutcomplete', () => {
-          // Volver al menú (fin del contenido actual)
-          this.scene.start('MenuScene');
-        });
+        // Activar exploración libre
+        this.startFreeExploration();
       };
 
-      this.input.keyboard.once('keydown-SPACE', finishScene);
-      this.input.once('pointerdown', finishScene);
+      this.input.keyboard.once('keydown-SPACE', continueExploring);
+      this.input.once('pointerdown', continueExploring);
+    });
+  }
+
+  startFreeExploration() {
+    this.freeExploration = true;
+
+    const { width } = this.scale;
+
+    // Instrucciones actualizadas
+    this.freeExploreText = this.add.text(width / 2, 30, 'Explora el palacio libremente\n[ESC] para terminar | Busca la entrada a la bodega', {
+      fontSize: '14px',
+      color: '#ffffff',
+      backgroundColor: '#00000088',
+      padding: { x: 10, y: 5 },
+      align: 'center'
+    }).setOrigin(0.5).setDepth(1000);
+
+    // Indicador de la zona de la bodega (opcional, visual)
+    if (this.bodegaZone) {
+      this.bodegaIndicator = this.add.rectangle(
+        this.bodegaZone.x + this.bodegaZone.width / 2,
+        this.bodegaZone.y + this.bodegaZone.height / 2,
+        this.bodegaZone.width,
+        this.bodegaZone.height,
+        0x00ff00, 0.2
+      ).setDepth(1);
+
+      // Parpadeo sutil
+      this.tweens.add({
+        targets: this.bodegaIndicator,
+        alpha: 0.1,
+        duration: 1000,
+        yoyo: true,
+        repeat: -1
+      });
+    }
+  }
+
+  entrarBodega() {
+    if (this.enteringBodega) return;
+    this.enteringBodega = true;
+
+    this.freeExploration = false;
+
+    // Fade out y transición a la bodega
+    this.cameras.main.fadeOut(1000, 0, 0, 0);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.start('Scene_Bodega');
+    });
+  }
+
+  finalizarEscena() {
+    this.freeExploration = false;
+
+    // Fade out - fin de la escena
+    this.cameras.main.fadeOut(2000, 0, 0, 0);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.start('MenuScene');
     });
   }
 }

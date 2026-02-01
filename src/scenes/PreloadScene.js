@@ -117,6 +117,11 @@ export default class PreloadScene extends Phaser.Scene {
       this.load.image(`crowd_npc_back_${i}`, `${charPath}/npcs/back/npc${i}.png`);
     }
 
+    // ----- MÚSICOS (Scene 1-3) -----
+    for (let i = 1; i <= 4; i++) {
+      this.load.image(`musician_${i}`, `${charPath}/npcs/musicians/musician${i}.png`);
+    }
+
     // ============================================
     // TILEMAPS AND TILESETS
     // ============================================
@@ -134,6 +139,13 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('tileset_bodega', `${mapPath}/bodega.gif`);
     this.load.image('plaza_lado_derecho', `${mapPath}/pzaLadoDerecho.png`);
     this.load.image('plaza_lado_izq', `${mapPath}/pzaLadoIzq.png`);
+
+    // Scene 1-3 y 1-4 (Palacio - Hall del Baile)
+    this.load.tilemapTiledJSON('palacio_map', `${mapPath}/palacio.json`);
+    this.load.image('tileset_hall', `${mapPath}/hall.gif`);
+
+    // Scene Bodega (transición desde Scene 1-4)
+    this.load.tilemapTiledJSON('bodega_map', `${mapPath}/bodega.json`);
 
     // ============================================
     // UI / BACKGROUNDS

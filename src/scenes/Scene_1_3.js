@@ -13,141 +13,141 @@ export default class Scene_1_3 extends Phaser.Scene {
     const centerY = height / 2;
 
     // ============================================
-    // PLACEHOLDERS - ESCENARIO (Hall del Palacio)
+    // TILEMAP DEL PALACIO
     // ============================================
 
-    // Fondo del hall (paredes elegantes)
-    this.add.rectangle(centerX, centerY, width, height, 0x2a1a1a);
+    const palacioMap = this.make.tilemap({ key: 'palacio_map' });
+    const tilesetHall = palacioMap.addTilesetImage('hall', 'tileset_hall');
+    const tilesetInterior = palacioMap.addTilesetImage('interior1', 'tileset_interior1');
 
-    // Pared de fondo con decoración
-    this.add.rectangle(centerX, height * 0.25, width, height * 0.35, 0x3a2020);
+    // Crear capa de tiles
+    const floorLayer = palacioMap.createLayer('Capa de patrones 1', [tilesetHall, tilesetInterior], 0, 0);
 
-    // Cortinas laterales
-    this.add.rectangle(50, height * 0.4, 80, height * 0.6, 0x8B0000).setOrigin(0.5, 0.5);
-    this.add.rectangle(width - 50, height * 0.4, 80, height * 0.6, 0x8B0000).setOrigin(0.5, 0.5);
+    // Escalar para cubrir pantalla (palacio es 960x640, pantalla es 800x600)
+    const mapWidth = palacioMap.widthInPixels;
+    const mapHeight = palacioMap.heightInPixels;
+    const scaleX = width / mapWidth;
+    const scaleY = height / mapHeight;
+    const mapScale = Math.max(scaleX, scaleY);
+    floorLayer.setScale(mapScale);
 
-    // Candelabros (círculos dorados)
-    for (let i = 0; i < 3; i++) {
-      const cx = 200 + i * 200;
-      this.add.circle(cx, 80, 25, 0xffd700, 0.8);
-      // Luz del candelabro
-      this.add.circle(cx, 80, 40, 0xffff00, 0.1);
-    }
-
-    // Suelo del salón (mármol)
-    this.add.rectangle(centerX, height * 0.75, width, height * 0.5, 0x4a4a5a);
-
-    // Patrón del suelo
-    for (let i = 0; i < 8; i++) {
-      for (let j = 0; j < 4; j++) {
-        const tx = 50 + i * 100;
-        const ty = height * 0.55 + j * 40;
-        this.add.rectangle(tx, ty, 90, 35, (i + j) % 2 === 0 ? 0x3a3a4a : 0x5a5a6a);
-      }
-    }
+    // Centrar el mapa
+    const scaledWidth = mapWidth * mapScale;
+    const scaledHeight = mapHeight * mapScale;
+    floorLayer.setPosition((width - scaledWidth) / 2, (height - scaledHeight) / 2);
 
     // ============================================
-    // PLACEHOLDER - ORQUESTA
+    // MÚSICOS (sala superior izquierda)
     // ============================================
 
-    this.orquesta = this.add.container(centerX, height * 0.18);
+    const salaX = 120;
+    const salaY = height * 0.22;
 
-    // Plataforma de la orquesta
-    const plataformaOrquesta = this.add.rectangle(0, 20, 300, 30, 0x4a3020);
-
-    // Músicos (simplificados)
-    for (let i = 0; i < 5; i++) {
-      const mx = -80 + i * 40;
-      const musico = this.add.rectangle(mx, 0, 20, 35, 0x1a1a1a);
-      const cabeza = this.add.circle(mx, -22, 8, 0xf5d0c5);
-      this.orquesta.add([musico, cabeza]);
-    }
-
-    // Etiqueta
-    const orquestaLabel = this.add.text(0, 45, '[ORQUESTA]', {
-      fontSize: '10px',
-      color: '#888888'
-    }).setOrigin(0.5);
-
-    this.orquesta.add([plataformaOrquesta, orquestaLabel]);
+    this.add.image(salaX - 40, salaY, 'musician_1').setOrigin(0.5, 1).setDepth(salaY);
+    this.add.image(salaX, salaY, 'musician_2').setOrigin(0.5, 1).setDepth(salaY);
+    this.add.image(salaX + 40, salaY, 'musician_3').setOrigin(0.5, 1).setDepth(salaY);
+    this.add.image(salaX + 80, salaY, 'musician_4').setOrigin(0.5, 1).setDepth(salaY);
 
     // Indicador de música (notas animadas)
     this.notasMusicales = [];
     for (let i = 0; i < 3; i++) {
-      const nota = this.add.text(centerX - 60 + i * 60, height * 0.12, '♪', {
+      const nota = this.add.text(salaX - 20 + i * 40, salaY - 50, '♪', {
         fontSize: '20px',
         color: '#ffd700'
-      }).setOrigin(0.5).setAlpha(0);
+      }).setOrigin(0.5).setAlpha(0).setDepth(500);
       this.notasMusicales.push(nota);
     }
 
     // ============================================
-    // BAILARINES (usando NPCs reales)
+    // ALCALDE E HIJO (frente a las escaleras)
+    // ============================================
+
+    const escalerasY = height * 0.38;
+
+    // Alabarderos (4 frente a las escaleras)
+    this.add.image(centerX - 100, escalerasY, 'alabardiere')
+      .setOrigin(0.5, 1)
+      .setDepth(escalerasY);
+
+    this.add.image(centerX - 50, escalerasY, 'alabardiere')
+      .setOrigin(0.5, 1)
+      .setDepth(escalerasY);
+
+    this.add.image(centerX + 50, escalerasY, 'alabardiere')
+      .setOrigin(0.5, 1)
+      .setDepth(escalerasY)
+      .setFlipX(true);
+
+    this.add.image(centerX + 100, escalerasY, 'alabardiere')
+      .setOrigin(0.5, 1)
+      .setDepth(escalerasY)
+      .setFlipX(true);
+
+    // Carabinieri a los lados
+    this.add.image(centerX - 150, escalerasY, 'carabiniere')
+      .setOrigin(0.5, 1)
+      .setDepth(escalerasY);
+
+    this.add.image(centerX + 150, escalerasY, 'carabiniere')
+      .setOrigin(0.5, 1)
+      .setDepth(escalerasY)
+      .setFlipX(true);
+
+    // Alcalde (en el escenario, centrado)
+    this.alcalde = this.add.image(centerX + 30, escalerasY - 20, 'mayor_stand')
+      .setOrigin(0.5, 1)
+      .setDepth(escalerasY + 10);
+
+    // Hijo del Alcalde (al lado del alcalde, semi-oculto inicialmente)
+    this.hijoAlcalde = this.add.image(centerX - 30, escalerasY - 15, 'mayor_son')
+      .setOrigin(0.5, 1)
+      .setDepth(escalerasY + 10)
+      .setAlpha(0.5);
+
+    // ============================================
+    // BAILARINES (zona amplia del salón)
     // ============================================
 
     this.bailarines = [];
     this.bailando = true;
 
-    // Crear parejas de baile con NPCs reales
-    const posicionesBaile = [
-      { x: 150, y: height * 0.55 },
-      { x: 300, y: height * 0.6 },
-      { x: 450, y: height * 0.55 },
-      { x: 600, y: height * 0.6 },
-      { x: 220, y: height * 0.7 },
-      { x: 380, y: height * 0.72 },
-      { x: 540, y: height * 0.7 },
-    ];
+    // Zona de baile definida por esquinas
+    const zonaMinX = 60;
+    const zonaMaxX = 740;
+    const zonaMinY = escalerasY + 60;
+    const zonaMaxY = escalerasY + 300;
+
+    // Crear parejas de baile distribuidas
+    const posicionesBaile = [];
+
+    // Fila 1 (más cerca de las escaleras)
+    for (let x = zonaMinX + 50; x < zonaMaxX - 50; x += 90) {
+      posicionesBaile.push({ x: x, y: zonaMinY + 20 });
+    }
+
+    // Fila 2
+    for (let x = zonaMinX + 80; x < zonaMaxX - 80; x += 85) {
+      posicionesBaile.push({ x: x, y: zonaMinY + 80 });
+    }
+
+    // Fila 3
+    for (let x = zonaMinX + 60; x < zonaMaxX - 60; x += 95) {
+      posicionesBaile.push({ x: x, y: zonaMinY + 140 });
+    }
+
+    // Fila 4 (más al fondo)
+    for (let x = zonaMinX + 100; x < zonaMaxX - 100; x += 100) {
+      posicionesBaile.push({ x: x, y: zonaMinY + 200 });
+    }
+
+    // Fila 5 (última fila)
+    for (let x = zonaMinX + 70; x < zonaMaxX - 70; x += 110) {
+      posicionesBaile.push({ x: x, y: zonaMaxY - 20 });
+    }
 
     posicionesBaile.forEach((pos, i) => {
       this.createParejaBaile(pos.x, pos.y, i);
     });
-
-    // ============================================
-    // ALCALDE E HIJO
-    // ============================================
-
-    // Guardias a los lados del escenario
-    // Alabarderos
-    this.add.image(centerX - 120, height * 0.38, 'alabardiere')
-      .setOrigin(0.5, 1)
-      .setDepth(100);
-
-    this.add.image(centerX + 120, height * 0.38, 'alabardiere')
-      .setOrigin(0.5, 1)
-      .setDepth(100)
-      .setFlipX(true);
-
-    // Carabinieri izquierda
-    this.add.image(centerX - 170, height * 0.38, 'carabiniere')
-      .setOrigin(0.5, 1)
-      .setDepth(100);
-
-    this.add.image(centerX - 220, height * 0.38, 'carabiniere')
-      .setOrigin(0.5, 1)
-      .setDepth(100);
-
-    // Carabinieri derecha
-    this.add.image(centerX + 170, height * 0.38, 'carabiniere')
-      .setOrigin(0.5, 1)
-      .setDepth(100)
-      .setFlipX(true);
-
-    this.add.image(centerX + 220, height * 0.38, 'carabiniere')
-      .setOrigin(0.5, 1)
-      .setDepth(100)
-      .setFlipX(true);
-
-    // Alcalde (en el escenario, centrado)
-    this.alcalde = this.add.image(centerX + 30, height * 0.38, 'mayor_stand')
-      .setOrigin(0.5, 1)
-      .setDepth(100);
-
-    // Hijo del Alcalde (al lado del alcalde, semi-oculto inicialmente)
-    this.hijoAlcalde = this.add.image(centerX - 30, height * 0.39, 'mayor_son')
-      .setOrigin(0.5, 1)
-      .setDepth(100)
-      .setAlpha(0.5);
 
     // ============================================
     // CAJA DE DIÁLOGO
