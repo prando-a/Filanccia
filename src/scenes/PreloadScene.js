@@ -135,6 +135,10 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('plaza_lado_derecho', `${mapPath}/pzaLadoDerecho.png`);
     this.load.image('plaza_lado_izq', `${mapPath}/pzaLadoIzq.png`);
 
+    // Scene 1-3 (Palacio - Salón de baile)
+    this.load.tilemapTiledJSON('palacio_map', `${mapPath}/palacio.json`);
+    this.load.image('tileset_hall', `${mapPath}/hall.gif`);
+
     // ============================================
     // UI / BACKGROUNDS
     // ============================================
