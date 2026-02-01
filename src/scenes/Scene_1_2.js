@@ -201,17 +201,6 @@ export default class Scene_1_2 extends Phaser.Scene {
     this.alcalde.setDepth(height * 0.44);
 
     // ============================================
-    // UI - Indicador de escena (debug)
-    // ============================================
-
-    this.add.text(10, 10, 'ESCENA 1-2: Plaza Central', {
-      fontSize: '14px',
-      color: '#ffffff',
-      backgroundColor: '#00000088',
-      padding: { x: 8, y: 4 }
-    }).setDepth(1000);
-
-    // ============================================
     // CAJA DE DIÁLOGO
     // ============================================
 

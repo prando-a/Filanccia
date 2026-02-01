@@ -14,7 +14,8 @@ export default class MenuScene extends Phaser.Scene {
     const centerY = height / 2;
 
     // Background
-    this.add.rectangle(centerX, centerY, width, height, 0x1a1a2e);
+    const bg = this.add.image(centerX, centerY, 'menu_bg');
+    bg.setDisplaySize(width, height);
 
     // Música de fondo (si no está ya sonando)
     if (!this.sound.get('bso_main')?.isPlaying) {
@@ -25,19 +26,15 @@ export default class MenuScene extends Phaser.Scene {
       this.music.play();
     }
 
-    // Title
-    const title = this.add.text(centerX, centerY - 100, 'FILANCCIA', {
-      fontFamily: 'GameFont, Arial',
-      fontSize: '64px',
-      color: '#ffffff',
-      stroke: '#000000',
-      strokeThickness: 4
-    }).setOrigin(0.5);
+    // Title banner
+    const banner = this.add.image(centerX, centerY - 80, 'title_banner')
+      .setOrigin(0.5)
+      .setScale(2);
 
-    // Subtle title animation
+    // Subtle banner animation
     this.tweens.add({
-      targets: title,
-      y: title.y - 10,
+      targets: banner,
+      y: banner.y - 10,
       duration: 2000,
       ease: 'Sine.easeInOut',
       yoyo: true,
@@ -45,7 +42,7 @@ export default class MenuScene extends Phaser.Scene {
     });
 
     // Start button
-    const startBtn = this.add.text(centerX, centerY + 50, '[ COMENZAR ]', {
+    const startBtn = this.add.text(centerX, centerY + 200, '[ COMENZAR ]', {
       fontFamily: 'GameFont, Arial',
       fontSize: '28px',
       color: '#ffd700',

@@ -92,17 +92,6 @@ export default class Scene_1_1 extends Phaser.Scene {
     });
 
     // ============================================
-    // UI
-    // ============================================
-
-    this.add.text(10, 10, 'ESCENA 1-1: Camino a la Plaza', {
-      fontSize: '14px',
-      color: '#ffffff',
-      backgroundColor: '#00000088',
-      padding: { x: 8, y: 4 }
-    }).setDepth(1000);
-
-    // ============================================
     // SECUENCIA
     // ============================================
 

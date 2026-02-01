@@ -133,17 +133,6 @@ export default class Scene_1_0 extends Phaser.Scene {
     }
 
     // ============================================
-    // UI
-    // ============================================
-
-    this.debugText = this.add.text(10, 10, 'ESCENA 1-0: Casa de Marlo - Baño', {
-      fontSize: '14px',
-      color: '#ffffff',
-      backgroundColor: '#00000088',
-      padding: { x: 2, y: 1 }
-    }).setScrollFactor(0).setDepth(1000);
-
-    // ============================================
     // CAJA DE DIÁLOGO
     // ============================================
 
@@ -408,8 +397,6 @@ export default class Scene_1_0 extends Phaser.Scene {
 
   startGameplay() {
     this.gameplayMode = true;
-
-    this.debugText.setText('ESCENA 1-0: GAMEPLAY - Sal del baño');
 
     // Instrucciones
     this.instructionText = this.add.text(

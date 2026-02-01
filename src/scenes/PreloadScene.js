@@ -128,6 +128,13 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('tileset_bodega', `${mapPath}/bodega.gif`);
 
     // ============================================
+    // UI / BACKGROUNDS
+    // ============================================
+
+    this.load.image('title_banner', 'src/assets/ui/banner.png');
+    this.load.image('menu_bg', 'src/assets/background/bg.png');
+
+    // ============================================
     // AUDIO
     // ============================================
 
