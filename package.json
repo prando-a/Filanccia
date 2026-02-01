@@ -5,7 +5,8 @@
   "main": "src/main.js",
   "scripts": {
     "start": "http-server . -p 8080 -c-1",
-    "build": "mkdir -p dist && cp index.html dist/ && cp -r src assets dist/"
+    "build": "shx rm -rf dist && shx mkdir -p dist && shx cp index.html dist/ && shx cp -r src dist/ && shx cp -r assets dist/",
+    "build:win": "if not exist dist mkdir dist && copy index.html dist\\ && xcopy /E /I /Y src dist\\src && xcopy /E /I /Y assets dist\\assets"
   },
   "author": "",
   "license": "MIT",
@@ -13,6 +14,7 @@
     "phaser": "^3.55.2"
   },
   "devDependencies": {
-    "http-server": "^14.1.1"
+    "http-server": "^14.1.1",
+    "shx": "^0.3.4"
   }
 }
