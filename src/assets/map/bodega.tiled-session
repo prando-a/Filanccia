@@ -6,7 +6,19 @@
     "activeFile": "",
     "expandedProjectPaths": [
     ],
+    "file.lastUsedOpenFilter": "Todos los archivos (*)",
     "fileStates": {
+        "bodega.tmx": {
+            "scale": 1.1766145833333332,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 412.1995484927627,
+                "y": 319.98583506706217
+            }
+        },
+        "bodega.tmx#bodega": {
+            "scaleInDock": 1.5
+        }
     },
     "last.exportedFilePath": "C:/Users/ismae/Desktop/MalagaJam2026/Filanccia/src/assets/map",
     "last.imagePath": "C:/Users/ismae/Desktop/MalagaJam2026/Filanccia/src/assets/map",
@@ -16,6 +28,7 @@
     ],
     "project": "bodega.tiled-project",
     "recentFiles": [
+        "bodega.tmx"
     ],
     "tileset.embedInMap": true
 }
