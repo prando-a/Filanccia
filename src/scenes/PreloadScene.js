@@ -102,8 +102,13 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('alabardiere', `${charPath}/alabardieriIdleSouth.png`);
 
     // ----- NPCS MULTITUD (Scene 1-2) -----
-    for (let i = 1; i <= 6; i++) {
-      this.load.image(`crowd_npc${i}`, `${charPath}/scene2_npcs/npc${i}.png`);
+    // Front-facing NPCs (facing camera)
+    for (let i = 1; i <= 15; i++) {
+      this.load.image(`crowd_npc_front_${i}`, `${charPath}/npcs/front/npc${i}.png`);
+    }
+    // Back-facing NPCs (facing away from camera)
+    for (let i = 1; i <= 15; i++) {
+      this.load.image(`crowd_npc_back_${i}`, `${charPath}/npcs/back/npc${i}.png`);
     }
 
     // ============================================

@@ -267,9 +267,10 @@ export default class Scene_1_2 extends Phaser.Scene {
   }
 
   createCiudadano(x, y, scale) {
-    // Elegir un NPC aleatorio de los 6 disponibles
-    const npcIndex = Phaser.Math.Between(1, 6);
-    const npcKey = `crowd_npc${npcIndex}`;
+    // Elegir un NPC aleatorio de los 15 disponibles
+    // Usamos back porque la multitud mira hacia el alcalde (de espaldas a la cámara)
+    const npcIndex = Phaser.Math.Between(1, 15);
+    const npcKey = `crowd_npc_back_${npcIndex}`;
 
     const ciudadano = this.add.sprite(x, y, npcKey)
       .setScale(scale)
