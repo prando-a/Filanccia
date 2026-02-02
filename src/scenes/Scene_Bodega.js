@@ -16,28 +16,45 @@ export default class Scene_Bodega extends Phaser.Scene {
     // ============================================
 
     this.bodegaMap = this.make.tilemap({ key: 'bodega_map' });
+
+    // Debug: verificar que el tilemap se cargó
+    console.log('Bodega map loaded:', this.bodegaMap);
+    console.log('Map layers:', this.bodegaMap.layers.map(l => l.name));
+    console.log('Map tilesets:', this.bodegaMap.tilesets.map(t => t.name));
+
     const tilesetBodega = this.bodegaMap.addTilesetImage('bodega', 'tileset_bodega');
+    console.log('Tileset added:', tilesetBodega);
 
     // Crear capa de tiles
     this.floorLayer = this.bodegaMap.createLayer('Capa de patrones 1', tilesetBodega, 0, 0);
+    console.log('Floor layer created:', this.floorLayer);
 
-    // Escalar para cubrir pantalla (bodega es 832x512)
-    const mapWidth = this.bodegaMap.widthInPixels;
-    const mapHeight = this.bodegaMap.heightInPixels;
+    // Valores por defecto para el caso en que no se cree la capa
+    const mapWidth = this.bodegaMap.widthInPixels || 832;
+    const mapHeight = this.bodegaMap.heightInPixels || 512;
     const scaleX = width / mapWidth;
     const scaleY = height / mapHeight;
     this.mapScale = Math.max(scaleX, scaleY);
-    this.floorLayer.setScale(this.mapScale);
 
     // Centrar el mapa
     const scaledWidth = mapWidth * this.mapScale;
     const scaledHeight = mapHeight * this.mapScale;
     this.mapOffsetX = (width - scaledWidth) / 2;
     this.mapOffsetY = (height - scaledHeight) / 2;
-    this.floorLayer.setPosition(this.mapOffsetX, this.mapOffsetY);
 
-    // Atmósfera oscura
-    this.floorLayer.setTint(0x666666);
+    if (this.floorLayer) {
+      // Escalar para cubrir pantalla
+      this.floorLayer.setScale(this.mapScale);
+      this.floorLayer.setPosition(this.mapOffsetX, this.mapOffsetY);
+    } else {
+      // Fallback: crear fondo oscuro si el tilemap no se carga
+      console.warn('Could not create floor layer, using fallback background');
+      this.add.rectangle(centerX, height / 2, width, height, 0x1a1a2e);
+    }
+
+    // Atmósfera oscura usando overlay (compatible con todas las versiones)
+    this.darknessOverlay = this.add.rectangle(centerX, height / 2, width, height, 0x000000, 0.3)
+      .setDepth(1);
 
     // ============================================
     // COLLIDERS (desde el tilemap)
@@ -49,6 +66,11 @@ export default class Scene_Bodega extends Phaser.Scene {
     const objectLayer = this.bodegaMap.getObjectLayer('colliders');
     if (objectLayer) {
       objectLayer.objects.forEach(obj => {
+        // Skip spawn and exit points - they're not colliders
+        if (obj.name === 'spawn' || obj.name === 'exit') {
+          return;
+        }
+
         const scaledX = this.mapOffsetX + obj.x * this.mapScale;
         const scaledY = this.mapOffsetY + obj.y * this.mapScale;
         const scaledW = obj.width * this.mapScale;
@@ -61,39 +83,75 @@ export default class Scene_Bodega extends Phaser.Scene {
           height: scaledH
         });
       });
+      console.log('Bodega colliders loaded:', this.colliders.length);
+
+      // Debug: mostrar colliders visualmente (solo si debug está activado)
+      if (this.game.config.physics.arcade?.debug) {
+        this.colliders.forEach(col => {
+          this.add.rectangle(col.x + col.width / 2, col.y + col.height / 2, col.width, col.height, 0x0000ff, 0.3)
+            .setDepth(999);
+        });
+      }
     }
 
-    // Zona de salida (parte superior del mapa, cerca de donde entramos)
-    this.exitZone = {
-      x: this.mapOffsetX + 342 * this.mapScale,
-      y: this.mapOffsetY,
-      width: 40 * this.mapScale,
-      height: 30 * this.mapScale
-    };
+    // Zona de salida (cerca del spawn, parte inferior del mapa según tu diseño)
+    // Buscar si hay un objeto "exit" en el tilemap, si no usar posición cerca del spawn
+    let exitFound = false;
+    if (objectLayer) {
+      const exitPoint = objectLayer.objects.find(obj => obj.name === 'exit');
+      if (exitPoint) {
+        this.exitZone = {
+          x: this.mapOffsetX + exitPoint.x * this.mapScale,
+          y: this.mapOffsetY + exitPoint.y * this.mapScale,
+          width: (exitPoint.width || 40) * this.mapScale,
+          height: (exitPoint.height || 40) * this.mapScale
+        };
+        exitFound = true;
+        console.log('Exit zone found:', this.exitZone);
+      }
+    }
+
+    // Fallback: zona de salida cerca del spawn (parte inferior)
+    if (!exitFound) {
+      this.exitZone = {
+        x: this.mapOffsetX + 350 * this.mapScale,
+        y: this.mapOffsetY + 580 * this.mapScale,
+        width: 80 * this.mapScale,
+        height: 40 * this.mapScale
+      };
+    }
 
     // ============================================
-    // MARLO
+    // MARLO (usar spawn point del tilemap)
     // ============================================
 
-    // Marlo aparece en la parte superior (donde está la entrada desde el palacio)
-    this.marlo = this.add.sprite(centerX, 80, 'marlo_idle_south')
+    // Buscar el punto de spawn en el tilemap
+    let spawnX = centerX;
+    let spawnY = height * 0.75;
+
+    const objectsLayer = this.bodegaMap.getObjectLayer('colliders');
+    if (objectsLayer) {
+      const spawnPoint = objectsLayer.objects.find(obj => obj.name === 'spawn');
+      if (spawnPoint) {
+        spawnX = this.mapOffsetX + spawnPoint.x * this.mapScale;
+        spawnY = this.mapOffsetY + spawnPoint.y * this.mapScale;
+        console.log('Spawn point found:', spawnX, spawnY);
+      }
+    }
+
+    this.marlo = this.add.sprite(spawnX, spawnY, 'marlo_idle_north')
       .setOrigin(0.5, 1)
       .setDepth(500);
-    this.marloDirection = 'south';
+    this.marloDirection = 'north';
 
     // ============================================
-    // ELEMENTOS DE LA BODEGA
+    // ELEMENTOS INTERACTIVOS
     // ============================================
 
-    // Barriles y cajas (decoración con colisión visual)
-    this.createBarrel(150, 200);
-    this.createBarrel(180, 220);
-    this.createBarrel(600, 300);
-    this.createCrate(250, 400);
-    this.createCrate(550, 450);
-
-    // Objeto interactivo: nota misteriosa
-    this.notaMisteriosa = this.add.container(400, 350);
+    // Objeto interactivo: nota misteriosa (posición ajustada al centro del mapa)
+    const notaX = this.mapOffsetX + 500 * this.mapScale;
+    const notaY = this.mapOffsetY + 300 * this.mapScale;
+    this.notaMisteriosa = this.add.container(notaX, notaY);
     const notaGlow = this.add.circle(0, 0, 20, 0xffff00, 0.2);
     const notaSprite = this.add.rectangle(0, 0, 15, 20, 0xf5f5dc);
     this.notaMisteriosa.add([notaGlow, notaSprite]);
@@ -158,45 +216,6 @@ export default class Scene_Bodega extends Phaser.Scene {
 
     // Fade in
     this.cameras.main.fadeIn(1000, 0, 0, 0);
-  }
-
-  createBarrel(x, y) {
-    const barrel = this.add.container(x, y);
-    const base = this.add.ellipse(0, 10, 30, 15, 0x4a3020);
-    const body = this.add.rectangle(0, 0, 25, 30, 0x5a4030);
-    const top = this.add.ellipse(0, -10, 25, 12, 0x6a5040);
-    barrel.add([base, body, top]);
-    barrel.setDepth(y);
-
-    // Añadir como collider
-    this.colliders.push({
-      x: x - 15,
-      y: y - 15,
-      width: 30,
-      height: 30
-    });
-
-    return barrel;
-  }
-
-  createCrate(x, y) {
-    const crate = this.add.container(x, y);
-    const body = this.add.rectangle(0, 0, 35, 35, 0x6a5a40);
-    body.setStrokeStyle(2, 0x4a3a20);
-    const cross1 = this.add.rectangle(0, 0, 30, 4, 0x4a3a20);
-    const cross2 = this.add.rectangle(0, 0, 4, 30, 0x4a3a20);
-    crate.add([body, cross1, cross2]);
-    crate.setDepth(y);
-
-    // Añadir como collider
-    this.colliders.push({
-      x: x - 17,
-      y: y - 17,
-      width: 35,
-      height: 35
-    });
-
-    return crate;
   }
 
   handleInteraction() {

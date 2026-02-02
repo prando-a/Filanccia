@@ -236,15 +236,26 @@ export default class Scene_1_2 extends Phaser.Scene {
 
       case 1:
         // Primer diálogo del Alcalde
-        this.showDialogue('Alcalde', '¡Bienvenidos, queridos filenccianos! Hoy celebramos el centenario de nuestra ciudad...');
+        this.showDialogue('Alcalde', '¡Bienvenidos, queridos filenccianos! ¡Bienvenidos a la celebración del centenario de nuestra amada ciudad!');
         break;
 
       case 2:
-        // Segundo diálogo del Alcalde
-        this.showDialogue('Alcalde', '¡QUE COMIENCE EL CARNAVAL!');
+        this.showDialogue('Alcalde', 'Hace cien años, nuestros ancestros fundaron Filanccia sobre los principios de la prosperidad y la tradición.');
         break;
 
       case 3:
+        this.showDialogue('Alcalde', 'Esta noche, bajo las máscaras del carnaval, todos somos iguales. Nobles y plebeyos, unidos en la celebración.');
+        break;
+
+      case 4:
+        this.showDialogue('Alcalde', 'Pero antes de que comience la fiesta, tengo un anuncio especial que hacer en el palacio...');
+        break;
+
+      case 5:
+        this.showDialogue('Alcalde', '¡Os espero a todos en el gran salón! ¡Y ahora... QUE COMIENCE EL CARNAVAL!');
+        break;
+
+      case 6:
         // Fade out y transición
         this.cameras.main.fadeOut(1000, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {

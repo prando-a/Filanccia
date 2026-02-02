@@ -78,6 +78,24 @@ export default class Scene_1_4 extends Phaser.Scene {
         }
       });
       console.log('Total colliders:', this.colliders.length);
+
+      // Debug: mostrar colliders visualmente (solo si debug está activado)
+      if (this.game.config.physics.arcade?.debug) {
+        this.colliders.forEach(col => {
+          this.add.rectangle(col.x + col.width / 2, col.y + col.height / 2, col.width, col.height, 0x0000ff, 0.3)
+            .setDepth(999);
+        });
+        // Mostrar bodega zone en verde
+        if (this.bodegaZone) {
+          this.add.rectangle(
+            this.bodegaZone.x + this.bodegaZone.width / 2,
+            this.bodegaZone.y + this.bodegaZone.height / 2,
+            this.bodegaZone.width,
+            this.bodegaZone.height,
+            0x00ff00, 0.3
+          ).setDepth(999);
+        }
+      }
     } else {
       console.error('No colliders layer found in palacio_map!');
     }
@@ -216,6 +234,25 @@ export default class Scene_1_4 extends Phaser.Scene {
       }
     });
 
+    // E para interactuar (entrar a la bodega)
+    this.input.keyboard.on('keydown-E', () => {
+      if (this.freeExploration && this.nearBodega) {
+        this.entrarBodega();
+      }
+    });
+
+    // Crear prompt de interacción "E" (inicialmente oculto)
+    this.interactPrompt = this.add.container(0, 0);
+    const promptBg = this.add.rectangle(0, 0, 80, 30, 0x000000, 0.8).setStrokeStyle(2, 0xffd700);
+    const promptText = this.add.text(0, 0, '[E] Entrar', {
+      fontSize: '12px',
+      color: '#ffd700',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+    this.interactPrompt.add([promptBg, promptText]);
+    this.interactPrompt.setVisible(false).setDepth(1001);
+    this.nearBodega = false;
+
     // Verificar si venimos de la bodega
     const data = this.scene.settings.data || {};
 
@@ -260,6 +297,12 @@ export default class Scene_1_4 extends Phaser.Scene {
   }
 
   handleInput() {
+    // Durante la investigación del cadáver
+    if (this.investigando && this.waitingForInput) {
+      this.handleThoughtInput();
+      return;
+    }
+
     if (this.gameplayMode || this.freeExploration) return;
 
     if (this.waitingForInput && !this.isAnimating) {
@@ -298,23 +341,35 @@ export default class Scene_1_4 extends Phaser.Scene {
         });
         break;
 
+      // ============================================
+      // REACCIONES DE LOS CIUDADANOS
+      // ============================================
+
       case 1:
-        this.showDialogue('Ciudadano', '¡Ha muerto!');
+        this.showDialogue('Ciudadano', '¡Ha muerto! ¡El hijo del Alcalde ha muerto!');
         break;
 
       case 2:
-        this.showDialogue('Ciudadano', '¡No es posible!');
+        this.showDialogue('Ciudadana', '¡No puede ser! ¡Estaba con nosotros hace apenas unos minutos!');
         break;
 
       case 3:
-        this.showDialogue('Ciudadano', '¡Por Dios!');
+        this.showDialogue('Ciudadano', '¡Dios mío! ¡Es horrible! ¡Mirad la sangre!');
         break;
 
       case 4:
-        this.showDialogue('Ciudadano', '¡No tiene rostro!');
+        this.showDialogue('Ciudadana', '¡Su rostro! ¡Le han arrancado el rostro!');
         break;
 
       case 5:
+        this.showDialogue('Ciudadano', '¡Un demonio! ¡Ha sido obra de un demonio!');
+        break;
+
+      case 6:
+        this.showDialogue('Ciudadana', '¡Los guardias! ¡Que alguien llame a los guardias!');
+        break;
+
+      case 7:
         // Carabinieri intervienen
         this.isAnimating = true;
         this.carabinieriIntervienen(() => {
@@ -324,19 +379,55 @@ export default class Scene_1_4 extends Phaser.Scene {
         });
         break;
 
-      case 6:
-        this.showDialogue('Madre de Marlo', 'Tenemos que movernos, Marlo. Vamos a irnos.');
-        break;
-
-      case 7:
-        this.showDialogue('Marlo', 'Vale, pero dame un segundo, tengo que coger una cosa.');
-        break;
+      // ============================================
+      // CONVERSACIÓN FAMILIAR
+      // ============================================
 
       case 8:
-        this.showThought('No... necesito ver eso.');
+        this.showDialogue('Madre de Marlo', 'Marlo, tenemos que salir de aquí inmediatamente. Esto no es seguro.');
         break;
 
       case 9:
+        this.showDialogue('Padre de Marlo', 'Tu madre tiene razón. Vámonos de aquí, hijo.');
+        break;
+
+      case 10:
+        this.showDialogue('Marlo', 'Esperad... necesito un momento.');
+        break;
+
+      case 11:
+        this.showDialogue('Madre de Marlo', '¡Marlo! No es momento para curiosear. Un hombre ha muerto.');
+        break;
+
+      case 12:
+        this.showDialogue('Marlo', 'Lo sé, mamá. Es solo que... algo no está bien aquí.');
+        break;
+
+      case 13:
+        this.showDialogue('Padre de Marlo', 'Claro que no está bien. Han asesinado al heredero del Alcalde en pleno carnaval.');
+        break;
+
+      case 14:
+        this.showDialogue('Marlo', 'No, me refiero a... el rostro. ¿Por qué llevarse su rostro?');
+        break;
+
+      case 15:
+        this.showDialogue('Madre de Marlo', 'No lo sé y no quiero saberlo. Nos vamos ahora mismo.');
+        break;
+
+      case 16:
+        this.showDialogue('Marlo', 'Dadme un segundo. Olvidé algo en el salón... enseguida os alcanzo.');
+        break;
+
+      case 17:
+        this.showDialogue('Padre de Marlo', 'No tardes, Marlo. Te esperamos en la entrada.');
+        break;
+
+      case 18:
+        this.showThought('No puedo irme así. Necesito ver esto de cerca.');
+        break;
+
+      case 19:
         this.startGameplay();
         break;
     }
@@ -518,9 +609,22 @@ export default class Scene_1_4 extends Phaser.Scene {
       }
     }
 
-    // En exploración libre, verificar zona de la bodega
-    if (this.freeExploration && this.checkBodegaZone(this.marlo.x, this.marlo.y)) {
-      this.entrarBodega();
+    // En exploración libre, verificar cercanía a la bodega para mostrar prompt
+    if (this.freeExploration) {
+      const nearBodega = this.checkBodegaZone(this.marlo.x, this.marlo.y);
+      if (nearBodega && !this.nearBodega) {
+        // Acaba de entrar en la zona
+        this.nearBodega = true;
+        this.interactPrompt.setVisible(true);
+        this.interactPrompt.setPosition(this.marlo.x, this.marlo.y - 60);
+      } else if (!nearBodega && this.nearBodega) {
+        // Acaba de salir de la zona
+        this.nearBodega = false;
+        this.interactPrompt.setVisible(false);
+      } else if (nearBodega) {
+        // Sigue en la zona, actualizar posición del prompt
+        this.interactPrompt.setPosition(this.marlo.x, this.marlo.y - 60);
+      }
     }
   }
 
@@ -535,23 +639,61 @@ export default class Scene_1_4 extends Phaser.Scene {
     if (this.instructionText) this.instructionText.destroy();
     if (this.zonaInvestigar) this.zonaInvestigar.destroy();
 
-    // Secuencia de investigación
-    this.time.delayedCall(500, () => {
-      this.showThought('El hijo del Alcalde... sin rostro...');
-      this.waitingForInput = true;
+    // Secuencia de investigación con más diálogos
+    this.investigationStep = 0;
+    this.runInvestigationSequence();
+  }
 
-      const continueExploring = () => {
-        if (!this.waitingForInput) return;
-        this.waitingForInput = false;
-        this.thoughtBox.setVisible(false);
-
+  runInvestigationSequence() {
+    switch (this.investigationStep) {
+      case 0:
+        this.time.delayedCall(500, () => {
+          this.showThought('El hijo del Alcalde... sin vida, sin rostro. Esto es una pesadilla.');
+          this.investigationStep++;
+        });
+        break;
+      case 1:
+        this.showThought('Hace apenas unos minutos estaba en el escenario, recibiendo aplausos...');
+        this.investigationStep++;
+        break;
+      case 2:
+        this.showThought('¿Quién podría hacer algo tan horrible? ¿Y por qué arrancarle el rostro?');
+        this.investigationStep++;
+        break;
+      case 3:
+        this.showThought('En el carnaval todos llevamos máscaras para ocultar quiénes somos...');
+        this.investigationStep++;
+        break;
+      case 4:
+        this.showThought('Pero él... ya no tiene nada que ocultar. Le han quitado todo.');
+        this.investigationStep++;
+        break;
+      case 5:
+        this.showThought('Esto no es un crimen común. Hay algo ritual, algo simbólico en todo esto.');
+        this.investigationStep++;
+        break;
+      case 6:
+        this.showThought('Los carabinieri no van a descubrir nada. Nunca lo hacen.');
+        this.investigationStep++;
+        break;
+      case 7:
+        this.showThought('Tengo que investigar por mi cuenta. Quizás en la bodega encuentre alguna pista...');
+        this.investigationStep++;
+        break;
+      case 8:
         // Activar exploración libre
+        this.thoughtBox.setVisible(false);
         this.startFreeExploration();
-      };
+        break;
+    }
+  }
 
-      this.input.keyboard.once('keydown-SPACE', continueExploring);
-      this.input.once('pointerdown', continueExploring);
-    });
+  handleThoughtInput() {
+    if (this.investigando && this.waitingForInput && !this.isAnimating) {
+      this.waitingForInput = false;
+      this.thoughtBox.setVisible(false);
+      this.runInvestigationSequence();
+    }
   }
 
   startFreeExploration() {

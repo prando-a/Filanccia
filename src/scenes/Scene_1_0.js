@@ -233,7 +233,7 @@ export default class Scene_1_0 extends Phaser.Scene {
 
       case 2:
         // Madre habla
-        this.showDialogue('Madre', '¡Marlo! ¡Llegamos tarde, date prisa!');
+        this.showDialogue('Madre', '¡Marlo! ¿Todavía estás ahí? ¡El carnaval del centenario no espera a nadie!');
         break;
 
       case 3:
@@ -247,6 +247,21 @@ export default class Scene_1_0 extends Phaser.Scene {
         break;
 
       case 4:
+        // Marlo responde
+        this.showDialogue('Marlo', 'Ya casi estoy, mamá. Solo me falta... la máscara.');
+        break;
+
+      case 5:
+        // Madre insiste
+        this.showDialogue('Madre', 'Tu padre ya está en la puerta. El Alcalde dará su discurso en menos de una hora.');
+        break;
+
+      case 6:
+        // Madre añade
+        this.showDialogue('Madre', 'Dicen que anunciará algo importante esta noche. ¡No podemos perdérnoslo!');
+        break;
+
+      case 7:
         // La madre sale del lugar
         this.isAnimating = true;
         this.madreSale(() => {
@@ -256,12 +271,12 @@ export default class Scene_1_0 extends Phaser.Scene {
         });
         break;
 
-      case 5:
+      case 8:
         // Marlo responde (madre ya se fue)
-        this.showDialogue('Marlo', '¡Ya voy! ¡Ya estoy listo!');
+        this.showDialogue('Marlo', '¡Ya voy! Solo necesito un momento más...');
         break;
 
-      case 6:
+      case 9:
         // Marlo vuelve a mirar al espejo
         this.isAnimating = true;
         this.marloTurn('espejo', () => {
@@ -271,7 +286,7 @@ export default class Scene_1_0 extends Phaser.Scene {
         });
         break;
 
-      case 7:
+      case 10:
         // Pausa antes de la cinemática
         this.isAnimating = true;
         this.time.delayedCall(500, () => {
@@ -281,7 +296,7 @@ export default class Scene_1_0 extends Phaser.Scene {
         });
         break;
 
-      case 8:
+      case 11:
         // Cinemática: colocarse la máscara
         this.isAnimating = true;
         this.cinematicaMascara(() => {
@@ -291,7 +306,7 @@ export default class Scene_1_0 extends Phaser.Scene {
         });
         break;
 
-      case 9:
+      case 12:
         // Iniciar gameplay
         this.startGameplay();
         break;

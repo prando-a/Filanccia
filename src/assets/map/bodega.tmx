@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="26" height="16" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="40">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="26" height="16" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="42">
  <editorsettings>
   <export target="bodega.json" format="json"/>
  </editorsettings>
@@ -62,5 +62,9 @@
   <object id="37" x="584.728" y="307.662" width="81.59" height="62.8923"/>
   <object id="38" x="534.585" y="384.153" width="67.9917" height="51.8437"/>
   <object id="39" x="480.191" y="317.861" width="66.2919" height="56.0931"/>
+  <object id="40" name="spawn" x="379.025" y="451.604" width="32" height="32">
+   <ellipse/>
+  </object>
+  <object id="41" name="exit" x="358.864" y="488.7" width="45" height="20"/>
  </objectgroup>
 </map>

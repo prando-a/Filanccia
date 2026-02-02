@@ -328,7 +328,41 @@ export default class Scene_1_3 extends Phaser.Scene {
         });
         break;
 
+      // ============================================
+      // CONVERSACIÓN DURANTE EL BAILE
+      // ============================================
+
       case 1:
+        this.showDialogue('Noble', '¡Qué espléndido baile! El Alcalde se ha superado este año.');
+        break;
+
+      case 2:
+        this.showDialogue('Dama', 'Las máscaras son preciosas. Dicen que las trajo de Venecia especialmente para esta noche.');
+        break;
+
+      case 3:
+        this.showDialogue('Noble', '¿Habéis oído los rumores? Parece que el Alcalde tiene un anuncio importante.');
+        break;
+
+      case 4:
+        this.showDialogue('Dama', 'Todos hablan de ello. Algunos dicen que nombrará a su sucesor esta noche.');
+        break;
+
+      case 5:
+        this.showDialogue('Noble', 'Era de esperar. El Alcalde ya no es joven, y su hijo ha demostrado ser capaz.');
+        break;
+
+      case 6:
+        // Pausa para disfrutar del baile
+        this.isAnimating = true;
+        this.time.delayedCall(2000, () => {
+          this.isAnimating = false;
+          this.currentStep++;
+          this.runSequence();
+        });
+        break;
+
+      case 7:
         // La orquesta finaliza
         this.isAnimating = true;
         this.stopMusica();
@@ -340,17 +374,55 @@ export default class Scene_1_3 extends Phaser.Scene {
         });
         break;
 
-      case 2:
-        // Alcalde da el brindis
-        this.showDialogue('Alcalde', 'Queridos ciudadanos, hoy no solo celebramos el centenario de Filanccia...');
+      // ============================================
+      // DISCURSO DEL ALCALDE
+      // ============================================
+
+      case 8:
+        this.showDialogue('Alcalde', '¡Estimados invitados! Por favor, un momento de atención...');
         break;
 
-      case 3:
-        // Alcalde anuncia al heredero
-        this.showDialogue('Alcalde', 'También anuncio que mi hijo me sucederá en el cargo.');
+      case 9:
+        this.showDialogue('Alcalde', 'Hace cien años, nuestros ancestros fundaron esta ciudad con un sueño.');
         break;
 
-      case 4:
+      case 10:
+        this.showDialogue('Alcalde', 'Un sueño de prosperidad, de cultura, de una vida mejor para todos.');
+        break;
+
+      case 11:
+        this.showDialogue('Alcalde', 'Esta noche celebramos no solo ese sueño, sino su realización.');
+        break;
+
+      case 12:
+        this.showDialogue('Alcalde', 'Filanccia ha florecido bajo el liderazgo de mi familia durante generaciones.');
+        break;
+
+      case 13:
+        this.showDialogue('Alcalde', 'Pero todo líder debe pensar en el futuro. En quién continuará su obra.');
+        break;
+
+      case 14:
+        this.showDialogue('Alcalde', 'He gobernado esta ciudad durante veinte años, y ha sido el mayor honor de mi vida.');
+        break;
+
+      case 15:
+        this.showDialogue('Alcalde', 'Pero ha llegado el momento de preparar la transición hacia una nueva era.');
+        break;
+
+      case 16:
+        this.showDialogue('Alcalde', 'Por ello, esta noche, ante todos vosotros, anuncio oficialmente...');
+        break;
+
+      case 17:
+        this.showDialogue('Alcalde', '¡Que mi hijo será mi sucesor como Alcalde de Filanccia!');
+        break;
+
+      // ============================================
+      // PRESENTACIÓN DEL HIJO
+      // ============================================
+
+      case 18:
         // Presentar al hijo
         this.isAnimating = true;
         this.presentarHijo(() => {
@@ -360,7 +432,80 @@ export default class Scene_1_3 extends Phaser.Scene {
         });
         break;
 
-      case 5:
+      case 19:
+        this.showDialogue('Alcalde', '¡Él llevará el legado de nuestra familia y guiará a Filanccia hacia su próximo siglo de gloria!');
+        break;
+
+      // ============================================
+      // REACCIONES DE LA MULTITUD
+      // ============================================
+
+      case 20:
+        this.showDialogue('Noble', '¡Bravo! ¡Una elección excelente!');
+        break;
+
+      case 21:
+        this.showDialogue('Dama', '¡El joven señor será un gran líder! ¡Lo lleva en la sangre!');
+        break;
+
+      case 22:
+        this.showDialogue('Ciudadano', '¡Viva el futuro Alcalde! ¡Viva Filanccia!');
+        break;
+
+      case 23:
+        this.showDialogue('Noble', 'La dinastía continúa. Filanccia está en buenas manos.');
+        break;
+
+      case 24:
+        // Murmullo de un escéptico
+        this.showDialogue('Voz entre la multitud', '...aunque algunos dicen que es demasiado joven para el cargo...');
+        break;
+
+      case 25:
+        this.showDialogue('Otra voz', '¡Silencio! No es momento para dudas. Es una noche de celebración.');
+        break;
+
+      // ============================================
+      // DISCURSO DEL HIJO DEL ALCALDE
+      // ============================================
+
+      case 26:
+        this.showDialogue('Hijo del Alcalde', 'Gracias, padre. Gracias a todos por vuestra confianza.');
+        break;
+
+      case 27:
+        this.showDialogue('Hijo del Alcalde', 'Sé que tengo grandes zapatos que llenar. Mi padre ha sido un líder ejemplar.');
+        break;
+
+      case 28:
+        this.showDialogue('Hijo del Alcalde', 'Pero os prometo que dedicaré cada día de mi vida al servicio de Filanccia.');
+        break;
+
+      case 29:
+        this.showDialogue('Hijo del Alcalde', 'Continuaré las tradiciones que nos han hecho grandes...');
+        break;
+
+      case 30:
+        this.showDialogue('Hijo del Alcalde', 'Y trabajaré para construir un futuro aún más brillante para todos nosotros.');
+        break;
+
+      case 31:
+        this.showDialogue('Hijo del Alcalde', '¡Por Filanccia! ¡Por el centenario! ¡Y por los próximos cien años de prosperidad!');
+        break;
+
+      // ============================================
+      // APLAUSOS FINALES
+      // ============================================
+
+      case 32:
+        this.showDialogue('Multitud', '¡¡¡VIVA!!! ¡¡¡VIVA EL FUTURO ALCALDE!!!');
+        break;
+
+      case 33:
+        this.showDialogue('Alcalde', '¡Y ahora, que continúe la celebración! ¡Que la música no pare hasta el amanecer!');
+        break;
+
+      case 34:
         // Fade out y transición
         this.cameras.main.fadeOut(1000, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {

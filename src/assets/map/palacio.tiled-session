@@ -8,12 +8,34 @@
         "."
     ],
     "fileStates": {
+        "bodega.json": {
+            "scale": 1.2400240384615384,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 415.71774740719195,
+                "y": 256.04342347581667
+            }
+        },
+        "bodega.json#bodega": {
+            "scaleInDock": 1
+        },
+        "bodega.tmx": {
+            "scale": 1.2400240384615384,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 415.71774740719195,
+                "y": 256.04342347581667
+            }
+        },
+        "bodega.tmx#bodega": {
+            "scaleInDock": 1
+        },
         "palacio.tmx": {
             "scale": 0.75,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 150,
-                "y": 339.33333333333337
+                "x": 372.66666666666663,
+                "y": 486
             }
         },
         "palacio.tmx#hall": {
@@ -32,6 +54,7 @@
     ],
     "project": "palacio.tiled-project",
     "recentFiles": [
+        "bodega.json",
         "palacio.tmx"
     ],
     "tileset.embedInMap": true
