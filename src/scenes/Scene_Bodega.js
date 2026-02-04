@@ -2,14 +2,19 @@
 // Escena Bodega: Área secreta del palacio
 // Marlo explora la bodega en busca de pistas
 
+import SettingsUI from '../ui/SettingsUI.js';
+
 export default class Scene_Bodega extends Phaser.Scene {
   constructor() {
     super({ key: 'Scene_Bodega' });
   }
 
-  create() {
+  create(data) {
     const { width, height } = this.scale;
     const centerX = width / 2;
+
+    // Guardar si venimos del sótano
+    this.fromSotano = data?.fromSotano || false;
 
     // ============================================
     // TILEMAP DATA (solo para colliders, spawn, exit)
@@ -49,9 +54,9 @@ export default class Scene_Bodega extends Phaser.Scene {
       .setDepth(0)
       .play('bodega_anim');
 
-    // Atmósfera oscura usando overlay
-    this.darknessOverlay = this.add.rectangle(centerX, height / 2, width, height, 0x000000, 0.2)
-      .setDepth(1);
+    // Atmósfera oscura (desactivada - descomentar para activar)
+    // this.darknessOverlay = this.add.rectangle(centerX, height / 2, width, height, 0x000000, 0.2)
+    //   .setDepth(1);
 
     // ============================================
     // COLLIDERS (desde el tilemap)
@@ -119,60 +124,101 @@ export default class Scene_Bodega extends Phaser.Scene {
     }
 
     // ============================================
+    // POSICIONES DE ELEMENTOS (calculadas primero para spawn)
+    // ============================================
+
+    // Posición de la trampilla (necesaria para spawn si venimos del sótano)
+    const trampillaPosX = 200;    // Posición X (0-832)
+    const trampillaPosY = 350;    // Posición Y (0-512)
+    const trampillaX = this.mapOffsetX + trampillaPosX * this.mapScale;
+    const trampillaY = this.mapOffsetY + trampillaPosY * this.mapScale;
+
+    // ============================================
     // MARLO (usar spawn point del tilemap)
     // ============================================
 
     // Buscar el punto de spawn en el tilemap
     let spawnX = centerX;
     let spawnY = height * 0.75;
+    let startDirection = 'north';
 
-    const objectsLayer = this.bodegaMap.getObjectLayer('colliders');
-    if (objectsLayer) {
-      const spawnPoint = objectsLayer.objects.find(obj => obj.name === 'spawn');
-      if (spawnPoint) {
-        spawnX = this.mapOffsetX + spawnPoint.x * this.mapScale;
-        spawnY = this.mapOffsetY + spawnPoint.y * this.mapScale;
-        console.log('Spawn point found:', spawnX, spawnY);
+    // Si venimos del sótano, aparecer cerca de la trampilla
+    if (this.fromSotano) {
+      spawnX = trampillaX;
+      spawnY = trampillaY + 40;  // Un poco debajo de la trampilla
+      startDirection = 'south';  // Mirando hacia abajo (acaba de subir)
+      console.log('Spawning from sotano near trampilla:', spawnX, spawnY);
+    } else {
+      const objectsLayer = this.bodegaMap.getObjectLayer('colliders');
+      if (objectsLayer) {
+        const spawnPoint = objectsLayer.objects.find(obj => obj.name === 'spawn');
+        if (spawnPoint) {
+          spawnX = this.mapOffsetX + spawnPoint.x * this.mapScale;
+          spawnY = this.mapOffsetY + spawnPoint.y * this.mapScale;
+          console.log('Spawn point found:', spawnX, spawnY);
+        }
       }
     }
 
-    this.marlo = this.add.sprite(spawnX, spawnY, 'marlo_idle_north')
+    this.marlo = this.add.sprite(spawnX, spawnY, `marlo_idle_${startDirection}`)
       .setOrigin(0.5, 1)
       .setDepth(500);
-    this.marloDirection = 'north';
+    this.marloDirection = startDirection;
+
+    // ============================================
+    // ELEMENTOS DECORATIVOS (escritorio, trampilla)
+    // ============================================
+
+    // ========== ESCRITORIO (ajustar posición aquí) ==========
+    const escritorioPosX = 620;   // Posición X (0-832)
+    const escritorioPosY = 100;   // Posición Y (0-512)
+    const escritorioScale = 1.2;  // Escala
+    // ========================================================
+
+    const escritorioX = this.mapOffsetX + escritorioPosX * this.mapScale;
+    const escritorioY = this.mapOffsetY + escritorioPosY * this.mapScale;
+
+    this.escritorio = this.add.image(escritorioX, escritorioY, 'escritorio_item')
+      .setScale(this.mapScale * escritorioScale)
+      .setDepth(escritorioY);  // Y-sorting
+
+    // ========== TRAMPILLA (posición definida arriba) ==========
+    const trampillaScale = 1.0;   // Escala
+    // ==========================================================
+
+    this.trampilla = this.add.image(trampillaX, trampillaY, 'trampilla_item')
+      .setScale(this.mapScale * trampillaScale)
+      .setDepth(5)  // Bajo, está en el suelo
+      .setInteractive({ useHandCursor: true });
+
+    // Zona de interacción de la trampilla
+    this.trampillaZone = {
+      x: trampillaX,
+      y: trampillaY,
+      radius: 50  // Distancia para interactuar
+    };
 
     // ============================================
     // ELEMENTOS INTERACTIVOS
     // ============================================
 
-    // Objeto interactivo: nota misteriosa (posición ajustada al centro del mapa)
-    const notaX = this.mapOffsetX + 500 * this.mapScale;
-    const notaY = this.mapOffsetY + 300 * this.mapScale;
-    this.notaMisteriosa = this.add.container(notaX, notaY);
+    // ========== NOTA MISTERIOSA (encima del escritorio) ==========
+    const notaPosX = 620;      // Misma X que el escritorio
+    const notaPosY = 90;      // Un poco más arriba (encima del escritorio)
+    const notaScale = 0.8;     // Escala de la nota
+    // =============================================================
 
-    // Glow effect (círculo amarillo pulsante)
-    const notaGlow = this.add.circle(0, 0, 25, 0xffff00, 0.15);
+    const notaX = this.mapOffsetX + notaPosX * this.mapScale;
+    const notaY = this.mapOffsetY + notaPosY * this.mapScale;
 
-    // Sprite de la nota (generado con PixelLab)
-    const notaSprite = this.add.image(0, 0, 'nota_item')
-      .setScale(this.mapScale * 0.8);
-
-    this.notaMisteriosa.add([notaGlow, notaSprite]);
-    this.notaMisteriosa.setDepth(340);
-
-    // Animación de brillo
-    this.tweens.add({
-      targets: notaGlow,
-      alpha: 0.3,
-      scale: 1.3,
-      duration: 1200,
-      yoyo: true,
-      repeat: -1
-    });
+    // Sprite de la nota (generado con PixelLab) - SIN glow
+    this.notaMisteriosa = this.add.image(notaX, notaY, 'nota_item')
+      .setScale(this.mapScale * notaScale)
+      .setDepth(escritorioY + 1);  // Justo encima del escritorio
 
     this.notaRecogida = false;
     this.hintSoundPlayed = false;  // Para que el sonido solo suene una vez
-    this.hintDistance = 80;  // Distancia para activar el hint sonoro
+    this.hintDistance = 100;       // Distancia para activar el hint sonoro
 
     // Cargar sonido hint (si existe)
     try {
@@ -210,6 +256,9 @@ export default class Scene_Bodega extends Phaser.Scene {
 
     this.thoughtBox.add([thoughtBg, this.thoughtText]);
 
+    // Settings UI
+    this.settingsUI = new SettingsUI(this);
+
     // ============================================
     // CONTROLES
     // ============================================
@@ -219,9 +268,20 @@ export default class Scene_Bodega extends Phaser.Scene {
       up: 'W', down: 'S', left: 'A', right: 'D'
     });
 
-    this.input.keyboard.on('keydown-ESC', () => this.volverAlPalacio());
+    this.input.keyboard.on('keydown-ESC', () => {
+      if (this.settingsUI?.isVisible()) {
+        this.settingsUI.toggle();
+      } else {
+        this.volverAlPalacio();
+      }
+    });
     this.input.keyboard.on('keydown-SPACE', () => this.handleInteraction());
-    this.input.on('pointerdown', () => this.handleInteraction());
+    this.input.on('pointerdown', (pointer) => {
+      // No interactuar si el panel de ajustes está abierto
+      if (!this.settingsUI?.isVisible()) {
+        this.handleInteraction();
+      }
+    });
 
     this.marloSpeed = 150;
     this.waitingForInput = false;
@@ -247,7 +307,18 @@ export default class Scene_Bodega extends Phaser.Scene {
 
       if (dist < 50) {
         this.recogerNota();
+        return;
       }
+    }
+
+    // Verificar si está cerca de la trampilla
+    const distTrampilla = Phaser.Math.Distance.Between(
+      this.marlo.x, this.marlo.y,
+      this.trampillaZone.x, this.trampillaZone.y
+    );
+
+    if (distTrampilla < this.trampillaZone.radius) {
+      this.irASotano();
     }
   }
 
@@ -364,13 +435,6 @@ export default class Scene_Bodega extends Phaser.Scene {
         if (this.hintSound) {
           this.hintSound.play();
         }
-        // También podemos hacer que el glow se intensifique
-        this.tweens.add({
-          targets: this.notaMisteriosa.first,  // El glow
-          alpha: 0.5,
-          scale: 1.5,
-          duration: 300
-        });
       }
     }
 
@@ -389,5 +453,27 @@ export default class Scene_Bodega extends Phaser.Scene {
       // Volver a Scene_1_4 en modo exploración libre
       this.scene.start('Scene_1_4', { fromBodega: true });
     });
+  }
+
+  irASotano() {
+    if (this.exiting) return;
+    this.exiting = true;
+
+    // Mostrar pensamiento antes de bajar
+    this.showThought('Una trampilla... ¿Qué habrá abajo?');
+
+    this.time.delayedCall(1500, () => {
+      this.cameras.main.fadeOut(1000, 0, 0, 0);
+      this.cameras.main.once('camerafadeoutcomplete', () => {
+        this.scene.start('Scene_Sotano');
+      });
+    });
+  }
+
+  // Datos específicos de esta escena para guardar
+  getSaveData() {
+    return {
+      notaRecogida: this.notaRecogida
+    };
   }
 }

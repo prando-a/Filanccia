@@ -2,6 +2,8 @@
 // Escena 1-4: El Asesinato
 // El hijo del Alcalde es encontrado muerto, sin rostro
 
+import SettingsUI from '../ui/SettingsUI.js';
+
 export default class Scene_1_4 extends Phaser.Scene {
   constructor() {
     super({ key: 'Scene_1_4' });
@@ -252,6 +254,9 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.interactPrompt.add([promptBg, promptText]);
     this.interactPrompt.setVisible(false).setDepth(1001);
     this.nearBodega = false;
+
+    // Settings UI
+    this.settingsUI = new SettingsUI(this);
 
     // Verificar si venimos de la bodega
     const data = this.scene.settings.data || {};

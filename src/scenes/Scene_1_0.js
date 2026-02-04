@@ -2,6 +2,8 @@
 // Escena 1-0: Casa de Marlo - Baño
 // Marlo se prepara frente al espejo antes del festival
 
+import SettingsUI from '../ui/SettingsUI.js';
+
 export default class Scene_1_0 extends Phaser.Scene {
   constructor() {
     super({ key: 'Scene_1_0' });
@@ -181,6 +183,9 @@ export default class Scene_1_0 extends Phaser.Scene {
 
     this.input.keyboard.on('keydown-SPACE', () => this.handleInput());
     this.input.on('pointerdown', () => this.handleInput());
+
+    // Settings UI
+    this.settingsUI = new SettingsUI(this);
 
     // Iniciar con fade in
     this.cameras.main.fadeIn(1000, 0, 0, 0);

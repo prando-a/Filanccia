@@ -153,11 +153,17 @@ export default class PreloadScene extends Phaser.Scene {
       frameHeight: 512
     });
 
+    // Scene Sótano (transición desde bodega por trampilla)
+    this.load.tilemapTiledJSON('sotano_map', `${mapPath}/sotano.json`);
+    this.load.image('tileset_sotano', `${mapPath}/sotano.png`);
+
     // ============================================
     // ITEMS / OBJETOS INTERACTIVOS
     // ============================================
 
     this.load.image('nota_item', 'src/assets/items/nota.png');
+    this.load.image('escritorio_item', 'src/assets/items/escritorio.png');
+    this.load.image('trampilla_item', 'src/assets/items/trampilla.png');
 
     // ============================================
     // UI / BACKGROUNDS
@@ -165,6 +171,7 @@ export default class PreloadScene extends Phaser.Scene {
 
     this.load.image('title_banner', 'src/assets/ui/banner.png');
     this.load.image('menu_bg', 'src/assets/background/bg.png');
+    this.load.image('menu_button', 'src/assets/ui/menu_button.png');
 
     // ============================================
     // AUDIO

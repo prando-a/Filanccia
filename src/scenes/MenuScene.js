@@ -2,6 +2,7 @@
 // Main menu scene
 
 import SwipeControls from '../input/SwipeControls.js';
+import SettingsUI from '../ui/SettingsUI.js';
 
 export default class MenuScene extends Phaser.Scene {
   constructor() {
@@ -17,13 +18,20 @@ export default class MenuScene extends Phaser.Scene {
     const bg = this.add.image(centerX, centerY, 'menu_bg');
     bg.setDisplaySize(width, height);
 
+    // Cargar volumen guardado
+    const savedVolume = localStorage.getItem('filanccia_volume');
+    this.currentVolume = savedVolume ? parseFloat(savedVolume) : 0.5;
+
     // Música de fondo (si no está ya sonando)
     if (!this.sound.get('bso_main')?.isPlaying) {
       this.music = this.sound.add('bso_main', {
         loop: true,
-        volume: 0.5
+        volume: this.currentVolume
       });
       this.music.play();
+    } else {
+      // Si ya está sonando, aplicar el volumen guardado
+      this.sound.get('bso_main').setVolume(this.currentVolume);
     }
 
     // Title banner
@@ -81,6 +89,16 @@ export default class MenuScene extends Phaser.Scene {
       fontSize: '12px',
       color: '#666666'
     }).setOrigin(1, 1);
+
+    // Settings UI
+    this.settingsUI = new SettingsUI(this);
+
+    // ESC para cerrar ajustes
+    this.input.keyboard.on('keydown-ESC', () => {
+      if (this.settingsUI.isVisible()) {
+        this.settingsUI.toggle();
+      }
+    });
 
     // Fade in
     this.cameras.main.fadeIn(500);

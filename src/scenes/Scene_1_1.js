@@ -2,6 +2,8 @@
 // Escena 1-1: Camino a la Plaza
 // Parallax vertical - la familia camina hacia la plaza
 
+import SettingsUI from '../ui/SettingsUI.js';
+
 export default class Scene_1_1 extends Phaser.Scene {
   constructor() {
     super({ key: 'Scene_1_1' });
@@ -90,6 +92,9 @@ export default class Scene_1_1 extends Phaser.Scene {
       repeat: -1,
       ease: 'Sine.easeInOut'
     });
+
+    // Settings UI
+    this.settingsUI = new SettingsUI(this);
 
     // ============================================
     // SECUENCIA

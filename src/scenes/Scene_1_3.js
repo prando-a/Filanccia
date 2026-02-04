@@ -2,6 +2,8 @@
 // Escena 1-3: Palacio de la Alcaldía - Hall
 // Ballo Mascherato y anuncio del heredero
 
+import SettingsUI from '../ui/SettingsUI.js';
+
 export default class Scene_1_3 extends Phaser.Scene {
   constructor() {
     super({ key: 'Scene_1_3' });
@@ -200,6 +202,9 @@ export default class Scene_1_3 extends Phaser.Scene {
     // Input para avanzar diálogos
     this.input.keyboard.on('keydown-SPACE', () => this.handleInput());
     this.input.on('pointerdown', () => this.handleInput());
+
+    // Settings UI
+    this.settingsUI = new SettingsUI(this);
 
     // Iniciar secuencia con fade in
     this.cameras.main.fadeIn(1000, 0, 0, 0);
