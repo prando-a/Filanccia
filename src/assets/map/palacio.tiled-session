@@ -23,15 +23,15 @@
             "expandedObjectLayers": [
                 2
             ],
-            "scale": 3,
+            "scale": 1,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 418.8333333333333,
-                "y": 192.5
+                "x": 412.5,
+                "y": 222.5
             }
         },
         "bodega.tmx#bodega": {
-            "scaleInDock": 1,
+            "scaleInDock": 0.5,
             "scaleInEditor": 1
         },
         "palacio.tmx": {

@@ -28,7 +28,7 @@ export default class Scene_Bodega extends Phaser.Scene {
     const scaledWidth = mapWidth * this.mapScale;
     const scaledHeight = mapHeight * this.mapScale;
     this.mapOffsetX = (width - scaledWidth) / 2;
-    this.mapOffsetY = (height - scaledHeight) / 2;
+    this.mapOffsetY = (height - scaledHeight + 50) / 2;
 
     // ============================================
     // MAPA ANIMADO (spritesheet)
@@ -149,22 +149,38 @@ export default class Scene_Bodega extends Phaser.Scene {
     const notaX = this.mapOffsetX + 500 * this.mapScale;
     const notaY = this.mapOffsetY + 300 * this.mapScale;
     this.notaMisteriosa = this.add.container(notaX, notaY);
-    const notaGlow = this.add.circle(0, 0, 20, 0xffff00, 0.2);
-    const notaSprite = this.add.rectangle(0, 0, 15, 20, 0xf5f5dc);
+
+    // Glow effect (círculo amarillo pulsante)
+    const notaGlow = this.add.circle(0, 0, 25, 0xffff00, 0.15);
+
+    // Sprite de la nota (generado con PixelLab)
+    const notaSprite = this.add.image(0, 0, 'nota_item')
+      .setScale(this.mapScale * 0.8);
+
     this.notaMisteriosa.add([notaGlow, notaSprite]);
     this.notaMisteriosa.setDepth(340);
 
     // Animación de brillo
     this.tweens.add({
       targets: notaGlow,
-      alpha: 0.4,
-      scale: 1.2,
-      duration: 1000,
+      alpha: 0.3,
+      scale: 1.3,
+      duration: 1200,
       yoyo: true,
       repeat: -1
     });
 
     this.notaRecogida = false;
+    this.hintSoundPlayed = false;  // Para que el sonido solo suene una vez
+    this.hintDistance = 80;  // Distancia para activar el hint sonoro
+
+    // Cargar sonido hint (si existe)
+    try {
+      this.hintSound = this.sound.add('hint_sound', { volume: 0.5 });
+    } catch (e) {
+      console.warn('Hint sound not loaded - add hint.mp3 to src/assets/audio/');
+      this.hintSound = null;
+    }
 
     // ============================================
     // UI
@@ -265,7 +281,7 @@ export default class Scene_Bodega extends Phaser.Scene {
   checkCollision(x, y, radius = 16) {
     for (const col of this.colliders) {
       if (x + radius > col.x && x - radius < col.x + col.width &&
-          y + radius > col.y && y - radius < col.y + col.height) {
+        y + radius > col.y && y - radius < col.y + col.height) {
         return true;
       }
     }
@@ -276,7 +292,7 @@ export default class Scene_Bodega extends Phaser.Scene {
     if (!this.exitZone) return false;
     const col = this.exitZone;
     return x > col.x && x < col.x + col.width &&
-           y > col.y && y < col.y + col.height;
+      y > col.y && y < col.y + col.height;
   }
 
   update() {
@@ -335,6 +351,28 @@ export default class Scene_Bodega extends Phaser.Scene {
     this.marlo.y = Phaser.Math.Clamp(this.marlo.y, 60, 580);
 
     this.marlo.setDepth(this.marlo.y);
+
+    // Hint sonoro: reproducir cuando Marlo se acerca a la nota
+    if (!this.notaRecogida && !this.hintSoundPlayed && this.notaMisteriosa) {
+      const distToNota = Phaser.Math.Distance.Between(
+        this.marlo.x, this.marlo.y,
+        this.notaMisteriosa.x, this.notaMisteriosa.y
+      );
+
+      if (distToNota < this.hintDistance) {
+        this.hintSoundPlayed = true;
+        if (this.hintSound) {
+          this.hintSound.play();
+        }
+        // También podemos hacer que el glow se intensifique
+        this.tweens.add({
+          targets: this.notaMisteriosa.first,  // El glow
+          alpha: 0.5,
+          scale: 1.5,
+          duration: 300
+        });
+      }
+    }
 
     // Verificar zona de salida
     if (this.checkExitZone(this.marlo.x, this.marlo.y)) {

@@ -154,6 +154,12 @@ export default class PreloadScene extends Phaser.Scene {
     });
 
     // ============================================
+    // ITEMS / OBJETOS INTERACTIVOS
+    // ============================================
+
+    this.load.image('nota_item', 'src/assets/items/nota.png');
+
+    // ============================================
     // UI / BACKGROUNDS
     // ============================================
 
@@ -165,6 +171,8 @@ export default class PreloadScene extends Phaser.Scene {
     // ============================================
 
     this.load.audio('bso_main', 'src/assets/bso/bso.mp3');
+    // Sonido hint para objetos interactivos (añadir archivo hint.mp3 a src/assets/audio/)
+    this.load.audio('hint_sound', 'src/assets/audio/hint.mp3');
   }
 
   create() {
