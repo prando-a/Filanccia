@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "palacio.tmx",
+    "activeFile": "bodega.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -20,15 +20,19 @@
             "scaleInDock": 1
         },
         "bodega.tmx": {
-            "scale": 1.2400240384615384,
-            "selectedLayer": 1,
+            "expandedObjectLayers": [
+                2
+            ],
+            "scale": 3,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 415.71774740719195,
-                "y": 256.04342347581667
+                "x": 418.8333333333333,
+                "y": 192.5
             }
         },
         "bodega.tmx#bodega": {
-            "scaleInDock": 1
+            "scaleInDock": 1,
+            "scaleInEditor": 1
         },
         "palacio.tmx": {
             "scale": 0.75,
@@ -45,15 +49,17 @@
             "scaleInDock": 1
         }
     },
+    "frame.defaultDuration": 100,
     "last.exportedFilePath": "C:/Users/ismae/Desktop/MalagaJam2026/Filanccia/src/assets/map",
     "last.imagePath": "C:/Users/ismae/Desktop/MalagaJam2026/Filanccia/src/assets/map",
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
-        "palacio.tmx"
+        "bodega.tmx"
     ],
     "project": "palacio.tiled-project",
     "recentFiles": [
+        "bodega.tmx",
         "bodega.json",
         "palacio.tmx"
     ],

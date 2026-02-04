@@ -11,7 +11,8 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "phaser": "^3.55.2"
+    "phaser": "^3.55.2",
+    "phaser-animated-tiles": "^2.0.2"
   },
   "devDependencies": {
     "http-server": "^14.1.1",

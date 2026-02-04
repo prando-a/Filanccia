@@ -147,6 +147,11 @@ export default class PreloadScene extends Phaser.Scene {
 
     // Scene Bodega (transición desde Scene 1-4)
     this.load.tilemapTiledJSON('bodega_map', `${mapPath}/bodega.json`);
+    // Bodega animated spritesheet (14 frames, 5 columns x 3 rows, 832x512 per frame)
+    this.load.spritesheet('bodega_animated', `${mapPath}/bodega_animated.png`, {
+      frameWidth: 832,
+      frameHeight: 512
+    });
 
     // ============================================
     // UI / BACKGROUNDS

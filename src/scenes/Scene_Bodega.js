@@ -12,26 +12,14 @@ export default class Scene_Bodega extends Phaser.Scene {
     const centerX = width / 2;
 
     // ============================================
-    // TILEMAP DE LA BODEGA
+    // TILEMAP DATA (solo para colliders, spawn, exit)
     // ============================================
 
     this.bodegaMap = this.make.tilemap({ key: 'bodega_map' });
 
-    // Debug: verificar que el tilemap se cargó
-    console.log('Bodega map loaded:', this.bodegaMap);
-    console.log('Map layers:', this.bodegaMap.layers.map(l => l.name));
-    console.log('Map tilesets:', this.bodegaMap.tilesets.map(t => t.name));
-
-    const tilesetBodega = this.bodegaMap.addTilesetImage('bodega', 'tileset_bodega');
-    console.log('Tileset added:', tilesetBodega);
-
-    // Crear capa de tiles
-    this.floorLayer = this.bodegaMap.createLayer('Capa de patrones 1', tilesetBodega, 0, 0);
-    console.log('Floor layer created:', this.floorLayer);
-
-    // Valores por defecto para el caso en que no se cree la capa
-    const mapWidth = this.bodegaMap.widthInPixels || 832;
-    const mapHeight = this.bodegaMap.heightInPixels || 512;
+    // Calcular escala y offset basados en el tamaño del mapa
+    const mapWidth = 832;  // Tamaño original del mapa
+    const mapHeight = 512;
     const scaleX = width / mapWidth;
     const scaleY = height / mapHeight;
     this.mapScale = Math.max(scaleX, scaleY);
@@ -42,18 +30,27 @@ export default class Scene_Bodega extends Phaser.Scene {
     this.mapOffsetX = (width - scaledWidth) / 2;
     this.mapOffsetY = (height - scaledHeight) / 2;
 
-    if (this.floorLayer) {
-      // Escalar para cubrir pantalla
-      this.floorLayer.setScale(this.mapScale);
-      this.floorLayer.setPosition(this.mapOffsetX, this.mapOffsetY);
-    } else {
-      // Fallback: crear fondo oscuro si el tilemap no se carga
-      console.warn('Could not create floor layer, using fallback background');
-      this.add.rectangle(centerX, height / 2, width, height, 0x1a1a2e);
-    }
+    // ============================================
+    // MAPA ANIMADO (spritesheet)
+    // ============================================
 
-    // Atmósfera oscura usando overlay (compatible con todas las versiones)
-    this.darknessOverlay = this.add.rectangle(centerX, height / 2, width, height, 0x000000, 0.3)
+    // Crear animación del mapa (14 frames)
+    this.anims.create({
+      key: 'bodega_anim',
+      frames: this.anims.generateFrameNumbers('bodega_animated', { start: 0, end: 13 }),
+      frameRate: 8,  // 8 FPS - ajusta según se vea bien
+      repeat: -1     // Loop infinito
+    });
+
+    // Crear sprite del mapa animado
+    this.animatedMap = this.add.sprite(centerX, height / 2, 'bodega_animated')
+      .setOrigin(0.5, 0.5)
+      .setScale(this.mapScale)
+      .setDepth(0)
+      .play('bodega_anim');
+
+    // Atmósfera oscura usando overlay
+    this.darknessOverlay = this.add.rectangle(centerX, height / 2, width, height, 0x000000, 0.2)
       .setDepth(1);
 
     // ============================================

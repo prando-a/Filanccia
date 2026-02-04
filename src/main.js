@@ -10,6 +10,8 @@ import Scene_1_2 from './scenes/Scene_1_2.js';
 import Scene_1_3 from './scenes/Scene_1_3.js';
 import Scene_1_4 from './scenes/Scene_1_4.js';
 import Scene_Bodega from './scenes/Scene_Bodega.js';
+// AnimatedTiles plugin loaded via script tag in index.html
+const AnimatedTiles = window['AnimatedTiles.min'];
 
 const config = {
   type: Phaser.AUTO,
@@ -44,6 +46,11 @@ const config = {
   },
   audio: {
     disableWebAudio: false
+  },
+  plugins: {
+    scene: [
+      { key: 'animatedTiles', plugin: AnimatedTiles, mapping: 'animatedTiles' }
+    ]
   }
 };
 
