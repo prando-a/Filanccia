@@ -42,7 +42,7 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.mapOffsetX = (width - scaledWidth) / 2;
     this.mapOffsetY = (height - scaledHeight) / 2;
     this.floorLayer.setPosition(this.mapOffsetX, this.mapOffsetY);
-
+    this.floorLayer.setDepth(0);  // Asegurar que el suelo esté siempre abajo
 
     // ============================================
     // COLLIDERS (desde el tilemap)
@@ -166,6 +166,16 @@ export default class Scene_1_4 extends Phaser.Scene {
       .setOrigin(0.5, 1)
       .setDepth(height * 0.75);
     this.marloDirection = 'west';
+    console.log('[MARLO DEBUG] Marlo created:', {
+      x: this.marlo.x,
+      y: this.marlo.y,
+      visible: this.marlo.visible,
+      active: this.marlo.active,
+      alpha: this.marlo.alpha,
+      depth: this.marlo.depth,
+      scale: this.marlo.scale,
+      texture: this.marlo.texture?.key
+    });
 
     // ============================================
     // CAJA DE DIÁLOGO
@@ -269,6 +279,36 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     console.log('Scene_1_4 init - fromBodega:', fromBodega, 'fromSave:', fromSave, 'loadData:', this.loadData);
 
+    // DEBUG: Monitor continuo de Marlo para detectar cuándo cambia
+    if (fromSave) {
+      this._marloWatcher = this.time.addEvent({
+        delay: 100,  // Cada 100ms
+        repeat: 50,  // Por 5 segundos
+        callback: () => {
+          if (this.marlo) {
+            const state = {
+              time: Date.now(),
+              x: this.marlo.x,
+              y: this.marlo.y,
+              visible: this.marlo.visible,
+              active: this.marlo.active,
+              alpha: this.marlo.alpha,
+              depth: this.marlo.depth,
+              scaleX: this.marlo.scaleX,
+              scaleY: this.marlo.scaleY
+            };
+
+            // Detectar cambios problemáticos
+            if (this.marlo.alpha < 1 || !this.marlo.visible) {
+              console.error('[MARLO WATCHER] ⚠️⚠️⚠️ MARLO PROBLEMA:', state);
+            } else {
+              console.log('[MARLO WATCHER] Estado OK:', state);
+            }
+          }
+        }
+      });
+    }
+
     if (fromBodega) {
       // Volver desde la bodega - exploración libre
       this.cameras.main.fadeIn(1000, 0, 0, 0);
@@ -283,14 +323,50 @@ export default class Scene_1_4 extends Phaser.Scene {
       });
     } else if (fromSave) {
       // Cargar desde partida guardada - exploración libre
+      console.log('[MARLO DEBUG] fromSave branch - before fadeIn. Marlo state:', {
+        x: this.marlo.x,
+        y: this.marlo.y,
+        visible: this.marlo.visible,
+        active: this.marlo.active,
+        alpha: this.marlo.alpha,
+        depth: this.marlo.depth
+      });
       this.cameras.main.fadeIn(1000, 0, 0, 0);
       this.cameras.main.once('camerafadeincomplete', () => {
+        console.log('[MARLO DEBUG] fadeIn complete callback starting. Marlo state BEFORE repositioning:', {
+          x: this.marlo.x,
+          y: this.marlo.y,
+          visible: this.marlo.visible,
+          active: this.marlo.active,
+          alpha: this.marlo.alpha,
+          depth: this.marlo.depth
+        });
         this.marlo.x = centerX;
         this.marlo.y = height * 0.7;
-        this.marlo.setDepth(this.marlo.y);
+        this.marlo.setDepth(900);  // Depth alto para estar sobre la multitud
+        this.marlo.setVisible(true);  // Forzar visible
+        this.marlo.setAlpha(1);  // Forzar alpha
         this.investigando = true;
-        console.log('Marlo positioned from save:', this.marlo.x, this.marlo.y);
+        this.marloSpeed = 150;  // IMPORTANTE: Definir velocidad que normalmente se define en startGameplay
+        console.log('[MARLO DEBUG] After repositioning, before startFreeExploration. Marlo state:', {
+          x: this.marlo.x,
+          y: this.marlo.y,
+          visible: this.marlo.visible,
+          active: this.marlo.active,
+          alpha: this.marlo.alpha,
+          depth: this.marlo.depth,
+          marloSpeed: this.marloSpeed
+        });
         this.startFreeExploration();
+        console.log('[MARLO DEBUG] After startFreeExploration. Marlo state:', {
+          x: this.marlo.x,
+          y: this.marlo.y,
+          visible: this.marlo.visible,
+          active: this.marlo.active,
+          alpha: this.marlo.alpha,
+          depth: this.marlo.depth,
+          freeExploration: this.freeExploration
+        });
       });
     } else {
       // Partida nueva - secuencia normal completa
@@ -563,6 +639,35 @@ export default class Scene_1_4 extends Phaser.Scene {
   }
 
   update() {
+    // Log periódico para monitorear Marlo (cada 60 frames aprox)
+    if (!this._debugCounter) this._debugCounter = 0;
+    this._debugCounter++;
+
+    if (this._debugCounter % 60 === 0 && this.marlo) {
+      console.log('[MARLO DEBUG] update() periodic check:', {
+        frame: this._debugCounter,
+        x: this.marlo.x,
+        y: this.marlo.y,
+        visible: this.marlo.visible,
+        active: this.marlo.active,
+        alpha: this.marlo.alpha,
+        depth: this.marlo.depth,
+        texture: this.marlo.texture?.key,
+        gameplayMode: this.gameplayMode,
+        freeExploration: this.freeExploration,
+        marloSpeed: this.marloSpeed
+      });
+    }
+
+    // Detectar cambios críticos en Marlo
+    if (this.marlo && (this.marlo.alpha < 1 || !this.marlo.visible || !this.marlo.active)) {
+      console.warn('[MARLO DEBUG] ⚠️ PROBLEMA DETECTADO en update():', {
+        visible: this.marlo.visible,
+        active: this.marlo.active,
+        alpha: this.marlo.alpha
+      });
+    }
+
     if (!this.gameplayMode && !this.freeExploration) return;
 
     // Movimiento de Marlo
@@ -624,8 +729,12 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.marlo.x = Phaser.Math.Clamp(this.marlo.x, 50, 750);
     this.marlo.y = Phaser.Math.Clamp(this.marlo.y, 100, 580);
 
-    // Actualizar depth para y-sorting
-    this.marlo.setDepth(this.marlo.y);
+    // Actualizar depth para y-sorting, con mínimo para exploración libre
+    if (this.freeExploration) {
+      this.marlo.setDepth(Math.max(this.marlo.y, 500));
+    } else {
+      this.marlo.setDepth(this.marlo.y);
+    }
 
     // En modo gameplay inicial, verificar si llegó al cadáver
     if (this.gameplayMode && !this.investigando) {
@@ -728,6 +837,15 @@ export default class Scene_1_4 extends Phaser.Scene {
   }
 
   startFreeExploration() {
+    console.log('[MARLO DEBUG] startFreeExploration() called. Marlo before:', {
+      x: this.marlo?.x,
+      y: this.marlo?.y,
+      visible: this.marlo?.visible,
+      active: this.marlo?.active,
+      alpha: this.marlo?.alpha,
+      depth: this.marlo?.depth
+    });
+
     this.freeExploration = true;
 
     const { width } = this.scale;
@@ -740,6 +858,19 @@ export default class Scene_1_4 extends Phaser.Scene {
       padding: { x: 10, y: 5 },
       align: 'center'
     }).setOrigin(0.5).setDepth(1000);
+
+    console.log('[MARLO DEBUG] startFreeExploration() finished. Marlo after:', {
+      x: this.marlo?.x,
+      y: this.marlo?.y,
+      visible: this.marlo?.visible,
+      active: this.marlo?.active,
+      alpha: this.marlo?.alpha,
+      depth: this.marlo?.depth,
+      freeExploration: this.freeExploration
+    });
+
+    // Verificar todos los tweens activos que podrían afectar a Marlo
+
   }
 
   entrarBodega() {

@@ -358,6 +358,7 @@ export default class Scene_Bodega extends Phaser.Scene {
     this.marloSpeed = 150;
     this.waitingForInput = false;
     this.exiting = false;
+    this.nearArmeria = false;
 
     // Fade in
     this.cameras.main.fadeIn(1000, 0, 0, 0);
@@ -394,16 +395,10 @@ export default class Scene_Bodega extends Phaser.Scene {
       return;
     }
 
-    // Verificar si está cerca de la zona de armería
-    const armeriaCenterX = this.armeriaZone.x + this.armeriaZone.width / 2;
-    const armeriaCenterY = this.armeriaZone.y + this.armeriaZone.height / 2;
-    const distArmeria = Phaser.Math.Distance.Between(
-      this.marlo.x, this.marlo.y,
-      armeriaCenterX, armeriaCenterY
-    );
-
-    if (distArmeria < 60) {
+    // Verificar si está cerca de la zona de armería (usa this.nearArmeria seteado en update())
+    if (this.nearArmeria) {
       this.irAArmeria();
+      return;
     }
   }
 
@@ -578,8 +573,10 @@ export default class Scene_Bodega extends Phaser.Scene {
     if (distArmeria < 60) {
       this.armeriaHint.setPosition(armeriaCenterX, armeriaCenterY - 30);
       this.armeriaHint.setVisible(true);
+      this.nearArmeria = true;
     } else {
       this.armeriaHint.setVisible(false);
+      this.nearArmeria = false;
     }
 
     // Verificar zona de salida (auto-salir al entrar)
