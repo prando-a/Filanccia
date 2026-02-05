@@ -23,12 +23,18 @@ export default class Scene_Sotano extends Phaser.Scene {
     // Crear capa de tiles
     this.floorLayer = this.sotanoMap.createLayer('Capa de patrones 1', tilesetSotano, 0, 0);
 
-    // Calcular escala y offset
-    const mapWidth = this.sotanoMap.widthInPixels || 512;
-    const mapHeight = this.sotanoMap.heightInPixels || 320;
+    // ========== ESCALA DEL MAPA (ajustar aquí) ==========
+    const mapWidth = this.sotanoMap.widthInPixels || 512;   // 512px
+    const mapHeight = this.sotanoMap.heightInPixels || 320; // 320px
     const scaleX = width / mapWidth;
     const scaleY = height / mapHeight;
-    this.mapScale = Math.max(scaleX, scaleY);
+
+    // Opciones de escala:
+    // Math.min = ver todo el mapa (barras negras)
+    // Math.max = llenar pantalla (recorta bordes)
+    // Valor fijo = escala específica (ej: 1.5)
+    this.mapScale = Math.min(scaleX, scaleY);  // ← CAMBIAR AQUÍ
+    // =====================================================
 
     // Centrar el mapa
     const scaledWidth = mapWidth * this.mapScale;
@@ -111,13 +117,13 @@ export default class Scene_Sotano extends Phaser.Scene {
     this.marloDirection = 'south';
 
     // ============================================
-    // ESCALERA (para subir a la bodega)
+    // ESCALERA (sprite para subir a la bodega)
     // ============================================
 
     // ========== ESCALERA (ajustar posición aquí) ==========
-    const escaleraPosX = 80;     // Posición X (0-512) - izquierda del mapa
-    const escaleraPosY = 120;    // Posición Y (0-320) - cerca de la pared
-    const escaleraScale = 2.0;   // Escala del sprite
+    const escaleraPosX = 350;    // Posición X (0-512) - cerca del exit
+    const escaleraPosY = 70;     // Posición Y (0-320) - arriba
+    const escaleraScale = 1.5;   // Escala del sprite
     // ======================================================
 
     const escaleraX = this.mapOffsetX + escaleraPosX * this.mapScale;
@@ -132,14 +138,6 @@ export default class Scene_Sotano extends Phaser.Scene {
       x: escaleraX,
       y: escaleraY,
       radius: 60
-    };
-
-    // Actualizar exitZone para que coincida con la escalera
-    this.exitZone = {
-      x: escaleraX - 30,
-      y: escaleraY - 40,
-      width: 60,
-      height: 80
     };
 
     // ============================================
@@ -194,7 +192,7 @@ export default class Scene_Sotano extends Phaser.Scene {
   checkCollision(x, y, radius = 16) {
     for (const col of this.colliders) {
       if (x + radius > col.x && x - radius < col.x + col.width &&
-          y + radius > col.y && y - radius < col.y + col.height) {
+        y + radius > col.y && y - radius < col.y + col.height) {
         return true;
       }
     }
@@ -205,7 +203,7 @@ export default class Scene_Sotano extends Phaser.Scene {
     if (!this.exitZone) return false;
     const col = this.exitZone;
     return x > col.x && x < col.x + col.width &&
-           y > col.y && y < col.y + col.height;
+      y > col.y && y < col.y + col.height;
   }
 
   update() {
@@ -260,9 +258,11 @@ export default class Scene_Sotano extends Phaser.Scene {
       }
     }
 
-    // Limitar al área del mapa
-    this.marlo.x = Phaser.Math.Clamp(this.marlo.x, this.mapOffsetX + 20, this.mapOffsetX + 512 * this.mapScale - 20);
-    this.marlo.y = Phaser.Math.Clamp(this.marlo.y, this.mapOffsetY + 40, this.mapOffsetY + 320 * this.mapScale - 20);
+    // Limitar al área del mapa (512x320 pixels)
+    const mapW = 512 * this.mapScale;
+    const mapH = 320 * this.mapScale;
+    this.marlo.x = Phaser.Math.Clamp(this.marlo.x, this.mapOffsetX + 30, this.mapOffsetX + mapW - 30);
+    this.marlo.y = Phaser.Math.Clamp(this.marlo.y, this.mapOffsetY + 50, this.mapOffsetY + mapH - 20);
 
     this.marlo.setDepth(this.marlo.y);
 

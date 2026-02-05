@@ -8,6 +8,9 @@
         "."
     ],
     "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
         "armeria.tmx": {
             "scale": 1.0073958333333333,
             "selectedLayer": 0,
