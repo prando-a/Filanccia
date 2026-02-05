@@ -27,7 +27,7 @@ export default class Scene_Bodega extends Phaser.Scene {
     const mapHeight = 512;
     const scaleX = width / mapWidth;
     const scaleY = height / mapHeight;
-    this.mapScale = Math.max(scaleX, scaleY);
+    this.mapScale = Math.min(scaleX, scaleY);
 
     // Centrar el mapa
     const scaledWidth = mapWidth * this.mapScale;
@@ -129,7 +129,7 @@ export default class Scene_Bodega extends Phaser.Scene {
 
     // Posición de la trampilla (necesaria para spawn si venimos del sótano)
     const trampillaPosX = 200;    // Posición X (0-832)
-    const trampillaPosY = 350;    // Posición Y (0-512)
+    const trampillaPosY = 400;    // Posición Y (0-512)
     const trampillaX = this.mapOffsetX + trampillaPosX * this.mapScale;
     const trampillaY = this.mapOffsetY + trampillaPosY * this.mapScale;
 
@@ -232,7 +232,7 @@ export default class Scene_Bodega extends Phaser.Scene {
     // UI
     // ============================================
 
-    this.instructionText = this.add.text(centerX, 30, 'Explora la bodega | [ESC] para volver al palacio', {
+    this.instructionText = this.add.text(centerX, 30, 'Explora la bodega | [E] Interactuar | [ESC] Menú', {
       fontSize: '14px',
       color: '#ffffff',
       backgroundColor: '#00000088',
@@ -256,6 +256,34 @@ export default class Scene_Bodega extends Phaser.Scene {
 
     this.thoughtBox.add([thoughtBg, this.thoughtText]);
 
+    // ============================================
+    // HINTS DE INTERACCIÓN
+    // ============================================
+
+    // Hint para la nota
+    this.notaHint = this.add.text(0, 0, '[E] Leer nota', {
+      fontSize: '12px',
+      color: '#ffffff',
+      backgroundColor: '#000000aa',
+      padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(1002).setVisible(false);
+
+    // Hint para la trampilla
+    this.trampillaHint = this.add.text(0, 0, '[E] Usar trampilla', {
+      fontSize: '12px',
+      color: '#ffffff',
+      backgroundColor: '#000000aa',
+      padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(1002).setVisible(false);
+
+    // Hint para la salida
+    this.exitHint = this.add.text(0, 0, 'Salir al palacio', {
+      fontSize: '12px',
+      color: '#ffffff',
+      backgroundColor: '#000000aa',
+      padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(1002).setVisible(false);
+
     // Settings UI
     this.settingsUI = new SettingsUI(this);
 
@@ -275,7 +303,8 @@ export default class Scene_Bodega extends Phaser.Scene {
         this.volverAlPalacio();
       }
     });
-    this.input.keyboard.on('keydown-SPACE', () => this.handleInteraction());
+    // Tecla E para interactuar
+    this.input.keyboard.on('keydown-E', () => this.handleInteraction());
     this.input.on('pointerdown', (pointer) => {
       // No interactuar si el panel de ajustes está abierto
       if (!this.settingsUI?.isVisible()) {
@@ -423,22 +452,66 @@ export default class Scene_Bodega extends Phaser.Scene {
 
     this.marlo.setDepth(this.marlo.y);
 
-    // Hint sonoro: reproducir cuando Marlo se acerca a la nota
-    if (!this.notaRecogida && !this.hintSoundPlayed && this.notaMisteriosa) {
+    // ============================================
+    // ACTUALIZAR HINTS DE PROXIMIDAD
+    // ============================================
+
+    // Hint de la nota
+    if (!this.notaRecogida && this.notaMisteriosa) {
       const distToNota = Phaser.Math.Distance.Between(
         this.marlo.x, this.marlo.y,
         this.notaMisteriosa.x, this.notaMisteriosa.y
       );
 
-      if (distToNota < this.hintDistance) {
-        this.hintSoundPlayed = true;
-        if (this.hintSound) {
-          this.hintSound.play();
+      if (distToNota < 60) {
+        this.notaHint.setPosition(this.notaMisteriosa.x, this.notaMisteriosa.y - 40);
+        this.notaHint.setVisible(true);
+
+        // Hint sonoro (solo una vez)
+        if (!this.hintSoundPlayed && distToNota < this.hintDistance) {
+          this.hintSoundPlayed = true;
+          if (this.hintSound) {
+            this.hintSound.play();
+          }
         }
+      } else {
+        this.notaHint.setVisible(false);
+      }
+    } else {
+      this.notaHint.setVisible(false);
+    }
+
+    // Hint de la trampilla
+    const distTrampilla = Phaser.Math.Distance.Between(
+      this.marlo.x, this.marlo.y,
+      this.trampillaZone.x, this.trampillaZone.y
+    );
+
+    if (distTrampilla < this.trampillaZone.radius) {
+      this.trampillaHint.setPosition(this.trampillaZone.x, this.trampillaZone.y - 30);
+      this.trampillaHint.setVisible(true);
+    } else {
+      this.trampillaHint.setVisible(false);
+    }
+
+    // Hint de la salida
+    if (this.exitZone) {
+      const exitCenterX = this.exitZone.x + this.exitZone.width / 2;
+      const exitCenterY = this.exitZone.y + this.exitZone.height / 2;
+      const distExit = Phaser.Math.Distance.Between(
+        this.marlo.x, this.marlo.y,
+        exitCenterX, exitCenterY
+      );
+
+      if (distExit < 60) {
+        this.exitHint.setPosition(exitCenterX, exitCenterY - 30);
+        this.exitHint.setVisible(true);
+      } else {
+        this.exitHint.setVisible(false);
       }
     }
 
-    // Verificar zona de salida
+    // Verificar zona de salida (auto-salir al entrar)
     if (this.checkExitZone(this.marlo.x, this.marlo.y)) {
       this.volverAlPalacio();
     }

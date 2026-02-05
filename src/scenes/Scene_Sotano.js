@@ -111,16 +111,56 @@ export default class Scene_Sotano extends Phaser.Scene {
     this.marloDirection = 'south';
 
     // ============================================
+    // ESCALERA (para subir a la bodega)
+    // ============================================
+
+    // ========== ESCALERA (ajustar posición aquí) ==========
+    const escaleraPosX = 80;     // Posición X (0-512) - izquierda del mapa
+    const escaleraPosY = 120;    // Posición Y (0-320) - cerca de la pared
+    const escaleraScale = 2.0;   // Escala del sprite
+    // ======================================================
+
+    const escaleraX = this.mapOffsetX + escaleraPosX * this.mapScale;
+    const escaleraY = this.mapOffsetY + escaleraPosY * this.mapScale;
+
+    this.escalera = this.add.image(escaleraX, escaleraY, 'escalera_item')
+      .setScale(this.mapScale * escaleraScale)
+      .setDepth(10);
+
+    // Zona de interacción centrada en la escalera
+    this.escaleraZone = {
+      x: escaleraX,
+      y: escaleraY,
+      radius: 60
+    };
+
+    // Actualizar exitZone para que coincida con la escalera
+    this.exitZone = {
+      x: escaleraX - 30,
+      y: escaleraY - 40,
+      width: 60,
+      height: 80
+    };
+
+    // ============================================
     // UI
     // ============================================
 
-    this.instructionText = this.add.text(centerX, 30, 'Sótano secreto | [ESC] para subir', {
+    this.instructionText = this.add.text(centerX, 30, 'Sótano secreto | [E] Interactuar | [ESC] Menú', {
       fontSize: '14px',
       color: '#ffffff',
       backgroundColor: '#00000088',
       padding: { x: 10, y: 5 },
       align: 'center'
     }).setOrigin(0.5).setDepth(1000);
+
+    // Hint para la salida (escalera/trampilla arriba)
+    this.exitHint = this.add.text(0, 0, '[E] Subir a la bodega', {
+      fontSize: '12px',
+      color: '#ffffff',
+      backgroundColor: '#000000aa',
+      padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(1002).setVisible(false);
 
     // Settings UI
     this.settingsUI = new SettingsUI(this);
@@ -137,13 +177,15 @@ export default class Scene_Sotano extends Phaser.Scene {
     this.input.keyboard.on('keydown-ESC', () => {
       if (this.settingsUI?.isVisible()) {
         this.settingsUI.toggle();
-      } else {
-        this.volverABodega();
       }
     });
 
+    // Tecla E para interactuar (subir por la trampilla)
+    this.input.keyboard.on('keydown-E', () => this.handleInteraction());
+
     this.marloSpeed = 150;
     this.exiting = false;
+    this.nearExit = false;
 
     // Fade in
     this.cameras.main.fadeIn(1000, 0, 0, 0);
@@ -224,8 +266,26 @@ export default class Scene_Sotano extends Phaser.Scene {
 
     this.marlo.setDepth(this.marlo.y);
 
-    // Verificar zona de salida
-    if (this.checkExitZone(this.marlo.x, this.marlo.y)) {
+    // Mostrar/ocultar hint de salida según proximidad a la escalera
+    if (this.escaleraZone) {
+      const distEscalera = Phaser.Math.Distance.Between(
+        this.marlo.x, this.marlo.y,
+        this.escaleraZone.x, this.escaleraZone.y
+      );
+
+      this.nearExit = distEscalera < this.escaleraZone.radius;
+      if (this.nearExit) {
+        this.exitHint.setPosition(this.escaleraZone.x, this.escaleraZone.y - 50);
+        this.exitHint.setVisible(true);
+      } else {
+        this.exitHint.setVisible(false);
+      }
+    }
+  }
+
+  handleInteraction() {
+    // Si está cerca de la salida, subir a la bodega
+    if (this.nearExit) {
       this.volverABodega();
     }
   }

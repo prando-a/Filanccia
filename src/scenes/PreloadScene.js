@@ -164,6 +164,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('nota_item', 'src/assets/items/nota.png');
     this.load.image('escritorio_item', 'src/assets/items/escritorio.png');
     this.load.image('trampilla_item', 'src/assets/items/trampilla.png');
+    this.load.image('escalera_item', 'src/assets/items/escalera.png');
 
     // ============================================
     // UI / BACKGROUNDS
