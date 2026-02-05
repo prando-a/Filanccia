@@ -173,17 +173,6 @@
                  "y":212
                 }, 
                 {
-                 "height":28,
-                 "id":14,
-                 "name":"",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16.6666666666666,
-                 "x":260,
-                 "y":228
-                }, 
-                {
                  "height":20,
                  "id":15,
                  "name":"",
@@ -204,29 +193,29 @@
                  "width":46.6666666666666,
                  "x":232,
                  "y":130
-                },
-            
-                {
-                 "height":17.3333333333333,
-                 "id":17,
-                 "name":"spawn",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":18.6666666666666,
-                 "x":344,
-                 "y":103.333333333333
                 }, 
                 {
-                 "height":18,
+                 "height":74,
                  "id":18,
                  "name":"exit",
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":53.3333333333334,
-                 "x":326.666666666667,
-                 "y":84.6666666666667
+                 "x":327.333333333334,
+                 "y":92.6666666666667
+                },
+            
+                {
+                 "height":16.6666666666667,
+                 "id":20,
+                 "name":"spawn",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":17.3333333333334,
+                 "x":348.666666666667,
+                 "y":170.666666666667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -235,7 +224,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":19,
+ "nextobjectid":22,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

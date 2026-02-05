@@ -33,7 +33,7 @@ export default class Scene_Sotano extends Phaser.Scene {
     // Math.min = ver todo el mapa (barras negras)
     // Math.max = llenar pantalla (recorta bordes)
     // Valor fijo = escala específica (ej: 1.5)
-    this.mapScale = Math.min(scaleX, scaleY);  // ← CAMBIAR AQUÍ
+    this.mapScale = Math.min(1.1, 1.1);  // ← CAMBIAR AQUÍ
     // =====================================================
 
     // Centrar el mapa
@@ -61,8 +61,13 @@ export default class Scene_Sotano extends Phaser.Scene {
           return;
         }
 
-        const scaledX = this.mapOffsetX + obj.x * this.mapScale;
-        const scaledY = this.mapOffsetY + obj.y * this.mapScale;
+        // ========== OFFSET COLLIDERS (ajustar aquí) ==========
+        const colliderOffsetX = 0;   // ← +/- para mover colliders horizontal
+        const colliderOffsetY = 22;  // ← +/- para mover colliders vertical (+ = abajo)
+        // ======================================================
+
+        const scaledX = this.mapOffsetX + obj.x * this.mapScale + colliderOffsetX;
+        const scaledY = this.mapOffsetY + obj.y * this.mapScale + colliderOffsetY;
         const scaledW = obj.width * this.mapScale;
         const scaledH = obj.height * this.mapScale;
 
@@ -96,19 +101,42 @@ export default class Scene_Sotano extends Phaser.Scene {
       };
     }
 
+    // ========== DEBUG COLLIDERS (cambiar a false para desactivar) ==========
+    const DEBUG_COLLIDERS = true;
+    if (DEBUG_COLLIDERS) {
+      // Colliders en rojo
+      this.colliders.forEach(col => {
+        this.add.rectangle(col.x + col.width / 2, col.y + col.height / 2, col.width, col.height, 0xff0000, 0.3)
+          .setDepth(998);
+      });
+      // Exit zone en azul
+      if (this.exitZone) {
+        this.add.rectangle(this.exitZone.x + this.exitZone.width / 2, this.exitZone.y + this.exitZone.height / 2,
+          this.exitZone.width, this.exitZone.height, 0x0000ff, 0.4).setDepth(998);
+      }
+      console.log('Sotano - Colliders:', this.colliders.length, 'Exit:', this.exitZone);
+    }
+    // =======================================================================
+
     // ============================================
     // MARLO
     // ============================================
 
     let spawnX = centerX;
-    let spawnY = this.mapOffsetY + 80;
+    let spawnY = this.mapOffsetY + 150;  // Fallback más abajo
 
     if (objectLayer) {
       const spawnPoint = objectLayer.objects.find(obj => obj.name === 'spawn');
       if (spawnPoint) {
         spawnX = this.mapOffsetX + spawnPoint.x * this.mapScale;
         spawnY = this.mapOffsetY + spawnPoint.y * this.mapScale;
+        console.log('Spawn point from JSON:', spawnPoint.x, spawnPoint.y, '-> Screen:', spawnX, spawnY);
       }
+    }
+
+    // DEBUG: Marcar spawn point en verde
+    if (DEBUG_COLLIDERS) {
+      this.add.circle(spawnX, spawnY, 10, 0x00ff00, 0.8).setDepth(999);
     }
 
     this.marlo = this.add.sprite(spawnX, spawnY, 'marlo_idle_south')
@@ -123,7 +151,7 @@ export default class Scene_Sotano extends Phaser.Scene {
     // ========== ESCALERA (ajustar posición aquí) ==========
     const escaleraPosX = 350;    // Posición X (0-512) - cerca del exit
     const escaleraPosY = 70;     // Posición Y (0-320) - arriba
-    const escaleraScale = 1.5;   // Escala del sprite
+    const escaleraScale = 1;   // Escala del sprite
     // ======================================================
 
     const escaleraX = this.mapOffsetX + escaleraPosX * this.mapScale;

@@ -86,13 +86,18 @@ export default class Scene_Bodega extends Phaser.Scene {
         });
       });
       console.log('Bodega colliders loaded:', this.colliders.length);
+    }
 
-      // Debug: mostrar colliders visualmente (solo si debug está activado)
-      if (this.game.config.physics.arcade?.debug) {
-        this.colliders.forEach(col => {
-          this.add.rectangle(col.x + col.width / 2, col.y + col.height / 2, col.width, col.height, 0x0000ff, 0.3)
-            .setDepth(999);
-        });
+    // ========== DEBUG COLLIDERS (cambiar a false para desactivar) ==========
+    const DEBUG_COLLIDERS = true;
+    if (DEBUG_COLLIDERS) {
+      this.colliders.forEach(col => {
+        this.add.rectangle(col.x + col.width / 2, col.y + col.height / 2, col.width, col.height, 0xff0000, 0.3)
+          .setDepth(998);
+      });
+      if (this.exitZone) {
+        this.add.rectangle(this.exitZone.x + this.exitZone.width / 2, this.exitZone.y + this.exitZone.height / 2,
+          this.exitZone.width, this.exitZone.height, 0x0000ff, 0.4).setDepth(998);
       }
     }
 
@@ -145,7 +150,7 @@ export default class Scene_Bodega extends Phaser.Scene {
     // Si venimos del sótano, aparecer cerca de la trampilla
     if (this.fromSotano) {
       spawnX = trampillaX;
-      spawnY = trampillaY + 40;  // Un poco debajo de la trampilla
+      spawnY = trampillaY + 5;  // Un poco debajo de la trampilla
       startDirection = 'south';  // Mirando hacia abajo (acaba de subir)
       console.log('Spawning from sotano near trampilla:', spawnX, spawnY);
     } else {
@@ -158,6 +163,11 @@ export default class Scene_Bodega extends Phaser.Scene {
           console.log('Spawn point found:', spawnX, spawnY);
         }
       }
+    }
+
+    // DEBUG: Marcar spawn point en verde
+    if (DEBUG_COLLIDERS) {
+      this.add.circle(spawnX, spawnY, 10, 0x00ff00, 0.8).setDepth(999);
     }
 
     this.marlo = this.add.sprite(spawnX, spawnY, `marlo_idle_${startDirection}`)
