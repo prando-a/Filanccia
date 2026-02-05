@@ -82,7 +82,7 @@ export default class Scene_1_4 extends Phaser.Scene {
       console.log('Total colliders:', this.colliders.length);
 
       // Debug: mostrar colliders visualmente (solo si debug está activado)
-      if (this.game.config.physics.arcade?.debug) {
+      if (this.game.config.physics?.arcade?.debug === true) {
         this.colliders.forEach(col => {
           this.add.rectangle(col.x + col.width / 2, col.y + col.height / 2, col.width, col.height, 0x0000ff, 0.3)
             .setDepth(999);
@@ -254,6 +254,7 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.interactPrompt.add([promptBg, promptText]);
     this.interactPrompt.setVisible(false).setDepth(1001);
     this.nearBodega = false;
+    this.enteringBodega = false;  // Reset flag para poder entrar de nuevo
 
     // Settings UI
     this.settingsUI = new SettingsUI(this);
@@ -707,46 +708,13 @@ export default class Scene_1_4 extends Phaser.Scene {
     const { width } = this.scale;
 
     // Instrucciones actualizadas
-    this.freeExploreText = this.add.text(width / 2, 30, 'Explora el palacio libremente\n[ESC] para terminar | Busca la entrada a la bodega', {
+    this.freeExploreText = this.add.text(width / 2, 30, 'Explora el palacio libremente | [ESC] para terminar', {
       fontSize: '14px',
       color: '#ffffff',
       backgroundColor: '#00000088',
       padding: { x: 10, y: 5 },
       align: 'center'
     }).setOrigin(0.5).setDepth(1000);
-
-    // Indicador de la zona de la bodega (más visible)
-    if (this.bodegaZone) {
-      // Hacer el indicador más grande para que sea más fácil de encontrar
-      this.bodegaIndicator = this.add.rectangle(
-        this.bodegaZone.x + this.bodegaZone.width / 2,
-        this.bodegaZone.y + this.bodegaZone.height / 2 + 10,
-        this.bodegaZone.width + 20,
-        this.bodegaZone.height + 40,
-        0x00ff00, 0.4
-      ).setDepth(999);
-
-      // Añadir texto indicador
-      this.bodegaText = this.add.text(
-        this.bodegaZone.x + this.bodegaZone.width / 2,
-        this.bodegaZone.y - 10,
-        '↓ BODEGA',
-        { fontSize: '12px', color: '#00ff00', backgroundColor: '#000000aa', padding: { x: 4, y: 2 } }
-      ).setOrigin(0.5).setDepth(1000);
-
-      // Parpadeo más notable
-      this.tweens.add({
-        targets: [this.bodegaIndicator, this.bodegaText],
-        alpha: 0.2,
-        duration: 800,
-        yoyo: true,
-        repeat: -1
-      });
-
-      console.log('Bodega indicator created at:', this.bodegaZone);
-    } else {
-      console.error('Cannot create bodega indicator - bodegaZone is null!');
-    }
   }
 
   entrarBodega() {

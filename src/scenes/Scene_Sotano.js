@@ -101,8 +101,8 @@ export default class Scene_Sotano extends Phaser.Scene {
       };
     }
 
-    // ========== DEBUG COLLIDERS (cambiar a false para desactivar) ==========
-    const DEBUG_COLLIDERS = true;
+    // ========== DEBUG COLLIDERS (controlado desde main.js línea 40) ==========
+    const DEBUG_COLLIDERS = this.game.config.physics?.arcade?.debug === true;
     if (DEBUG_COLLIDERS) {
       // Colliders en rojo
       this.colliders.forEach(col => {
@@ -161,12 +161,21 @@ export default class Scene_Sotano extends Phaser.Scene {
       .setScale(this.mapScale * escaleraScale)
       .setDepth(10);
 
-    // Zona de interacción centrada en la escalera
-    this.escaleraZone = {
-      x: escaleraX,
-      y: escaleraY,
-      radius: 60
-    };
+    // Zona de interacción - usar exitZone del JSON (no la posición del sprite)
+    if (this.exitZone) {
+      this.escaleraZone = {
+        x: this.exitZone.x + this.exitZone.width / 2,
+        y: this.exitZone.y + this.exitZone.height / 2,
+        radius: 80  // Radio amplio para detectar cerca del exit
+      };
+    } else {
+      // Fallback al sprite de escalera
+      this.escaleraZone = {
+        x: escaleraX,
+        y: escaleraY,
+        radius: 60
+      };
+    }
 
     // ============================================
     // UI

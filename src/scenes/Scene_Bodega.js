@@ -88,8 +88,8 @@ export default class Scene_Bodega extends Phaser.Scene {
       console.log('Bodega colliders loaded:', this.colliders.length);
     }
 
-    // ========== DEBUG COLLIDERS (cambiar a false para desactivar) ==========
-    const DEBUG_COLLIDERS = true;
+    // ========== DEBUG COLLIDERS (controlado desde main.js) ==========
+    const DEBUG_COLLIDERS = this.game.config.physics?.arcade?.debug === true;
     if (DEBUG_COLLIDERS) {
       this.colliders.forEach(col => {
         this.add.rectangle(col.x + col.width / 2, col.y + col.height / 2, col.width, col.height, 0xff0000, 0.3)

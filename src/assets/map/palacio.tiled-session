@@ -62,6 +62,17 @@
         "palacio.tmx#interior1": {
             "scaleInDock": 1
         },
+        "sotano.json": {
+            "scale": 1.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 235,
+                "y": 157.66666666666669
+            }
+        },
+        "sotano.json#sotano": {
+            "scaleInDock": 1
+        },
         "sotano.tmx": {
             "scale": 1.0073958333333333,
             "selectedLayer": 0,
