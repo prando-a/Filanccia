@@ -153,7 +153,8 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     this.padre = this.add.image(width - 200, height * 0.7, 'father_idle_west')
       .setOrigin(0.5, 1)
-      .setDepth(height * 0.7);
+      .setDepth(height * 0.7)
+      .setScale(1.15);
 
     this.madre = this.add.image(width - 220, height * 0.7, 'mother_idle_west')
       .setOrigin(0.5, 1)
@@ -161,10 +162,10 @@ export default class Scene_1_4 extends Phaser.Scene {
       .setScale(0.80);
 
     // Marlo (será controlable después)
-    this.marlo = this.add.sprite(width - 200, height * 0.75, 'marlo_idle_south')
+    this.marlo = this.add.sprite(width - 200, height * 0.75, 'marlo_idle_west')
       .setOrigin(0.5, 1)
       .setDepth(height * 0.75);
-    this.marloDirection = 'south';
+    this.marloDirection = 'west';
 
     // ============================================
     // CAJA DE DIÁLOGO
@@ -262,36 +263,37 @@ export default class Scene_1_4 extends Phaser.Scene {
     // Settings UI
     this.settingsUI = new SettingsUI(this);
 
-    // Verificar si venimos de la bodega o de un save
-    const fromBodega = this.loadData.fromBodega;
-    const fromSave = this.loadData.fromSave && this.loadData.globalFlags?.freeExplorationUnlocked;
+    // Determinar el modo de inicio
+    const fromBodega = this.loadData.fromBodega === true;
+    const fromSave = this.loadData.fromSave === true && this.loadData.globalFlags?.freeExplorationUnlocked === true;
 
-    // Si venimos de bodega o save, posicionar a Marlo ANTES del fade
-    if (fromBodega || fromSave) {
-      // Posicionar a Marlo en una zona segura
-      if (this.bodegaZone) {
-        this.marlo.x = this.bodegaZone.x + this.bodegaZone.width / 2;
-        this.marlo.y = this.bodegaZone.y + this.bodegaZone.height + 50;
-      } else {
-        this.marlo.x = width * 0.5;
-        this.marlo.y = height * 0.7;
-      }
-      this.marlo.setDepth(this.marlo.y);
-      this.marlo.setTexture('marlo_idle_south');
-      this.marlo.setVisible(true);
-      this.marlo.setAlpha(1);
-      this.marloDirection = 'south';
-      this.investigando = true;
+    console.log('Scene_1_4 init - fromBodega:', fromBodega, 'fromSave:', fromSave, 'loadData:', this.loadData);
 
-      console.log('Marlo positioned for save/bodega:', this.marlo.x, this.marlo.y);
-
-      // Fade in y luego activar exploración
+    if (fromBodega) {
+      // Volver desde la bodega - exploración libre
       this.cameras.main.fadeIn(1000, 0, 0, 0);
       this.cameras.main.once('camerafadeincomplete', () => {
+        if (this.bodegaZone) {
+          this.marlo.x = this.bodegaZone.x + this.bodegaZone.width / 2;
+          this.marlo.y = this.bodegaZone.y + this.bodegaZone.height + 30;
+        }
+        this.marlo.setDepth(this.marlo.y);
+        this.investigando = true;
+        this.startFreeExploration();
+      });
+    } else if (fromSave) {
+      // Cargar desde partida guardada - exploración libre
+      this.cameras.main.fadeIn(1000, 0, 0, 0);
+      this.cameras.main.once('camerafadeincomplete', () => {
+        this.marlo.x = centerX;
+        this.marlo.y = height * 0.7;
+        this.marlo.setDepth(this.marlo.y);
+        this.investigando = true;
+        console.log('Marlo positioned from save:', this.marlo.x, this.marlo.y);
         this.startFreeExploration();
       });
     } else {
-      // Iniciar con fade in y secuencia normal (partida nueva)
+      // Partida nueva - secuencia normal completa
       this.cameras.main.fadeIn(1000, 0, 0, 0);
       this.cameras.main.once('camerafadeincomplete', () => {
         this.time.delayedCall(500, () => this.runSequence());
@@ -538,7 +540,7 @@ export default class Scene_1_4 extends Phaser.Scene {
     for (const col of this.colliders) {
       // Verificar si el cuerpo del personaje colisiona con el collider
       if (x + radius > col.x && x - radius < col.x + col.width &&
-          y > col.y && bodyTop < col.y + col.height) {
+        y > col.y && bodyTop < col.y + col.height) {
         return true;
       }
     }
@@ -553,7 +555,7 @@ export default class Scene_1_4 extends Phaser.Scene {
     const col = this.bodegaZone;
     // Usar un área más generosa para detectar entrada
     const inZone = x > col.x - 10 && x < col.x + col.width + 10 &&
-                   y > col.y - 10 && y < col.y + col.height + 30;
+      y > col.y - 10 && y < col.y + col.height + 30;
     if (inZone) {
       console.log('Player in bodega zone!', { x, y, zone: col });
     }

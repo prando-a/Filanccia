@@ -16,6 +16,7 @@ export default class Scene_Bodega extends Phaser.Scene {
     // Guardar datos de carga
     this.loadData = data || {};
     this.fromSotano = this.loadData.fromSotano || false;
+    this.fromArmeria = this.loadData.fromArmeria || false;
     this.fromSave = this.loadData.fromSave || false;
 
     // ============================================
@@ -140,6 +141,14 @@ export default class Scene_Bodega extends Phaser.Scene {
     const trampillaX = this.mapOffsetX + trampillaPosX * this.mapScale;
     const trampillaY = this.mapOffsetY + trampillaPosY * this.mapScale;
 
+    // Zone for armeria door (left side of bodega) - defined early for spawn logic
+    this.armeriaZone = {
+      x: this.mapOffsetX + 50 * this.mapScale,
+      y: this.mapOffsetY + 290 * this.mapScale,
+      width: 40 * this.mapScale,
+      height: 50 * this.mapScale
+    };
+
     // ============================================
     // MARLO (usar spawn point del tilemap)
     // ============================================
@@ -155,6 +164,12 @@ export default class Scene_Bodega extends Phaser.Scene {
       spawnY = trampillaY + 5;  // Un poco debajo de la trampilla
       startDirection = 'south';  // Mirando hacia abajo (acaba de subir)
       console.log('Spawning from sotano near trampilla:', spawnX, spawnY);
+    } else if (this.fromArmeria) {
+      // Si venimos de la armería, aparecer cerca de la zona de armería
+      spawnX = this.armeriaZone.x + this.armeriaZone.width + 20;
+      spawnY = this.armeriaZone.y + this.armeriaZone.height / 2;
+      startDirection = 'east';  // Mirando hacia la derecha (acaba de salir de la armería)
+      console.log('Spawning from armeria:', spawnX, spawnY);
     } else {
       const objectsLayer = this.bodegaMap.getObjectLayer('colliders');
       if (objectsLayer) {
@@ -304,6 +319,14 @@ export default class Scene_Bodega extends Phaser.Scene {
       padding: { x: 8, y: 4 }
     }).setOrigin(0.5).setDepth(1002).setVisible(false);
 
+    // Hint para la armeria
+    this.armeriaHint = this.add.text(0, 0, '[E] Ir a armería', {
+      fontSize: '12px',
+      color: '#ffffff',
+      backgroundColor: '#000000aa',
+      padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(1002).setVisible(false);
+
     // Settings UI
     this.settingsUI = new SettingsUI(this);
 
@@ -368,6 +391,19 @@ export default class Scene_Bodega extends Phaser.Scene {
 
     if (distTrampilla < this.trampillaZone.radius) {
       this.irASotano();
+      return;
+    }
+
+    // Verificar si está cerca de la zona de armería
+    const armeriaCenterX = this.armeriaZone.x + this.armeriaZone.width / 2;
+    const armeriaCenterY = this.armeriaZone.y + this.armeriaZone.height / 2;
+    const distArmeria = Phaser.Math.Distance.Between(
+      this.marlo.x, this.marlo.y,
+      armeriaCenterX, armeriaCenterY
+    );
+
+    if (distArmeria < 60) {
+      this.irAArmeria();
     }
   }
 
@@ -531,6 +567,21 @@ export default class Scene_Bodega extends Phaser.Scene {
       }
     }
 
+    // Hint de la armería
+    const armeriaCenterX = this.armeriaZone.x + this.armeriaZone.width / 2;
+    const armeriaCenterY = this.armeriaZone.y + this.armeriaZone.height / 2;
+    const distArmeria = Phaser.Math.Distance.Between(
+      this.marlo.x, this.marlo.y,
+      armeriaCenterX, armeriaCenterY
+    );
+
+    if (distArmeria < 60) {
+      this.armeriaHint.setPosition(armeriaCenterX, armeriaCenterY - 30);
+      this.armeriaHint.setVisible(true);
+    } else {
+      this.armeriaHint.setVisible(false);
+    }
+
     // Verificar zona de salida (auto-salir al entrar)
     if (this.checkExitZone(this.marlo.x, this.marlo.y)) {
       this.volverAlPalacio();
@@ -559,6 +610,20 @@ export default class Scene_Bodega extends Phaser.Scene {
       this.cameras.main.fadeOut(1000, 0, 0, 0);
       this.cameras.main.once('camerafadeoutcomplete', () => {
         this.scene.start('Scene_Sotano');
+      });
+    });
+  }
+
+  irAArmeria() {
+    if (this.exiting) return;
+    this.exiting = true;
+
+    this.showThought('La armería del palacio...');
+
+    this.time.delayedCall(1500, () => {
+      this.cameras.main.fadeOut(1000, 0, 0, 0);
+      this.cameras.main.once('camerafadeoutcomplete', () => {
+        this.scene.start('Scene_Armeria');
       });
     });
   }

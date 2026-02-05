@@ -11,6 +11,7 @@ import Scene_1_3 from './scenes/Scene_1_3.js';
 import Scene_1_4 from './scenes/Scene_1_4.js';
 import Scene_Bodega from './scenes/Scene_Bodega.js';
 import Scene_Sotano from './scenes/Scene_Sotano.js';
+import Scene_Armeria from './scenes/Scene_Armeria.js';
 // AnimatedTiles plugin loaded via script tag in index.html
 const AnimatedTiles = window['AnimatedTiles.min'];
 
@@ -31,7 +32,8 @@ const config = {
     Scene_1_3,
     Scene_1_4,
     Scene_Bodega,
-    Scene_Sotano
+    Scene_Sotano,
+    Scene_Armeria
   ],
   physics: {
     default: 'arcade',

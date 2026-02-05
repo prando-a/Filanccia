@@ -157,6 +157,10 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.tilemapTiledJSON('sotano_map', `${mapPath}/sotano.json`);
     this.load.image('tileset_sotano', `${mapPath}/sotano.png`);
 
+    // Scene Armería (transición desde bodega por puerta izquierda)
+    this.load.tilemapTiledJSON('armeria_map', `${mapPath}/armeria.json`);
+    this.load.image('tileset_armeria', `${mapPath}/armeria.gif`);
+
     // ============================================
     // ITEMS / OBJETOS INTERACTIVOS
     // ============================================
