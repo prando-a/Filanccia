@@ -9,9 +9,12 @@ export default class Scene_Sotano extends Phaser.Scene {
     super({ key: 'Scene_Sotano' });
   }
 
-  create() {
+  create(data) {
     const { width, height } = this.scale;
     const centerX = width / 2;
+
+    // Guardar datos de carga si vienen de un save
+    this.loadData = data || {};
 
     // ============================================
     // TILEMAP DEL SÓTANO
@@ -337,4 +340,9 @@ export default class Scene_Sotano extends Phaser.Scene {
     });
   }
 
+  // Datos específicos de esta escena para guardar
+  // Placeholder para futuros items/flags
+  getSaveData() {
+    return {};
+  }
 }

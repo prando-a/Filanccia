@@ -13,8 +13,10 @@ export default class Scene_Bodega extends Phaser.Scene {
     const { width, height } = this.scale;
     const centerX = width / 2;
 
-    // Guardar si venimos del sótano
-    this.fromSotano = data?.fromSotano || false;
+    // Guardar datos de carga
+    this.loadData = data || {};
+    this.fromSotano = this.loadData.fromSotano || false;
+    this.fromSave = this.loadData.fromSave || false;
 
     // ============================================
     // TILEMAP DATA (solo para colliders, spawn, exit)
@@ -221,12 +223,20 @@ export default class Scene_Bodega extends Phaser.Scene {
     const notaX = this.mapOffsetX + notaPosX * this.mapScale;
     const notaY = this.mapOffsetY + notaPosY * this.mapScale;
 
-    // Sprite de la nota (generado con PixelLab) - SIN glow
-    this.notaMisteriosa = this.add.image(notaX, notaY, 'nota_item')
-      .setScale(this.mapScale * notaScale)
-      .setDepth(escritorioY + 1);  // Justo encima del escritorio
+    // Verificar si la nota ya fue recogida (desde save)
+    const notaYaRecogida = this.fromSave && this.loadData.globalFlags?.notaRecogida;
 
-    this.notaRecogida = false;
+    // Sprite de la nota (generado con PixelLab) - SIN glow
+    // Solo crear si no fue recogida previamente
+    if (!notaYaRecogida) {
+      this.notaMisteriosa = this.add.image(notaX, notaY, 'nota_item')
+        .setScale(this.mapScale * notaScale)
+        .setDepth(escritorioY + 1);  // Justo encima del escritorio
+    } else {
+      this.notaMisteriosa = null;
+    }
+
+    this.notaRecogida = notaYaRecogida;
     this.hintSoundPlayed = false;  // Para que el sonido solo suene una vez
     this.hintDistance = 100;       // Distancia para activar el hint sonoro
 

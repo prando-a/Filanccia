@@ -9,10 +9,13 @@ export default class Scene_1_4 extends Phaser.Scene {
     super({ key: 'Scene_1_4' });
   }
 
-  create() {
+  create(data) {
     const { width, height } = this.scale;
     const centerX = width / 2;
     const centerY = height / 2;
+
+    // Guardar datos de carga si vienen de un save
+    this.loadData = data || {};
 
     // ============================================
     // TILEMAP DEL PALACIO (mismo que Scene 1-3)
@@ -259,28 +262,48 @@ export default class Scene_1_4 extends Phaser.Scene {
     // Settings UI
     this.settingsUI = new SettingsUI(this);
 
-    // Verificar si venimos de la bodega
-    const data = this.scene.settings.data || {};
+    // Verificar si venimos de la bodega o de un save
+    const fromBodega = this.loadData.fromBodega;
+    const fromSave = this.loadData.fromSave && this.loadData.globalFlags?.freeExplorationUnlocked;
 
-    if (data.fromBodega) {
-      // Volver directamente a exploración libre
+    // Si venimos de bodega o save, posicionar a Marlo ANTES del fade
+    if (fromBodega || fromSave) {
+      // Posicionar a Marlo en una zona segura
+      if (this.bodegaZone) {
+        this.marlo.x = this.bodegaZone.x + this.bodegaZone.width / 2;
+        this.marlo.y = this.bodegaZone.y + this.bodegaZone.height + 50;
+      } else {
+        this.marlo.x = width * 0.5;
+        this.marlo.y = height * 0.7;
+      }
+      this.marlo.setDepth(this.marlo.y);
+      this.marlo.setTexture('marlo_idle_south');
+      this.marlo.setVisible(true);
+      this.marlo.setAlpha(1);
+      this.marloDirection = 'south';
+      this.investigando = true;
+
+      console.log('Marlo positioned for save/bodega:', this.marlo.x, this.marlo.y);
+
+      // Fade in y luego activar exploración
       this.cameras.main.fadeIn(1000, 0, 0, 0);
       this.cameras.main.once('camerafadeincomplete', () => {
-        // Posicionar a Marlo cerca de la zona de la bodega
-        if (this.bodegaZone) {
-          this.marlo.x = this.bodegaZone.x + this.bodegaZone.width / 2;
-          this.marlo.y = this.bodegaZone.y + this.bodegaZone.height + 30;
-        }
-        this.investigando = true;
         this.startFreeExploration();
       });
     } else {
-      // Iniciar con fade in y secuencia normal
+      // Iniciar con fade in y secuencia normal (partida nueva)
       this.cameras.main.fadeIn(1000, 0, 0, 0);
       this.cameras.main.once('camerafadeincomplete', () => {
         this.time.delayedCall(500, () => this.runSequence());
       });
     }
+  }
+
+  // Datos específicos de esta escena para guardar
+  getSaveData() {
+    return {
+      freeExploration: this.freeExploration
+    };
   }
 
   createCiudadanoHorrorizado(x, y) {

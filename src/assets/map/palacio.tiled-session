@@ -11,12 +11,26 @@
         "": {
             "scaleInDock": 1
         },
-        "armeria.tmx": {
-            "scale": 1.0073958333333333,
+        "armeria.json": {
+            "scale": 1.7777573529411763,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 479.95036707682766,
-                "y": 320.132354461793
+                "x": 271.971874676869,
+                "y": 175.783269568814
+            }
+        },
+        "armeria.json#armeria": {
+            "scaleInDock": 1
+        },
+        "armeria.tmx": {
+            "expandedObjectLayers": [
+                2
+            ],
+            "scale": 1.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 307,
+                "y": 248.3333333333333
             }
         },
         "armeria.tmx#armeria": {
@@ -24,7 +38,7 @@
         },
         "bodega.json": {
             "scale": 1.2400240384615384,
-            "selectedLayer": 0,
+            "selectedLayer": 1,
             "viewCenter": {
                 "x": 415.71774740719195,
                 "y": 256.04342347581667
@@ -63,6 +77,9 @@
             "scaleInDock": 1
         },
         "sotano.json": {
+            "expandedObjectLayers": [
+                2
+            ],
             "scale": 1.5,
             "selectedLayer": 1,
             "viewCenter": {
@@ -95,7 +112,9 @@
     ],
     "project": "palacio.tiled-project",
     "recentFiles": [
+        "armeria.tmx",
         "bodega.tmx",
+        "sotano.json",
         "bodega.json",
         "palacio.tmx"
     ],

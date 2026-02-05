@@ -1,6 +1,8 @@
 // src/ui/SettingsUI.js
 // Módulo reutilizable para la UI de ajustes
 
+import SaveManager from '../managers/SaveManager.js';
+
 export default class SettingsUI {
   constructor(scene) {
     this.scene = scene;
@@ -47,33 +49,33 @@ export default class SettingsUI {
     const overlay = this.scene.add.rectangle(0, 0, width, height, 0x000000, 0.7);
     overlay.setInteractive();
 
-    // Panel principal
-    const panelBg = this.scene.add.rectangle(0, 0, 320, 240, 0x2a2a2a)
+    // Panel principal (más alto para incluir botón de menú)
+    const panelBg = this.scene.add.rectangle(0, 0, 320, 290, 0x2a2a2a)
       .setStrokeStyle(2, 0xffd700);
 
     // Título
-    const title = this.scene.add.text(0, -95, 'AJUSTES', {
+    const title = this.scene.add.text(0, -105, 'AJUSTES', {
       fontFamily: 'Arial',
       fontSize: '20px',
       color: '#ffd700'
     }).setOrigin(0.5);
 
     // Volumen label
-    const volLabel = this.scene.add.text(-130, -50, 'Volumen:', {
+    const volLabel = this.scene.add.text(-130, -60, 'Volumen:', {
       fontFamily: 'Arial',
       fontSize: '16px',
       color: '#ffffff'
     }).setOrigin(0, 0.5);
 
     // Porcentaje de volumen
-    this.volValueText = this.scene.add.text(110, -50, `${this.getDisplayPercentage()}%`, {
+    this.volValueText = this.scene.add.text(110, -60, `${this.getDisplayPercentage()}%`, {
       fontFamily: 'Arial',
       fontSize: '16px',
       color: '#ffd700'
     }).setOrigin(0.5);
 
     // Botones +/-
-    const volDown = this.scene.add.text(40, -50, '[ - ]', {
+    const volDown = this.scene.add.text(40, -60, '[ - ]', {
       fontFamily: 'Arial',
       fontSize: '16px',
       color: '#ffffff',
@@ -81,7 +83,7 @@ export default class SettingsUI {
       padding: { x: 6, y: 3 }
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
-    const volUp = this.scene.add.text(75, -50, '[ + ]', {
+    const volUp = this.scene.add.text(75, -60, '[ + ]', {
       fontFamily: 'Arial',
       fontSize: '16px',
       color: '#ffffff',
@@ -96,7 +98,7 @@ export default class SettingsUI {
     const sliderWidth = 200;
     const sliderHeight = 16;
     const sliderX = -100;
-    const sliderY = -15;
+    const sliderY = -25;
 
     // Fondo del slider
     this.sliderBg = this.scene.add.rectangle(sliderX + sliderWidth / 2, sliderY, sliderWidth, sliderHeight, 0x444444)
@@ -148,27 +150,61 @@ export default class SettingsUI {
       color: '#888888'
     }).setOrigin(0, 0.5);
 
-    // Guardar
-    const saveBtn = this.scene.add.text(0, 35, '[ GUARDAR ]', {
+    // ============================================
+    // BOTÓN GUARDAR (solo visible en escenas de juego, no en menú)
+    // ============================================
+    const isMenuScene = this.scene.scene.key === 'MenuScene';
+    const canSave = !isMenuScene && SaveManager.canSaveInScene(this.scene);
+
+    this.saveBtn = this.scene.add.text(0, 25, '[ GUARDAR ]', {
       fontFamily: 'Arial',
       fontSize: '16px',
-      color: '#ffffff',
-      backgroundColor: '#4a7c4e',
+      color: canSave ? '#ffffff' : '#666666',
+      backgroundColor: canSave ? '#4a7c4e' : '#333333',
       padding: { x: 12, y: 6 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    }).setOrigin(0.5);
 
-    saveBtn.on('pointerover', () => saveBtn.setStyle({ backgroundColor: '#5a9c5e' }));
-    saveBtn.on('pointerout', () => saveBtn.setStyle({ backgroundColor: '#4a7c4e' }));
-    saveBtn.on('pointerdown', () => this.saveGame());
+    // Ocultar botón guardar en el menú principal
+    if (isMenuScene) {
+      this.saveBtn.setVisible(false);
+    } else if (canSave) {
+      this.saveBtn.setInteractive({ useHandCursor: true });
+      this.saveBtn.on('pointerover', () => this.saveBtn.setStyle({ backgroundColor: '#5a9c5e' }));
+      this.saveBtn.on('pointerout', () => this.saveBtn.setStyle({ backgroundColor: '#4a7c4e' }));
+      this.saveBtn.on('pointerdown', () => this.saveGame());
+    }
 
-    this.saveConfirmText = this.scene.add.text(0, 65, '', {
+    // Texto de confirmación/mensaje
+    this.saveConfirmText = this.scene.add.text(0, 55, '', {
       fontFamily: 'Arial',
       fontSize: '12px',
       color: '#88ff88'
     }).setOrigin(0.5);
 
+    // Mostrar mensaje si no se puede guardar (solo en escenas de juego, no en menú)
+    if (!isMenuScene && !canSave) {
+      this.saveConfirmText.setText('Completa esta escena para poder guardar');
+      this.saveConfirmText.setStyle({ color: '#ffaa66' });
+    }
+
+    // Botón Menú Principal (solo visible en escenas de juego, no en menú)
+    this.menuBtn = this.scene.add.text(0, 90, '[ MENÚ PRINCIPAL ]', {
+      fontFamily: 'Arial',
+      fontSize: '14px',
+      color: '#ffaa00'
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    this.menuBtn.on('pointerover', () => this.menuBtn.setStyle({ color: '#ffffff' }));
+    this.menuBtn.on('pointerout', () => this.menuBtn.setStyle({ color: '#ffaa00' }));
+    this.menuBtn.on('pointerdown', () => this.goToMainMenu());
+
+    // Ocultar botón en el menú principal
+    if (isMenuScene) {
+      this.menuBtn.setVisible(false);
+    }
+
     // Cerrar
-    const closeBtn = this.scene.add.text(0, 90, '[ CERRAR ]', {
+    const closeBtn = this.scene.add.text(0, 115, '[ CERRAR ]', {
       fontFamily: 'Arial',
       fontSize: '14px',
       color: '#ff6666'
@@ -183,8 +219,8 @@ export default class SettingsUI {
       volLabel, volDown, volUp, this.volValueText,
       this.sliderBg, this.sliderFill, this.sliderHandle,
       sliderLabelMin, sliderLabelMax,
-      saveBtn, this.saveConfirmText,
-      closeBtn
+      this.saveBtn, this.saveConfirmText,
+      this.menuBtn, closeBtn
     ]);
 
     // Guardar config del slider para updates
@@ -194,7 +230,62 @@ export default class SettingsUI {
   toggle() {
     this.visible = !this.visible;
     this.panel.setVisible(this.visible);
-    if (this.saveConfirmText) this.saveConfirmText.setText('');
+
+    if (this.visible) {
+      // Actualizar estado del botón guardar cada vez que se abre
+      this.updateSaveButtonState();
+    } else {
+      // Limpiar mensaje solo si no es el mensaje de "no se puede guardar"
+      const canSave = SaveManager.canSaveInScene(this.scene);
+      if (canSave && this.saveConfirmText) {
+        this.saveConfirmText.setText('');
+      }
+    }
+  }
+
+  updateSaveButtonState() {
+    const isMenuScene = this.scene.scene.key === 'MenuScene';
+
+    // En el menú principal, ocultar botones de guardar y menú principal
+    if (isMenuScene) {
+      this.saveBtn.setVisible(false);
+      this.menuBtn.setVisible(false);
+      this.saveConfirmText.setText('');
+      return;
+    }
+
+    // En otras escenas, mostrar botón de menú
+    this.menuBtn.setVisible(true);
+
+    const canSave = SaveManager.canSaveInScene(this.scene);
+    this.saveBtn.setVisible(true);
+
+    if (canSave) {
+      this.saveBtn.setStyle({
+        color: '#ffffff',
+        backgroundColor: '#4a7c4e'
+      });
+      this.saveBtn.setInteractive({ useHandCursor: true });
+      this.saveBtn.removeAllListeners('pointerover');
+      this.saveBtn.removeAllListeners('pointerout');
+      this.saveBtn.removeAllListeners('pointerdown');
+      this.saveBtn.on('pointerover', () => this.saveBtn.setStyle({ backgroundColor: '#5a9c5e' }));
+      this.saveBtn.on('pointerout', () => this.saveBtn.setStyle({ backgroundColor: '#4a7c4e' }));
+      this.saveBtn.on('pointerdown', () => this.saveGame());
+
+      // Limpiar mensaje de error
+      this.saveConfirmText.setText('');
+      this.saveConfirmText.setStyle({ color: '#88ff88' });
+    } else {
+      this.saveBtn.setStyle({
+        color: '#666666',
+        backgroundColor: '#333333'
+      });
+      this.saveBtn.disableInteractive();
+
+      this.saveConfirmText.setText('Completa esta escena para poder guardar');
+      this.saveConfirmText.setStyle({ color: '#ffaa66' });
+    }
   }
 
   isVisible() {
@@ -226,23 +317,42 @@ export default class SettingsUI {
   }
 
   saveGame() {
-    let sceneData = {};
-    if (typeof this.scene.getSaveData === 'function') {
-      sceneData = this.scene.getSaveData();
+    // Verificar de nuevo si se puede guardar
+    if (!SaveManager.canSaveInScene(this.scene)) {
+      this.saveConfirmText.setText('Completa esta escena para poder guardar');
+      this.saveConfirmText.setStyle({ color: '#ffaa66' });
+      return;
     }
 
-    const gameState = {
-      currentScene: this.scene.scene.key,
-      sceneData: sceneData,
-      timestamp: Date.now(),
-      volume: this.getRealVolume()
-    };
+    // Usar SaveManager para guardar
+    const success = SaveManager.save(this.scene);
 
-    localStorage.setItem('filanccia_save', JSON.stringify(gameState));
-    this.saveConfirmText.setText('¡Guardado!');
+    if (success) {
+      this.saveConfirmText.setText('¡Partida guardada!');
+      this.saveConfirmText.setStyle({ color: '#88ff88' });
+    } else {
+      this.saveConfirmText.setText('Error al guardar');
+      this.saveConfirmText.setStyle({ color: '#ff6666' });
+    }
 
     this.scene.time.delayedCall(2000, () => {
-      if (this.saveConfirmText) this.saveConfirmText.setText('');
+      if (this.saveConfirmText) {
+        const canSave = SaveManager.canSaveInScene(this.scene);
+        if (canSave) {
+          this.saveConfirmText.setText('');
+        }
+      }
+    });
+  }
+
+  goToMainMenu() {
+    // Cerrar el panel primero
+    this.toggle();
+
+    // Fade out y volver al menú
+    this.scene.cameras.main.fadeOut(500, 0, 0, 0);
+    this.scene.cameras.main.once('camerafadeoutcomplete', () => {
+      this.scene.scene.start('MenuScene');
     });
   }
 
