@@ -28,8 +28,8 @@ export default class SettingsUI {
 
     // Botón de ajustes usando imagen menu_button
     this.settingsBtn = this.scene.add.image(width - 35, 35, 'menu_button')
-      .setOrigin(0.5, 0.5)
-      .setScale(0.15)
+      .setOrigin(0.9, 0.5)
+      .setScale(0.9)
       .setInteractive({ useHandCursor: true })
       .setDepth(1000)
       .setScrollFactor(0);
