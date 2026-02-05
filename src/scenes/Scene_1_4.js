@@ -42,7 +42,7 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.mapOffsetX = (width - scaledWidth) / 2;
     this.mapOffsetY = (height - scaledHeight) / 2;
     this.floorLayer.setPosition(this.mapOffsetX, this.mapOffsetY);
-    this.floorLayer.setDepth(0);  // Asegurar que el suelo esté siempre abajo
+    this.floorLayer.setDepth(0);
 
     // ============================================
     // COLLIDERS (desde el tilemap)
@@ -52,28 +52,22 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.bodegaZone = null;
 
     const objectLayer = this.palacioMap.getObjectLayer('colliders');
-    console.log('Object layer found:', objectLayer ? 'YES' : 'NO');
 
     if (objectLayer) {
-      console.log('Number of objects:', objectLayer.objects.length);
       objectLayer.objects.forEach(obj => {
-        // Escalar posiciones según el mapa
         const scaledX = this.mapOffsetX + obj.x * this.mapScale;
         const scaledY = this.mapOffsetY + obj.y * this.mapScale;
         const scaledW = obj.width * this.mapScale;
         const scaledH = obj.height * this.mapScale;
 
         if (obj.name === 'bodega') {
-          // Zona de transición a la bodega
           this.bodegaZone = {
             x: scaledX,
             y: scaledY,
             width: scaledW,
             height: scaledH
           };
-          console.log('Bodega zone found:', this.bodegaZone);
         } else {
-          // Collider normal
           this.colliders.push({
             x: scaledX,
             y: scaledY,
@@ -82,7 +76,6 @@ export default class Scene_1_4 extends Phaser.Scene {
           });
         }
       });
-      console.log('Total colliders:', this.colliders.length);
 
       // Debug: mostrar colliders visualmente (solo si debug está activado)
       if (this.game.config.physics?.arcade?.debug === true) {
@@ -90,7 +83,6 @@ export default class Scene_1_4 extends Phaser.Scene {
           this.add.rectangle(col.x + col.width / 2, col.y + col.height / 2, col.width, col.height, 0x0000ff, 0.3)
             .setDepth(999);
         });
-        // Mostrar bodega zone en verde
         if (this.bodegaZone) {
           this.add.rectangle(
             this.bodegaZone.x + this.bodegaZone.width / 2,
@@ -101,15 +93,20 @@ export default class Scene_1_4 extends Phaser.Scene {
           ).setDepth(999);
         }
       }
-    } else {
-      console.error('No colliders layer found in palacio_map!');
     }
 
     // ============================================
-    // CADÁVER (donde estaba el hijo del alcalde)
+    // DETERMINAR MODO ANTES DE CREAR ELEMENTOS
     // ============================================
 
-    // Usar el sprite específico del cadáver
+    const fromBodega = this.loadData.fromBodega === true;
+    const fromSave = this.loadData.fromSave === true && this.loadData.globalFlags?.freeExplorationUnlocked === true;
+    const isResuming = fromBodega || fromSave;
+
+    // ============================================
+    // CADÁVER
+    // ============================================
+
     this.cadaver = this.add.image(centerX, height * 0.35, 'mayor_son_dead')
       .setOrigin(0.5, 0.5)
       .setDepth(height * 0.35);
@@ -120,7 +117,6 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     this.multitud = [];
 
-    // Círculo de personas alrededor del cadáver
     const radioCirculo = 100;
     for (let i = 0; i < 8; i++) {
       const angulo = (i / 8) * Math.PI * 2 - Math.PI / 2;
@@ -128,8 +124,18 @@ export default class Scene_1_4 extends Phaser.Scene {
       const y = height * 0.35 + Math.sin(angulo) * (radioCirculo * 0.6) + 50;
 
       if (y > height * 0.3) {
-        this.createCiudadanoHorrorizado(x, y);
+        this.createCiudadanoHorrorizado(x, y, isResuming);
       }
+    }
+
+    // Si estamos retomando, dispersar la multitud inmediatamente
+    if (isResuming) {
+      this.multitud.forEach(ciudadano => {
+        this.tweens.killTweensOf(ciudadano);
+        const direccion = ciudadano.x < centerX ? -1 : 1;
+        ciudadano.x += direccion * 50;
+        ciudadano.setAlpha(0.5);
+      });
     }
 
     // ============================================
@@ -138,44 +144,58 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     this.carabiniere1 = this.add.image(centerX - 80, height * 0.5, 'carabiniere')
       .setOrigin(0.5, 1)
-      .setDepth(height * 0.5)
-      .setAlpha(0);
+      .setDepth(height * 0.5);
 
     this.carabiniere2 = this.add.image(centerX + 80, height * 0.5, 'carabiniere')
       .setOrigin(0.5, 1)
       .setDepth(height * 0.5)
-      .setFlipX(true)
-      .setAlpha(0);
+      .setFlipX(true);
+
+    // Estado visual según modo
+    if (isResuming) {
+      this.carabiniere1.setAlpha(1);
+      this.carabiniere2.setAlpha(1);
+    } else {
+      this.carabiniere1.setAlpha(0);
+      this.carabiniere2.setAlpha(0);
+    }
 
     // ============================================
-    // FAMILIA DE MARLO
+    // FAMILIA DE MARLO (solo en secuencia inicial)
     // ============================================
 
-    this.padre = this.add.image(width - 200, height * 0.7, 'father_idle_west')
-      .setOrigin(0.5, 1)
-      .setDepth(height * 0.7)
-      .setScale(1.15);
+    if (!isResuming) {
+      this.padre = this.add.image(width - 200, height * 0.7, 'father_idle_west')
+        .setOrigin(0.5, 1)
+        .setDepth(height * 0.7)
+        .setScale(1.15);
 
-    this.madre = this.add.image(width - 220, height * 0.7, 'mother_idle_west')
-      .setOrigin(0.5, 1)
-      .setDepth(height * 0.7)
-      .setScale(0.80);
+      this.madre = this.add.image(width - 220, height * 0.7, 'mother_idle_west')
+        .setOrigin(0.5, 1)
+        .setDepth(height * 0.7)
+        .setScale(0.80);
+    }
 
-    // Marlo (será controlable después)
-    this.marlo = this.add.sprite(width - 200, height * 0.75, 'marlo_idle_west')
-      .setOrigin(0.5, 1)
-      .setDepth(height * 0.75);
-    this.marloDirection = 'west';
-    console.log('[MARLO DEBUG] Marlo created:', {
-      x: this.marlo.x,
-      y: this.marlo.y,
-      visible: this.marlo.visible,
-      active: this.marlo.active,
-      alpha: this.marlo.alpha,
-      depth: this.marlo.depth,
-      scale: this.marlo.scale,
-      texture: this.marlo.texture?.key
-    });
+    // ============================================
+    // MARLO
+    // ============================================
+
+    if (isResuming) {
+      // Posición central para exploración
+      this.marlo = this.add.sprite(centerX, height * 0.7, 'marlo_idle_south')
+        .setOrigin(0.5, 1)
+        .setDepth(900);
+      this.marloDirection = 'south';
+    } else {
+      // Posición con familia para secuencia
+      this.marlo = this.add.sprite(width - 200, height * 0.75, 'marlo_idle_west')
+        .setOrigin(0.5, 1)
+        .setDepth(height * 0.75);
+      this.marloDirection = 'west';
+    }
+
+    // SIEMPRE definir marloSpeed en create()
+    this.marloSpeed = 150;
 
     // ============================================
     // CAJA DE DIÁLOGO
@@ -257,7 +277,7 @@ export default class Scene_1_4 extends Phaser.Scene {
       }
     });
 
-    // Crear prompt de interacción "E" (inicialmente oculto)
+    // Prompt de interacción "E"
     this.interactPrompt = this.add.container(0, 0);
     const promptBg = this.add.rectangle(0, 0, 80, 30, 0x000000, 0.8).setStrokeStyle(2, 0xffd700);
     const promptText = this.add.text(0, 0, '[E] Entrar', {
@@ -268,108 +288,37 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.interactPrompt.add([promptBg, promptText]);
     this.interactPrompt.setVisible(false).setDepth(1001);
     this.nearBodega = false;
-    this.enteringBodega = false;  // Reset flag para poder entrar de nuevo
+    this.enteringBodega = false;
 
     // Settings UI
     this.settingsUI = new SettingsUI(this);
 
-    // Determinar el modo de inicio
-    const fromBodega = this.loadData.fromBodega === true;
-    const fromSave = this.loadData.fromSave === true && this.loadData.globalFlags?.freeExplorationUnlocked === true;
-
-    console.log('Scene_1_4 init - fromBodega:', fromBodega, 'fromSave:', fromSave, 'loadData:', this.loadData);
-
-    // DEBUG: Monitor continuo de Marlo para detectar cuándo cambia
-    if (fromSave) {
-      this._marloWatcher = this.time.addEvent({
-        delay: 100,  // Cada 100ms
-        repeat: 50,  // Por 5 segundos
-        callback: () => {
-          if (this.marlo) {
-            const state = {
-              time: Date.now(),
-              x: this.marlo.x,
-              y: this.marlo.y,
-              visible: this.marlo.visible,
-              active: this.marlo.active,
-              alpha: this.marlo.alpha,
-              depth: this.marlo.depth,
-              scaleX: this.marlo.scaleX,
-              scaleY: this.marlo.scaleY
-            };
-
-            // Detectar cambios problemáticos
-            if (this.marlo.alpha < 1 || !this.marlo.visible) {
-              console.error('[MARLO WATCHER] ⚠️⚠️⚠️ MARLO PROBLEMA:', state);
-            } else {
-              console.log('[MARLO WATCHER] Estado OK:', state);
-            }
-          }
-        }
-      });
-    }
+    // ============================================
+    // INICIAR SEGÚN MODO DE ENTRADA
+    // ============================================
 
     if (fromBodega) {
-      // Volver desde la bodega - exploración libre
       this.cameras.main.fadeIn(1000, 0, 0, 0);
       this.cameras.main.once('camerafadeincomplete', () => {
         if (this.bodegaZone) {
           this.marlo.x = this.bodegaZone.x + this.bodegaZone.width / 2;
           this.marlo.y = this.bodegaZone.y + this.bodegaZone.height + 30;
+          this.marlo.setDepth(this.marlo.y);
         }
-        this.marlo.setDepth(this.marlo.y);
+        this.marlo.setVisible(true);
+        this.marlo.setAlpha(1);
         this.investigando = true;
         this.startFreeExploration();
       });
     } else if (fromSave) {
-      // Cargar desde partida guardada - exploración libre
-      console.log('[MARLO DEBUG] fromSave branch - before fadeIn. Marlo state:', {
-        x: this.marlo.x,
-        y: this.marlo.y,
-        visible: this.marlo.visible,
-        active: this.marlo.active,
-        alpha: this.marlo.alpha,
-        depth: this.marlo.depth
-      });
       this.cameras.main.fadeIn(1000, 0, 0, 0);
       this.cameras.main.once('camerafadeincomplete', () => {
-        console.log('[MARLO DEBUG] fadeIn complete callback starting. Marlo state BEFORE repositioning:', {
-          x: this.marlo.x,
-          y: this.marlo.y,
-          visible: this.marlo.visible,
-          active: this.marlo.active,
-          alpha: this.marlo.alpha,
-          depth: this.marlo.depth
-        });
-        this.marlo.x = centerX;
-        this.marlo.y = height * 0.7;
-        this.marlo.setDepth(900);  // Depth alto para estar sobre la multitud
-        this.marlo.setVisible(true);  // Forzar visible
-        this.marlo.setAlpha(1);  // Forzar alpha
+        this.marlo.setVisible(true);
+        this.marlo.setAlpha(1);
         this.investigando = true;
-        this.marloSpeed = 150;  // IMPORTANTE: Definir velocidad que normalmente se define en startGameplay
-        console.log('[MARLO DEBUG] After repositioning, before startFreeExploration. Marlo state:', {
-          x: this.marlo.x,
-          y: this.marlo.y,
-          visible: this.marlo.visible,
-          active: this.marlo.active,
-          alpha: this.marlo.alpha,
-          depth: this.marlo.depth,
-          marloSpeed: this.marloSpeed
-        });
         this.startFreeExploration();
-        console.log('[MARLO DEBUG] After startFreeExploration. Marlo state:', {
-          x: this.marlo.x,
-          y: this.marlo.y,
-          visible: this.marlo.visible,
-          active: this.marlo.active,
-          alpha: this.marlo.alpha,
-          depth: this.marlo.depth,
-          freeExploration: this.freeExploration
-        });
       });
     } else {
-      // Partida nueva - secuencia normal completa
       this.cameras.main.fadeIn(1000, 0, 0, 0);
       this.cameras.main.once('camerafadeincomplete', () => {
         this.time.delayedCall(500, () => this.runSequence());
@@ -377,34 +326,34 @@ export default class Scene_1_4 extends Phaser.Scene {
     }
   }
 
-  // Datos específicos de esta escena para guardar
   getSaveData() {
     return {
       freeExploration: this.freeExploration
     };
   }
 
-  createCiudadanoHorrorizado(x, y) {
+  createCiudadanoHorrorizado(x, y, skipTween = false) {
     const npcIndex = Phaser.Math.Between(1, 15);
     const ciudadano = this.add.image(x, y, `crowd_npc_front_${npcIndex}`)
       .setOrigin(0.5, 1)
       .setDepth(y);
 
-    // Temblor de horror
-    this.tweens.add({
-      targets: ciudadano,
-      x: x + Phaser.Math.Between(-2, 2),
-      duration: 100,
-      yoyo: true,
-      repeat: -1
-    });
+    // Temblor de horror (solo si no estamos retomando)
+    if (!skipTween) {
+      this.tweens.add({
+        targets: ciudadano,
+        x: x + Phaser.Math.Between(-2, 2),
+        duration: 100,
+        yoyo: true,
+        repeat: -1
+      });
+    }
 
     this.multitud.push(ciudadano);
     return ciudadano;
   }
 
   handleInput() {
-    // Durante la investigación del cadáver
     if (this.investigando && this.waitingForInput) {
       this.handleThoughtInput();
       return;
@@ -439,7 +388,6 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     switch (this.currentStep) {
       case 0:
-        // Pausa inicial
         this.isAnimating = true;
         this.time.delayedCall(1500, () => {
           this.isAnimating = false;
@@ -447,10 +395,6 @@ export default class Scene_1_4 extends Phaser.Scene {
           this.runSequence();
         });
         break;
-
-      // ============================================
-      // REACCIONES DE LOS CIUDADANOS
-      // ============================================
 
       case 1:
         this.showDialogue('Ciudadano', '¡Ha muerto! ¡El hijo del Alcalde ha muerto!');
@@ -477,7 +421,6 @@ export default class Scene_1_4 extends Phaser.Scene {
         break;
 
       case 7:
-        // Carabinieri intervienen
         this.isAnimating = true;
         this.carabinieriIntervienen(() => {
           this.isAnimating = false;
@@ -485,10 +428,6 @@ export default class Scene_1_4 extends Phaser.Scene {
           this.runSequence();
         });
         break;
-
-      // ============================================
-      // CONVERSACIÓN FAMILIAR
-      // ============================================
 
       case 8:
         this.showDialogue('Madre de Marlo', 'Marlo, tenemos que salir de aquí inmediatamente. Esto no es seguro.');
@@ -557,7 +496,6 @@ export default class Scene_1_4 extends Phaser.Scene {
       duration: 500
     });
 
-    // Aparecer carabinieri
     this.tweens.add({
       targets: [this.carabiniere1, this.carabiniere2],
       alpha: 1,
@@ -565,7 +503,6 @@ export default class Scene_1_4 extends Phaser.Scene {
       delay: 500
     });
 
-    // Dispersar multitud
     this.multitud.forEach((ciudadano, i) => {
       const direccion = ciudadano.x < this.scale.width / 2 ? -1 : 1;
       this.tweens.add({
@@ -593,7 +530,10 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
-    // Instrucciones
+    // Ocultar padres (se han ido)
+    if (this.padre) this.padre.setVisible(false);
+    if (this.madre) this.madre.setVisible(false);
+
     this.instructionText = this.add.text(width / 2, 30, 'Usa las flechas o WASD para moverte\nAcércate al cadáver para investigar', {
       fontSize: '14px',
       color: '#ffffff',
@@ -602,19 +542,13 @@ export default class Scene_1_4 extends Phaser.Scene {
       align: 'center'
     }).setOrigin(0.5).setDepth(1000);
 
-    // Zona de interacción cerca del cadáver
     this.zonaInvestigar = this.add.circle(this.cadaver.x, this.cadaver.y + 30, 50, 0xff0000, 0.1);
-
-    this.marloSpeed = 150;
   }
 
   checkCollision(x, y, radius = 20) {
-    // Verificar colisión con los colliders del mapa
-    // Usamos el punto de los pies del personaje (y) y un poco más arriba para el cuerpo
-    const bodyTop = y - 40; // Aproximadamente la altura del sprite
+    const bodyTop = y - 40;
 
     for (const col of this.colliders) {
-      // Verificar si el cuerpo del personaje colisiona con el collider
       if (x + radius > col.x && x - radius < col.x + col.width &&
         y > col.y && bodyTop < col.y + col.height) {
         return true;
@@ -624,53 +558,20 @@ export default class Scene_1_4 extends Phaser.Scene {
   }
 
   checkBodegaZone(x, y) {
-    if (!this.bodegaZone) {
-      console.log('No bodega zone defined');
-      return false;
-    }
+    if (!this.bodegaZone) return false;
     const col = this.bodegaZone;
-    // Usar un área más generosa para detectar entrada
-    const inZone = x > col.x - 10 && x < col.x + col.width + 10 &&
+    return x > col.x - 10 && x < col.x + col.width + 10 &&
       y > col.y - 10 && y < col.y + col.height + 30;
-    if (inZone) {
-      console.log('Player in bodega zone!', { x, y, zone: col });
-    }
-    return inZone;
   }
 
   update() {
-    // Log periódico para monitorear Marlo (cada 60 frames aprox)
-    if (!this._debugCounter) this._debugCounter = 0;
-    this._debugCounter++;
-
-    if (this._debugCounter % 60 === 0 && this.marlo) {
-      console.log('[MARLO DEBUG] update() periodic check:', {
-        frame: this._debugCounter,
-        x: this.marlo.x,
-        y: this.marlo.y,
-        visible: this.marlo.visible,
-        active: this.marlo.active,
-        alpha: this.marlo.alpha,
-        depth: this.marlo.depth,
-        texture: this.marlo.texture?.key,
-        gameplayMode: this.gameplayMode,
-        freeExploration: this.freeExploration,
-        marloSpeed: this.marloSpeed
-      });
-    }
-
-    // Detectar cambios críticos en Marlo
-    if (this.marlo && (this.marlo.alpha < 1 || !this.marlo.visible || !this.marlo.active)) {
-      console.warn('[MARLO DEBUG] ⚠️ PROBLEMA DETECTADO en update():', {
-        visible: this.marlo.visible,
-        active: this.marlo.active,
-        alpha: this.marlo.alpha
-      });
+    // Validar marloSpeed al inicio
+    if (typeof this.marloSpeed !== 'number' || isNaN(this.marloSpeed)) {
+      this.marloSpeed = 150;
     }
 
     if (!this.gameplayMode && !this.freeExploration) return;
 
-    // Movimiento de Marlo
     let vx = 0;
     let vy = 0;
 
@@ -679,7 +580,6 @@ export default class Scene_1_4 extends Phaser.Scene {
     if (this.cursors.up.isDown || this.wasd.up.isDown) vy = -1;
     if (this.cursors.down.isDown || this.wasd.down.isDown) vy = 1;
 
-    // Determinar dirección
     let newDirection = this.marloDirection;
     let isMoving = vx !== 0 || vy !== 0;
 
@@ -688,7 +588,6 @@ export default class Scene_1_4 extends Phaser.Scene {
     else if (vx < 0) newDirection = 'west';
     else if (vx > 0) newDirection = 'east';
 
-    // Actualizar animación
     if (isMoving) {
       const animKey = `marlo_walk_${newDirection}`;
       if (this.marlo.anims.currentAnim?.key !== animKey) {
@@ -701,23 +600,25 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     this.marloDirection = newDirection;
 
-    // Normalizar diagonal
     if (vx !== 0 && vy !== 0) {
       vx *= 0.707;
       vy *= 0.707;
     }
 
-    // Calcular nueva posición
     const delta = this.game.loop.delta / 1000;
     const newX = this.marlo.x + vx * this.marloSpeed * delta;
     const newY = this.marlo.y + vy * this.marloSpeed * delta;
 
-    // Verificar colisiones en ambas fases (gameplayMode y freeExploration)
+    // Protección anti-NaN
+    if (isNaN(newX) || isNaN(newY)) {
+      console.error('[Scene_1_4] NaN position detected - aborting movement');
+      return;
+    }
+
     if (!this.checkCollision(newX, newY)) {
       this.marlo.x = newX;
       this.marlo.y = newY;
     } else {
-      // Intentar deslizar por paredes
       if (!this.checkCollision(newX, this.marlo.y)) {
         this.marlo.x = newX;
       } else if (!this.checkCollision(this.marlo.x, newY)) {
@@ -725,18 +626,15 @@ export default class Scene_1_4 extends Phaser.Scene {
       }
     }
 
-    // Limitar a los bordes de la pantalla
     this.marlo.x = Phaser.Math.Clamp(this.marlo.x, 50, 750);
     this.marlo.y = Phaser.Math.Clamp(this.marlo.y, 100, 580);
 
-    // Actualizar depth para y-sorting, con mínimo para exploración libre
     if (this.freeExploration) {
       this.marlo.setDepth(Math.max(this.marlo.y, 500));
     } else {
       this.marlo.setDepth(this.marlo.y);
     }
 
-    // En modo gameplay inicial, verificar si llegó al cadáver
     if (this.gameplayMode && !this.investigando) {
       const dist = Phaser.Math.Distance.Between(
         this.marlo.x, this.marlo.y,
@@ -749,20 +647,16 @@ export default class Scene_1_4 extends Phaser.Scene {
       }
     }
 
-    // En exploración libre, verificar cercanía a la bodega para mostrar prompt
     if (this.freeExploration) {
       const nearBodega = this.checkBodegaZone(this.marlo.x, this.marlo.y);
       if (nearBodega && !this.nearBodega) {
-        // Acaba de entrar en la zona
         this.nearBodega = true;
         this.interactPrompt.setVisible(true);
         this.interactPrompt.setPosition(this.marlo.x, this.marlo.y - 60);
       } else if (!nearBodega && this.nearBodega) {
-        // Acaba de salir de la zona
         this.nearBodega = false;
         this.interactPrompt.setVisible(false);
       } else if (nearBodega) {
-        // Sigue en la zona, actualizar posición del prompt
         this.interactPrompt.setPosition(this.marlo.x, this.marlo.y - 60);
       }
     }
@@ -771,15 +665,12 @@ export default class Scene_1_4 extends Phaser.Scene {
   iniciarInvestigacion() {
     this.gameplayMode = false;
 
-    // Detener animación
     this.marlo.stop();
     this.marlo.setTexture('marlo_idle_north');
 
-    // Ocultar UI de gameplay
     if (this.instructionText) this.instructionText.destroy();
     if (this.zonaInvestigar) this.zonaInvestigar.destroy();
 
-    // Secuencia de investigación con más diálogos
     this.investigationStep = 0;
     this.runInvestigationSequence();
   }
@@ -821,7 +712,6 @@ export default class Scene_1_4 extends Phaser.Scene {
         this.investigationStep++;
         break;
       case 8:
-        // Activar exploración libre
         this.thoughtBox.setVisible(false);
         this.startFreeExploration();
         break;
@@ -837,20 +727,15 @@ export default class Scene_1_4 extends Phaser.Scene {
   }
 
   startFreeExploration() {
-    console.log('[MARLO DEBUG] startFreeExploration() called. Marlo before:', {
-      x: this.marlo?.x,
-      y: this.marlo?.y,
-      visible: this.marlo?.visible,
-      active: this.marlo?.active,
-      alpha: this.marlo?.alpha,
-      depth: this.marlo?.depth
-    });
-
     this.freeExploration = true;
 
     const { width } = this.scale;
 
-    // Instrucciones actualizadas
+    // Destruir texto anterior si existe
+    if (this.freeExploreText) {
+      this.freeExploreText.destroy();
+    }
+
     this.freeExploreText = this.add.text(width / 2, 30, 'Explora el palacio libremente | [ESC] para terminar', {
       fontSize: '14px',
       color: '#ffffff',
@@ -858,19 +743,6 @@ export default class Scene_1_4 extends Phaser.Scene {
       padding: { x: 10, y: 5 },
       align: 'center'
     }).setOrigin(0.5).setDepth(1000);
-
-    console.log('[MARLO DEBUG] startFreeExploration() finished. Marlo after:', {
-      x: this.marlo?.x,
-      y: this.marlo?.y,
-      visible: this.marlo?.visible,
-      active: this.marlo?.active,
-      alpha: this.marlo?.alpha,
-      depth: this.marlo?.depth,
-      freeExploration: this.freeExploration
-    });
-
-    // Verificar todos los tweens activos que podrían afectar a Marlo
-
   }
 
   entrarBodega() {
@@ -879,7 +751,6 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     this.freeExploration = false;
 
-    // Fade out y transición a la bodega
     this.cameras.main.fadeOut(1000, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start('Scene_Bodega');
@@ -889,7 +760,6 @@ export default class Scene_1_4 extends Phaser.Scene {
   finalizarEscena() {
     this.freeExploration = false;
 
-    // Fade out - fin de la escena
     this.cameras.main.fadeOut(2000, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start('MenuScene');

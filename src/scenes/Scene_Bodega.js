@@ -252,7 +252,7 @@ export default class Scene_Bodega extends Phaser.Scene {
     }
 
     this.notaRecogida = notaYaRecogida;
-    this.hintSoundPlayed = false;  // Para que el sonido solo suene una vez
+    this.hintSoundPlayed = notaYaRecogida;  // Si ya fue recogida, no reproducir hint
     this.hintDistance = 100;       // Distancia para activar el hint sonoro
 
     // Cargar sonido hint (si existe)
@@ -372,7 +372,7 @@ export default class Scene_Bodega extends Phaser.Scene {
     }
 
     // Verificar si está cerca de la nota
-    if (!this.notaRecogida) {
+    if (!this.notaRecogida && this.notaMisteriosa) {
       const dist = Phaser.Math.Distance.Between(
         this.marlo.x, this.marlo.y,
         this.notaMisteriosa.x, this.notaMisteriosa.y
@@ -447,6 +447,11 @@ export default class Scene_Bodega extends Phaser.Scene {
   }
 
   update() {
+    // Validar marloSpeed al inicio
+    if (typeof this.marloSpeed !== 'number' || isNaN(this.marloSpeed)) {
+      this.marloSpeed = 150;
+    }
+
     if (this.waitingForInput || this.exiting) return;
 
     // Movimiento
@@ -486,6 +491,12 @@ export default class Scene_Bodega extends Phaser.Scene {
     const delta = this.game.loop.delta / 1000;
     const newX = this.marlo.x + vx * this.marloSpeed * delta;
     const newY = this.marlo.y + vy * this.marloSpeed * delta;
+
+    // Protección anti-NaN
+    if (isNaN(newX) || isNaN(newY)) {
+      console.error('[Scene_Bodega] NaN position detected - aborting movement');
+      return;
+    }
 
     if (!this.checkCollision(newX, newY)) {
       this.marlo.x = newX;

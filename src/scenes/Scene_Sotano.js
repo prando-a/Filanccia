@@ -247,6 +247,11 @@ export default class Scene_Sotano extends Phaser.Scene {
   }
 
   update() {
+    // Validar marloSpeed al inicio
+    if (typeof this.marloSpeed !== 'number' || isNaN(this.marloSpeed)) {
+      this.marloSpeed = 150;
+    }
+
     if (this.exiting) return;
 
     // Movimiento
@@ -286,6 +291,12 @@ export default class Scene_Sotano extends Phaser.Scene {
     const delta = this.game.loop.delta / 1000;
     const newX = this.marlo.x + vx * this.marloSpeed * delta;
     const newY = this.marlo.y + vy * this.marloSpeed * delta;
+
+    // Protección anti-NaN
+    if (isNaN(newX) || isNaN(newY)) {
+      console.error('[Scene_Sotano] NaN position detected - aborting movement');
+      return;
+    }
 
     if (!this.checkCollision(newX, newY)) {
       this.marlo.x = newX;
