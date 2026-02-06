@@ -482,7 +482,7 @@ export default class Scene_1_4 extends Phaser.Scene {
   carabinieriIntervienen(callback) {
     const { width, height } = this.scale;
 
-    const interventionText = this.add.text(width / 2, height * 0.2, '[ Los carabinieri intervienen ]', {
+    const interventionText = this.add.text(width / 2, height * 0.2, '[ Los guardias intervienen ]', {
       fontSize: '14px',
       color: '#8888ff',
       fontStyle: 'italic',
@@ -704,7 +704,7 @@ export default class Scene_1_4 extends Phaser.Scene {
         this.investigationStep++;
         break;
       case 6:
-        this.showThought('Los carabinieri no van a descubrir nada. Nunca lo hacen.');
+        this.showThought('Los guardias no van a descubrir nada. Nunca lo hacen.');
         this.investigationStep++;
         break;
       case 7:
