@@ -263,9 +263,11 @@ export default class Scene_1_4 extends Phaser.Scene {
       up: 'W', down: 'S', left: 'A', right: 'D'
     });
 
-    // ESC para finalizar (solo en exploración libre)
+    // ESC para finalizar (solo en exploración libre) o cerrar settings
     this.input.keyboard.on('keydown-ESC', () => {
-      if (this.freeExploration) {
+      if (this.settingsUI?.isVisible()) {
+        this.settingsUI.toggle();
+      } else if (this.freeExploration) {
         this.finalizarEscena();
       }
     });
@@ -504,6 +506,8 @@ export default class Scene_1_4 extends Phaser.Scene {
     });
 
     this.multitud.forEach((ciudadano, i) => {
+      // Kill trembling tweens before adding displacement tweens
+      this.tweens.killTweensOf(ciudadano);
       const direccion = ciudadano.x < this.scale.width / 2 ? -1 : 1;
       this.tweens.add({
         targets: ciudadano,
@@ -520,7 +524,10 @@ export default class Scene_1_4 extends Phaser.Scene {
         targets: interventionText,
         alpha: 0,
         duration: 500,
-        onComplete: callback
+        onComplete: () => {
+          interventionText.destroy();
+          callback();
+        }
       });
     });
   }
@@ -542,7 +549,7 @@ export default class Scene_1_4 extends Phaser.Scene {
       align: 'center'
     }).setOrigin(0.5).setDepth(1000);
 
-    this.zonaInvestigar = this.add.circle(this.cadaver.x, this.cadaver.y + 30, 50, 0xff0000, 0.1);
+    this.zonaInvestigar = this.add.circle(this.cadaver.x, this.cadaver.y + 30, 50, 0xff0000, 0);
   }
 
   checkCollision(x, y, radius = 20) {
@@ -751,6 +758,7 @@ export default class Scene_1_4 extends Phaser.Scene {
 
     this.freeExploration = false;
 
+    this.tweens.killAll();
     this.cameras.main.fadeOut(1000, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start('Scene_Bodega');
@@ -760,9 +768,18 @@ export default class Scene_1_4 extends Phaser.Scene {
   finalizarEscena() {
     this.freeExploration = false;
 
+    this.tweens.killAll();
     this.cameras.main.fadeOut(2000, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start('MenuScene');
     });
+  }
+
+  shutdown() {
+    this.input.keyboard.off('keydown-SPACE');
+    this.input.keyboard.off('keydown-ESC');
+    this.input.keyboard.off('keydown-E');
+    this.input.off('pointerdown');
+    this.tweens.killAll();
   }
 }

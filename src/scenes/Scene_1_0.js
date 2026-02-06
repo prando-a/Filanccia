@@ -180,6 +180,7 @@ export default class Scene_1_0 extends Phaser.Scene {
     this.isAnimating = false;
     this.waitingForInput = false;
     this.gameplayMode = false;
+    this.exiting = false;
 
     this.input.keyboard.on('keydown-SPACE', () => this.handleInput());
     this.input.on('pointerdown', () => this.handleInput());

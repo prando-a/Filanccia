@@ -43,12 +43,14 @@ export default class Scene_Bodega extends Phaser.Scene {
     // ============================================
 
     // Crear animación del mapa (14 frames)
-    this.anims.create({
-      key: 'bodega_anim',
-      frames: this.anims.generateFrameNumbers('bodega_animated', { start: 0, end: 13 }),
-      frameRate: 8,  // 8 FPS - ajusta según se vea bien
-      repeat: -1     // Loop infinito
-    });
+    if (!this.anims.exists('bodega_anim')) {
+      this.anims.create({
+        key: 'bodega_anim',
+        frames: this.anims.generateFrameNumbers('bodega_animated', { start: 0, end: 13 }),
+        frameRate: 8,  // 8 FPS - ajusta según se vea bien
+        repeat: -1     // Loop infinito
+      });
+    }
 
     // Crear sprite del mapa animado
     this.animatedMap = this.add.sprite(centerX, height / 2, 'bodega_animated')
@@ -88,7 +90,6 @@ export default class Scene_Bodega extends Phaser.Scene {
           height: scaledH
         });
       });
-      console.log('Bodega colliders loaded:', this.colliders.length);
     }
 
     // ========== DEBUG COLLIDERS (controlado desde main.js) ==========
@@ -117,7 +118,6 @@ export default class Scene_Bodega extends Phaser.Scene {
           height: (exitPoint.height || 40) * this.mapScale
         };
         exitFound = true;
-        console.log('Exit zone found:', this.exitZone);
       }
     }
 
@@ -163,13 +163,11 @@ export default class Scene_Bodega extends Phaser.Scene {
       spawnX = trampillaX;
       spawnY = trampillaY + 5;  // Un poco debajo de la trampilla
       startDirection = 'south';  // Mirando hacia abajo (acaba de subir)
-      console.log('Spawning from sotano near trampilla:', spawnX, spawnY);
     } else if (this.fromArmeria) {
       // Si venimos de la armería, aparecer cerca de la zona de armería
       spawnX = this.armeriaZone.x + this.armeriaZone.width + 20;
-      spawnY = this.armeriaZone.y + this.armeriaZone.height / 2;
+      spawnY = this.armeriaZone.y + this.armeriaZone.height - 45;
       startDirection = 'east';  // Mirando hacia la derecha (acaba de salir de la armería)
-      console.log('Spawning from armeria:', spawnX, spawnY);
     } else {
       const objectsLayer = this.bodegaMap.getObjectLayer('colliders');
       if (objectsLayer) {
@@ -177,7 +175,6 @@ export default class Scene_Bodega extends Phaser.Scene {
         if (spawnPoint) {
           spawnX = this.mapOffsetX + spawnPoint.x * this.mapScale;
           spawnY = this.mapOffsetY + spawnPoint.y * this.mapScale;
-          console.log('Spawn point found:', spawnX, spawnY);
         }
       }
     }
@@ -342,6 +339,9 @@ export default class Scene_Bodega extends Phaser.Scene {
     this.input.keyboard.on('keydown-ESC', () => {
       if (this.settingsUI?.isVisible()) {
         this.settingsUI.toggle();
+      } else if (this.waitingForInput) {
+        this.waitingForInput = false;
+        this.thoughtBox.setVisible(false);
       } else {
         this.volverAlPalacio();
       }
@@ -365,6 +365,8 @@ export default class Scene_Bodega extends Phaser.Scene {
   }
 
   handleInteraction() {
+    if (this.exiting) return;
+
     if (this.waitingForInput) {
       this.waitingForInput = false;
       this.thoughtBox.setVisible(false);
@@ -403,6 +405,7 @@ export default class Scene_Bodega extends Phaser.Scene {
   }
 
   recogerNota() {
+    if (this.notaRecogida || !this.notaMisteriosa) return;
     this.notaRecogida = true;
 
     // Animación de recoger
@@ -413,7 +416,10 @@ export default class Scene_Bodega extends Phaser.Scene {
       y: this.notaMisteriosa.y - 30,
       duration: 500,
       onComplete: () => {
-        this.notaMisteriosa.destroy();
+        if (this.notaMisteriosa) {
+          this.notaMisteriosa.destroy();
+          this.notaMisteriosa = null;
+        }
       }
     });
 
@@ -634,6 +640,15 @@ export default class Scene_Bodega extends Phaser.Scene {
         this.scene.start('Scene_Armeria');
       });
     });
+  }
+
+  shutdown() {
+    this.input.keyboard.off('keydown-ESC');
+    this.input.keyboard.off('keydown-E');
+    this.input.off('pointerdown');
+    if (this.animatedMap) {
+      this.animatedMap.stop();
+    }
   }
 
   // Datos específicos de esta escena para guardar

@@ -117,7 +117,6 @@ export default class Scene_Sotano extends Phaser.Scene {
         this.add.rectangle(this.exitZone.x + this.exitZone.width / 2, this.exitZone.y + this.exitZone.height / 2,
           this.exitZone.width, this.exitZone.height, 0x0000ff, 0.4).setDepth(998);
       }
-      console.log('Sotano - Colliders:', this.colliders.length, 'Exit:', this.exitZone);
     }
     // =======================================================================
 
@@ -133,7 +132,6 @@ export default class Scene_Sotano extends Phaser.Scene {
       if (spawnPoint) {
         spawnX = this.mapOffsetX + spawnPoint.x * this.mapScale;
         spawnY = this.mapOffsetY + spawnPoint.y * this.mapScale;
-        console.log('Spawn point from JSON:', spawnPoint.x, spawnPoint.y, '-> Screen:', spawnX, spawnY);
       }
     }
 
@@ -345,6 +343,7 @@ export default class Scene_Sotano extends Phaser.Scene {
     if (this.exiting) return;
     this.exiting = true;
 
+    this.tweens.killAll();
     this.cameras.main.fadeOut(1000, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start('Scene_Bodega', { fromSotano: true });
@@ -355,5 +354,12 @@ export default class Scene_Sotano extends Phaser.Scene {
   // Placeholder para futuros items/flags
   getSaveData() {
     return {};
+  }
+
+  shutdown() {
+    this.input.keyboard.off('keydown-ESC');
+    this.input.keyboard.off('keydown-E');
+    this.input.off('pointerdown');
+    this.tweens.killAll();
   }
 }

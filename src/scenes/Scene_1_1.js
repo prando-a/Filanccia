@@ -19,6 +19,7 @@ export default class Scene_1_1 extends Phaser.Scene {
 
     this.totalDuration = 8000; // Duración total de la escena en ms
     this.elapsedTime = 0;
+    this.isEnding = false;
 
     // ============================================
     // CAPA 1: CIELO (estático)
@@ -272,9 +273,16 @@ export default class Scene_1_1 extends Phaser.Scene {
     this.marlo.stop();
     this.marlo.setTexture('marlo_idle_north');
 
+    this.tweens.killAll();
     this.cameras.main.fadeOut(1000, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start('Scene_1_2');
     });
+  }
+
+  shutdown() {
+    this.input.keyboard.off('keydown-SPACE');
+    this.input.off('pointerdown');
+    this.tweens.killAll();
   }
 }

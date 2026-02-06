@@ -262,11 +262,18 @@ export default class Scene_1_2 extends Phaser.Scene {
 
       case 6:
         // Fade out y transición
+        this.tweens.killAll();
         this.cameras.main.fadeOut(1000, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {
           this.scene.start('Scene_1_3');
         });
         break;
     }
+  }
+
+  shutdown() {
+    this.input.keyboard.off('keydown-SPACE');
+    this.input.off('pointerdown');
+    this.tweens.killAll();
   }
 }

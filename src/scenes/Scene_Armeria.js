@@ -28,16 +28,17 @@ export default class Scene_Armeria extends Phaser.Scene {
 
     // ========== ESCALA DEL MAPA (ajustar aqui) ==========
     // Tamano original del mapa: 544x352 pixels (17x11 tiles de 32px)
-    const mapWidth = this.armeriaMap.widthInPixels || 544;
-    const mapHeight = this.armeriaMap.heightInPixels || 352;
+    const mapWidth = 544;
+    const mapHeight = 352;
     const scaleX = width / mapWidth;
     const scaleY = height / mapHeight;
+    this.mapScale = Math.min(scaleX, scaleY);
 
     // Opciones de escala:
     // Math.min = ver todo el mapa (barras negras)
     // Math.max = llenar pantalla (recorta bordes)
     // Valor fijo = escala especifica (ej: 1.5)
-    this.mapScale = Math.min(scaleX, scaleY);  // <- CAMBIAR AQUI
+    this.mapScale = Math.min(1.0, 1.0);  // <- CAMBIAR AQUI
     // =====================================================
 
     // ========== OFFSET DEL MAPA (ajustar aqui) ==========
@@ -143,7 +144,6 @@ export default class Scene_Armeria extends Phaser.Scene {
       if (spawnPoint) {
         spawnX = this.mapOffsetX + spawnPoint.x * this.mapScale;
         spawnY = this.mapOffsetY + spawnPoint.y * this.mapScale;
-        console.log('Spawn point from JSON:', spawnPoint.x, spawnPoint.y, '-> Screen:', spawnX, spawnY);
       }
     }
 
@@ -227,6 +227,11 @@ export default class Scene_Armeria extends Phaser.Scene {
   update() {
     if (this.exiting) return;
 
+    // Validar marloSpeed al inicio
+    if (typeof this.marloSpeed !== 'number' || isNaN(this.marloSpeed)) {
+      this.marloSpeed = 150;
+    }
+
     // Movimiento
     let vx = 0;
     let vy = 0;
@@ -264,6 +269,12 @@ export default class Scene_Armeria extends Phaser.Scene {
     const delta = this.game.loop.delta / 1000;
     const newX = this.marlo.x + vx * this.marloSpeed * delta;
     const newY = this.marlo.y + vy * this.marloSpeed * delta;
+
+    // Protección anti-NaN
+    if (isNaN(newX) || isNaN(newY)) {
+      console.error('[Scene_Armeria] NaN position detected - aborting movement');
+      return;
+    }
 
     if (!this.checkCollision(newX, newY)) {
       this.marlo.x = newX;
@@ -319,6 +330,11 @@ export default class Scene_Armeria extends Phaser.Scene {
     this.cameras.main.once('camerafadeoutcomplete', () => {
       this.scene.start('Scene_Bodega', { fromArmeria: true });
     });
+  }
+
+  shutdown() {
+    this.input.keyboard.off('keydown-ESC');
+    this.input.keyboard.off('keydown-E');
   }
 
   // Datos especificos de esta escena para guardar
