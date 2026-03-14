@@ -18,22 +18,24 @@ Plan: Narrative Content for Bodega, Sotano, Armeria (Dan Harmon Steps 5-8)
  ---
  Narrative Design
 
- ┌─────────┬────────────┬─────────────────────────────────┬──────────────────────────┬─────────────────────┐
- │  Scene  │    Step    │              Beat               │           NPC            │      Key Item       │
- ├─────────┼────────────┼─────────────────────────────────┼──────────────────────────┼─────────────────────┤
- │ Bodega  │ 5 – Find   │ "El testigo asustado"           │ Giacomo (cellarer)       │ trozo de terciopelo │
- ├─────────┼────────────┼─────────────────────────────────┼──────────────────────────┼─────────────────────┤
- │ Sotano  │ 6 – Take   │ "El santuario oscuro"           │ Piccolo (street child)   │ botón de ópalo      │
- ├─────────┼────────────┼─────────────────────────────────┼──────────────────────────┼─────────────────────┤
- │ Armeria │ 7 – Return │ "La prueba silenciada"          │ Rafaello (guard captain) │ sello de lacre      │
- ├─────────┼────────────┼─────────────────────────────────┼──────────────────────────┼─────────────────────┤
- │ 1-4     │ 8 – Change │ Strappavolti silhouette appears │ —                        │ —                   │
- └─────────┴────────────┴─────────────────────────────────┴──────────────────────────┴─────────────────────┘
+ ┌──────────────────┬────────────┬──────────────────────────────────────┬──────────────────────────┬─────────────────────┐
+ │      Scene       │    Step    │               Beat                   │           NPC            │      Key Item       │
+ ├──────────────────┼────────────┼──────────────────────────────────────┼──────────────────────────┼─────────────────────┤
+ │ Bodega           │ 5 – Find   │ "El testigo asustado"                │ Giacomo (cellarer)       │ trozo de terciopelo │
+ ├──────────────────┼────────────┼──────────────────────────────────────┼──────────────────────────┼─────────────────────┤
+ │ Sotano           │ 6 – Take   │ "El santuario oscuro"                │ Piccolo (street child)   │ botón de ópalo      │
+ ├──────────────────┼────────────┼──────────────────────────────────────┼──────────────────────────┼─────────────────────┤
+ │ Armeria          │ 7 – Return │ "La prueba silenciada" (stealth+test)│ Rafaello + Guardia corr. │ sello de lacre      │
+ ├──────────────────┼────────────┼──────────────────────────────────────┼──────────────────────────┼─────────────────────┤
+ │ 1-4 (return)     │ 8 – Change │ Padres no creen a Marlo, expulsión   │ Madre, Padre             │ —                   │
+ ├──────────────────┼────────────┼──────────────────────────────────────┼──────────────────────────┼─────────────────────┤
+ │ Armeria (return) │ Epílogo    │ Rafaello da espada. Fin Capítulo 1.  │ Rafaello                 │ espada pequeña      │
+ └──────────────────┴────────────┴──────────────────────────────────────┴──────────────────────────┴─────────────────────┘
 
- Clue chain logic: todasPistasRecogidas = tercioPeloRecogido && botonRecogido && selloRecogido
- When all three are collected and Marlo returns to Scene_1-4, Strappavolti's silhouette appears briefly across the hall.
+ Clue chain logic: todasPistasRecogidas = terciopeloRecogido && botonRecogido && selloRecogido
+ When all three are collected and Marlo returns to Scene_1-4, parents dialogue triggers → guards expel everyone.
 
- NPC Sprites (placeholders): colored this.add.rectangle() — Giacomo=brown, Piccolo=small gray, Rafaello=blue.
+ NPC Sprites (placeholders): colored this.add.rectangle() — Giacomo=brown, Piccolo=small gray, Rafaello=blue, Guardia corrupto=dark red.
 
  ---
  Dialogue Content
@@ -58,16 +60,57 @@ Plan: Narrative Content for Bodega, Sotano, Armeria (Dan Harmon Steps 5-8)
  [Piccolo]  Toma. Encontré esto cuando él pasó. Es de su abrigo.
  → Da: botón de ópalo → luces parpadean → "Él sabe que estás aquí."
 
- Rafaello (Armeria, 7 lines)
+ Rafaello (Armeria) — DISEÑO ACTUALIZADO (reemplaza el script original de 7 líneas)
 
- [Marlo]    ¿Es usted el capitán?
- [Rafaello] Y tú no deberías estar aquí, niño.
- [Rafaello] Tengo órdenes. El asesinato fue un accidente. Eso es lo que debo decir.
- [Rafaello] ...Pero lo encontré en la escena. Este sello.
- [Rafaello] Un símbolo. Una cara geométrica. Me ordenaron destruirlo.
- [Rafaello] No pude. Hay cosas que un hombre de honor no puede destruir.
- [Rafaello] Tómalo. Haz algo con él. Yo ya no puedo hacer nada más.
+ --- MECÁNICA PREVIA AL DIÁLOGO ---
+ Marlo thought on entry: "¿Qué está pasando? ¿Por qué el capitán de la guardia está vigilado como un rehén?"
+
+ Guardia corrupto patrulla la sala. Si ve a Marlo → atrapado (fade + mensaje, primera vez: tutorial "No dejes que te vean los enemigos" + respawn en último guardado).
+
+ Diálogo escuchado desde las sombras (Marlo oye sin ser visto):
+
+ [Guardia]  El Comité quiere silencio, capitán. Esta noche no existió nada.
+ [Rafaello] Encontré el sello. Eso no puede no existir.
+ [Guardia]  Entregue el sello o esto se complica para usted, ¿entiende?
+ [Rafaello] Llevo veinte años sirviendo a este palacio.
+ [Guardia]  Y querrá veinte más. Piénselo.
+ [Rafaello] ...
+ [Guardia]  Bien. Haré otra ronda. Cuando vuelva, más le vale tener una respuesta.
+
+ El guardia pasa por una puerta secreta en la estantería. La puerta puede abrirse con uno de los objetos recogidos (botón de ópalo — el símbolo coincide con la cerradura). Marlo libera a Rafaello del alcoba sellada.
+
+ --- DIÁLOGO CON RAFAELLO (árbol de decisiones, similar profundidad a Piccolo) ---
+
+ [Rafaello] Tú no eres de los guardias.
+ [Marlo]    No. Soy Marlo. Vi lo que pasó arriba.
+ [Rafaello] Un niño. Por supuesto. (pausa) ¿Qué sabes exactamente?
+
+ → Opciones:
+   A) "Vi al hombre sin rostro. Giacomo y Piccolo me hablaron de él."
+   B) "Sé que el Comité quiere silenciar el asesinato."
+
+ [Rafaello responde A] Esos dos... siguen vivos. Bien. Entonces sabes más de lo que aparentas.
+ [Rafaello responde B] El Comité tiene miedo. El miedo hace cosas feas a las instituciones.
+
+ [Rafaello] Bien. Necesito saber una cosa antes de confiar en ti.
+             Esta noche encontré tres cosas en la escena del crimen.
+             Solo una pertenece a él. ¿Cuál?
+             A) Una moneda de oro   B) Un guante de terciopelo oscuro   C) Una pluma de carnaval
+
+ → Si falla: "No estás listo. Vuelve cuando lo sepas." Rafaello cierra la conversación.
+ → Si acierta (B — conecta con pista de Giacomo):
+
+ [Rafaello] Lo sabías. Alguien te enseñó bien.
+ [Rafaello] No sé por qué confío en un niño. Pero hay algo en ti que él teme.
+             Y al mismo tiempo... admira. Tómalo.
  → Da: sello de lacre
+ [Rafaello] Haz algo con él. Yo ya no puedo hacer nada más esta noche.
+
+ --- MECÁNICA EXTRA (exploración previa al diálogo) ---
+ En las armas de la armería hay símbolos geométricos (la cara de Strappavolti) grabados y tachados.
+ Hay uno sin tachar — coincide exactamente con el sello. (Detalle atmosférico, no bloqueante.)
+
+ ---
 
  Bodega second note (near Sotano stairs, Strappavolti planted it):
  "Eres curioso, pequeño. Eso es bueno."
@@ -75,5 +118,37 @@ Plan: Narrative Content for Bodega, Sotano, Armeria (Dan Harmon Steps 5-8)
  Sotano wall symbols (interactive scratch marks):
  Marlo thought: "No es el primero... hay más marcas. Muchas más."
 
- Step 8 Marlo thought (after silhouette):
- "El asesino aún está aquí. Me ha estado observando todo el tiempo."
+ ---
+
+ Escena 1-4 return (Step 8 — La ciudad que no escucha)
+
+ Marlo thought on entry: "Mamá. Papá. Tengo que contarles lo que he visto."
+
+ [Marlo]   Mamá, papá. Hay algo que no cuadra. El capitán de la guardia estaba retenido.
+            Encontré esto. Es una señal. El asesino aún está aquí.
+ [Madre]   Marlo, ya basta. Estás asustado, es normal. Fue un accidente.
+ [Padre]   El palacio está bajo control. Los guardias sabrán qué hacer.
+ [Marlo]   ¡Pero lo vi! ¡Hay un guardia corrupto, y el capitán—!
+ [Madre]   Marlo. Para. Ya nos vamos a casa.
+ [Marlo]   No me voy.
+ [Padre]   (pausa) ¿Qué has dicho?
+ [Marlo]   He dicho que no me voy. No hasta que alguien escuche.
+
+ → Los guardias irrumpen y expulsan a todos los civiles del palacio.
+ → Imagen pixel art: padres siendo escoltados, Marlo empujado al final, puertas cerrándose.
+ → Marlo thought al cerrar las puertas: "No terminará aquí."
+
+ ---
+
+ Armeria (revisita — epílogo Capítulo 1)
+
+ Rafaello espera junto al armero, libre, tranquilo.
+
+ [Rafaello] Sabía que volverías.
+ [Marlo]    ¿Qué hago ahora?
+ [Rafaello] (toma una espada pequeña, la pone en las manos de Marlo)
+             ¿Alguna vez has usado una?
+ [Marlo]    No.
+ [Rafaello] La necesitarás.
+
+ → Fade a negro. Título. Fin Capítulo 1. Prompt de guardado.
