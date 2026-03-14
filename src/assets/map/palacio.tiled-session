@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "bodega.tmx",
+    "activeFile": "armeria.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -108,10 +108,12 @@
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
-        "bodega.tmx"
+        "armeria.json",
+        "armeria.tmx"
     ],
     "project": "palacio.tiled-project",
     "recentFiles": [
+        "armeria.json",
         "armeria.tmx",
         "bodega.tmx",
         "sotano.json",
