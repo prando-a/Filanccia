@@ -179,10 +179,74 @@ export default class Scene_Sotano extends Phaser.Scene {
     }
 
     // ============================================
+    // STATE FLAGS
+    // ============================================
+
+    this.globalFlags = this.loadData.globalFlags || {};
+    this.piccoloHablado = this.globalFlags.piccoloHablado || false;
+    this.botonRecogido = this.globalFlags.botonRecogido || false;
+
+    // ============================================
+    // NPC PICCOLO
+    // ============================================
+    
+    // ========== NPC PICCOLO (ajustar posición aquí) ==========
+    const piccoloPosX = 80;  // Izquierda
+    const piccoloPosY = 220; // Abajo
+    const piccoloX = this.mapOffsetX + piccoloPosX * this.mapScale;
+    const piccoloY = this.mapOffsetY + piccoloPosY * this.mapScale;
+
+    this.piccolo = this.add.rectangle(piccoloX, piccoloY, 16, 32, 0xaaaaaa)
+        .setOrigin(0.5, 1)
+        .setDepth(piccoloY);
+    this.hintDistance = 90; // Distancia para activar hints
+
+    this.piccoloHint = this.add.text(0, 0, '[E] Hablar', {
+      fontSize: '12px',
+      color: '#ffffff',
+      backgroundColor: '#000000aa',
+      padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(1002).setVisible(false);
+
+    // ============================================
+    // WALL SCRATCHES (Marcas en la pared)
+    // ============================================
+    
+    // ========== MARCAS (ajustar posición aquí) ==========
+    const scratchesPosX = 250; 
+    const scratchesPosY = 120; // Arriba en la pared
+    const scratchesX = this.mapOffsetX + scratchesPosX * this.mapScale;
+    const scratchesY = this.mapOffsetY + scratchesPosY * this.mapScale;
+
+    // Zona invisible para interactuar
+    this.scratchesZone = {
+      x: scratchesX,
+      y: scratchesY,
+      radius: 60
+    };
+
+    this.scratchesHint = this.add.text(0, 0, '[E] Examinar marcas', {
+      fontSize: '12px',
+      color: '#ffffff',
+      backgroundColor: '#000000aa',
+      padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(1002).setVisible(false);
+
+    // ============================================
+    // DIALOGUE SYSTEM (Variables)
+    // ============================================
+    
+    this.dialogueActive = false;
+    this.dialogueStep = 0;
+    this.dialogueConfig = [];
+    this.dialogueElements = [];
+    this.optionButtons = [];
+
+    // ============================================
     // UI
     // ============================================
 
-    this.instructionText = this.add.text(centerX, 30, 'Sótano secreto | [E] Interactuar | [ESC] Menú', {
+    this.instructionText = this.add.text(centerX, 30, 'Sótano secreto | [E] Interactuar | [R] Pistas | [ESC] Menú', {
       fontSize: '14px',
       color: '#ffffff',
       backgroundColor: '#00000088',
@@ -197,6 +261,10 @@ export default class Scene_Sotano extends Phaser.Scene {
       backgroundColor: '#000000aa',
       padding: { x: 8, y: 4 }
     }).setOrigin(0.5).setDepth(1002).setVisible(false);
+
+    // Inventory UI
+    this.setupInventoryUI();
+
 
     // Settings UI
     this.settingsUI = new SettingsUI(this);
@@ -218,6 +286,8 @@ export default class Scene_Sotano extends Phaser.Scene {
 
     // Tecla E para interactuar (subir por la trampilla)
     this.input.keyboard.on('keydown-E', () => this.handleInteraction());
+
+    this.input.keyboard.on('keydown-R', () => this.toggleInventory());
 
     this.marloSpeed = 150;
     this.exiting = false;
@@ -251,6 +321,18 @@ export default class Scene_Sotano extends Phaser.Scene {
     }
 
     if (this.exiting) return;
+
+    // Si hay un diálogo o inventario activo, no procesar movimiento ni interacciones
+    if (this.dialogueActive || this.inventoryVisible || this.settingsUI?.isVisible()) {
+      if (this.marlo.anims.currentAnim?.key !== `marlo_idle_${this.marloDirection}`) {
+        this.marlo.stop();
+        this.marlo.setTexture(`marlo_idle_${this.marloDirection}`);
+      }
+      this.piccoloHint.setVisible(false);
+      this.scratchesHint.setVisible(false);
+      if (this.exitHint) this.exitHint.setVisible(false);
+      return;
+    }
 
     // Movimiento
     let vx = 0;
@@ -315,6 +397,28 @@ export default class Scene_Sotano extends Phaser.Scene {
 
     this.marlo.setDepth(this.marlo.y);
 
+    // ==========================================
+    // DISTANCIAS Y HINTS DE INTERACCIÓN
+    // ==========================================
+
+    // Piccolo
+    const distPiccolo = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.piccolo.x, this.piccolo.y);
+    if (distPiccolo < this.hintDistance) {
+      this.piccoloHint.setPosition(this.piccolo.x, this.piccolo.y - 40);
+      this.piccoloHint.setVisible(true);
+    } else {
+      this.piccoloHint.setVisible(false);
+    }
+
+    // Scratches (Marcas en la pared)
+    const distScratches = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.scratchesZone.x, this.scratchesZone.y);
+    if (distScratches < this.scratchesZone.radius) {
+      this.scratchesHint.setPosition(this.scratchesZone.x, this.scratchesZone.y - 30);
+      this.scratchesHint.setVisible(true);
+    } else {
+      this.scratchesHint.setVisible(false);
+    }
+
     // Mostrar/ocultar hint de salida según proximidad a la escalera
     if (this.escaleraZone) {
       const distEscalera = Phaser.Math.Distance.Between(
@@ -332,12 +436,218 @@ export default class Scene_Sotano extends Phaser.Scene {
     }
   }
 
-  handleInteraction() {
-    // Si está cerca de la salida, subir a la bodega
-    if (this.nearExit) {
-      this.volverABodega();
+  // ==========================================
+  // FEEDBACK VISUAL Y PENSAMIENTOS
+  // ==========================================
+
+  showThought(text) {
+    if (this.dialogueActive || this.inventoryVisible) return;
+    this.showSimpleDialogue(text);
+  }
+
+  showSimpleDialogue(text) {
+    if (this.dialogueActive) return;
+    this.dialogueActive = true;
+    this.clearDialogue();
+    
+    const cam = this.cameras.main;
+    this.minigameDialogueBubble = this.add.text(cam.width / 2, 160, text, {
+      fontFamily: 'Arial', fontSize: '16px', color: '#FFFFFF', backgroundColor: '#000000aa', padding: { x: 12, y: 8 }
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(20000);
+
+    this.time.delayedCall(3000, () => {
+      if (this.minigameDialogueBubble) {
+        this.minigameDialogueBubble.destroy();
+        this.minigameDialogueBubble = null;
+      }
+      this.dialogueActive = false;
+    });
+  }
+
+  // ==========================================
+  // DIÁLOGOS DE PICCOLO (Lineal, sin ramas)
+  // ==========================================
+
+  startPiccoloDialogue() {
+    this.dialogueActive = true;
+    this.marlo.stop();
+    this.marlo.setTexture(`marlo_idle_west`); // Mirando hacia Piccolo (asumiendo que está a la izquierda)
+
+    this.dialogueStep = 0;
+    this.dialogueElements = [];
+
+    // [Marlo] ¿Eres tú quien vive aquí abajo? -> Implícito, Piccolo responde directo
+    this.dialogueConfig = [
+      { speaker: 'Piccolo', text: "A veces. Es más seguro que arriba durante el carnaval." },
+      { speaker: 'Piccolo', text: "Conozco cada pasillo de este palacio. Lo he visto muchas veces." },
+      { speaker: 'Piccolo', text: "Al hombre sin rostro. Baja aquí. No busca dinero." },
+      { speaker: 'Piccolo', text: "Busca algo de dentro de las personas. Algo que no se puede ver." },
+      { speaker: 'Piccolo', text: "Toma. Encontré esto cuando él pasó. Es de su abrigo." }
+    ];
+
+    this.showDialogueStep();
+  }
+
+  showDialogueStep() {
+    this.clearDialogue();
+    const step = this.dialogueConfig[this.dialogueStep];
+    if (!step) {
+      this.endPiccoloDialogue();
+      return;
+    }
+
+    const { width, height } = this.scale;
+    const overlay = this.add.rectangle(0, 0, width, height, 0x000000, 0.6).setOrigin(0).setDepth(10000);
+    this.dialogueElements.push(overlay);
+
+    const boxWidth = 500;
+    const boxX = (width - boxWidth) / 2;
+    const boxY = 120;
+
+    const tempText = this.add.text(0, 0, step.text, {
+      fontFamily: 'Arial', fontSize: '18px', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
+    }).setVisible(false);
+    const textHeight = tempText.height;
+    tempText.destroy();
+
+    const headerHeight = 40;
+    const totalBoxHeight = headerHeight + textHeight + 40; // 40 = espacio para continuar
+
+    const dialogueBox = this.add.rectangle(boxX + boxWidth / 2, boxY + totalBoxHeight / 2, boxWidth, totalBoxHeight, 0x1a1a1a, 0.95)
+      .setStrokeStyle(2, 0xffd700).setDepth(10001);
+    this.dialogueElements.push(dialogueBox);
+
+    const speakerTxt = this.add.text(boxX + 20, boxY + 15, `${step.speaker}:`, {
+      fontFamily: 'Arial', fontSize: '18px', color: '#B0C4DE', fontStyle: 'bold' // Color distinto para Piccolo
+    }).setDepth(10002);
+    this.dialogueElements.push(speakerTxt);
+
+    const contentTxt = this.add.text(boxX + 20, boxY + 45, step.text, {
+      fontFamily: 'Arial', fontSize: '18px', color: '#FFFFFF', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
+    }).setDepth(10002);
+    this.dialogueElements.push(contentTxt);
+
+    const continueTxt = this.add.text(boxX + boxWidth - 100, boxY + 45 + textHeight + 5, '[Continuar]', {
+      fontFamily: 'Arial', fontSize: '14px', color: '#AAAAAA', fontStyle: 'italic'
+    }).setDepth(10002).setInteractive().on('pointerdown', () => this.nextDialogueStep());
+    this.dialogueElements.push(continueTxt);
+
+    this.input.keyboard.once('keydown-SPACE', () => {
+      if (this.dialogueActive) this.nextDialogueStep();
+    });
+  }
+
+  nextDialogueStep() {
+    this.dialogueStep++;
+    if (this.dialogueStep < this.dialogueConfig.length) {
+      this.showDialogueStep();
+    } else {
+      this.endPiccoloDialogue();
     }
   }
+
+  clearDialogue() {
+    if (this.dialogueElements) {
+      this.dialogueElements.forEach(el => el.destroy());
+      this.dialogueElements = [];
+    }
+  }
+
+  endPiccoloDialogue() {
+    this.clearDialogue();
+    this.dialogueActive = false;
+    this.piccoloHablado = true;
+    this.botonRecogido = true;
+    this.updateInventoryView();
+    
+    // Mostramos pensamiento para dar feedback del objeto recibido y aplicamos el efecto atmosférico
+    this.showThought('He conseguido un... ¿Botón de ópalo?');
+    
+    this.time.delayedCall(2500, () => {
+      this.triggerFlickerEffect();
+    });
+  }
+
+  triggerFlickerEffect() {
+    // Apaga las luces por un instante
+    this.cameras.main.setAlpha(0.2);
+    this.time.delayedCall(150, () => {
+      this.cameras.main.setAlpha(1);
+      this.time.delayedCall(100, () => {
+        this.cameras.main.setAlpha(0.1);
+        this.time.delayedCall(300, () => {
+          this.cameras.main.setAlpha(1);
+          // Mensaje final
+          this.showThought('Él sabe que estás aquí.');
+        });
+      });
+    });
+  }
+
+  // ==========================================
+  // INVENTORY UI (Botón de Ópalo)
+  // ==========================================
+
+  setupInventoryUI() {
+    const { width, height } = this.scale;
+    this.inventoryVisible = false;
+    this.inventoryPanel = this.add.container(width / 2, height / 2).setDepth(20000).setVisible(false);
+    
+    const bg = this.add.rectangle(0, 0, 400, 300, 0x111111, 0.9).setStrokeStyle(2, 0xd0a050);
+    const title = this.add.text(0, -130, 'PISTAS Y OBJETOS', {
+      fontFamily: 'Arial', fontSize: '20px', color: '#FFD700', fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    this.itemsText = this.add.text(-170, -90, '', {
+      fontFamily: 'Arial', fontSize: '16px', color: '#FFFFFF', lineSpacing: 10, wordWrap: { width: 340 }
+    });
+
+    const closeInstruction = this.add.text(0, 120, '[R] Cerrar', {
+      fontFamily: 'Arial', fontSize: '14px', color: '#AAAAAA'
+    }).setOrigin(0.5);
+
+    this.inventoryPanel.add([bg, title, this.itemsText, closeInstruction]);
+  }
+
+  toggleInventory() {
+    if (this.settingsUI?.isVisible() || this.dialogueActive) return;
+    
+    this.inventoryVisible = !this.inventoryVisible;
+    if (this.inventoryVisible) {
+      this.updateInventoryView();
+      this.inventoryPanel.setVisible(true);
+    } else {
+      this.inventoryPanel.setVisible(false);
+    }
+  }
+
+  updateInventoryView() {
+    let items = '';
+    
+    // Revisamos variables de otras escenas cargadas en globalFlags por si acaso, 
+    // y las propias de la escena
+    if (this.globalFlags.terciopeloRecogido) {
+      items += '- Trozo de terciopelo ensangrentado\n\n';
+    }
+    if (this.botonRecogido) {
+      items += '- Botón de ópalo (abrigo oscuro)\n\n';
+    }
+    if (this.globalFlags.notaStrappavoltiRecogida) {
+      items += '- Nota Misteriosa: "Eres curioso, pequeño. Eso es bueno."\n\n';
+    }
+    
+    if (items === '') {
+      items = 'No tienes ninguna pista todavía...';
+    }
+    
+    if (this.itemsText) {
+      this.itemsText.setText(items);
+    }
+  }
+
+  // ==========================================
+  // TRANSICIONES Y GUARDADO
+  // ==========================================
 
   volverABodega() {
     if (this.exiting) return;
@@ -346,14 +656,25 @@ export default class Scene_Sotano extends Phaser.Scene {
     this.tweens.killAll();
     this.cameras.main.fadeOut(1000, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
-      this.scene.start('Scene_Bodega', { fromSotano: true });
+      this.scene.start('Scene_Bodega', { fromSotano: true, globalFlags: this.getMergedGlobalFlags() });
     });
   }
 
+  // Combinar los flags globales previos con el estado actual
+  getMergedGlobalFlags() {
+    return {
+      ...this.globalFlags,
+      piccoloHablado: this.piccoloHablado,
+      botonRecogido: this.botonRecogido,
+    };
+  }
+
   // Datos específicos de esta escena para guardar
-  // Placeholder para futuros items/flags
   getSaveData() {
-    return {};
+    return {
+      piccoloHablado: this.piccoloHablado,
+      botonRecogido: this.botonRecogido,
+    };
   }
 
   shutdown() {

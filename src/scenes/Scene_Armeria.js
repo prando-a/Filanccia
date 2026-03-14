@@ -328,7 +328,7 @@ export default class Scene_Armeria extends Phaser.Scene {
 
     this.cameras.main.fadeOut(1000, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
-      this.scene.start('Scene_Bodega', { fromArmeria: true });
+      this.scene.start('Scene_Bodega', { fromArmeria: true, globalFlags: this.loadData.globalFlags });
     });
   }
 

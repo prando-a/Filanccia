@@ -116,7 +116,10 @@ export default class SaveManager {
     const flags = {
       ...existingFlags,  // Mantener flags previos
       freeExplorationUnlocked: false,
-      notaRecogida: false
+      notaRecogida: false,
+      giacomoHablado: false,
+      terciopeloRecogido: false,
+      notaStrappavoltiRecogida: false
     };
 
     // Actualizar según la escena actual
@@ -124,11 +127,16 @@ export default class SaveManager {
       flags.freeExplorationUnlocked = scene.freeExploration === true;
     } else if (sceneKey === 'Scene_Bodega') {
       flags.freeExplorationUnlocked = true;  // Si está en bodega, ya desbloqueó exploración
-      flags.notaRecogida = sceneData.notaRecogida || false;
+      flags.notaRecogida = sceneData.notaRecogida || existingFlags.notaRecogida || false;
+      flags.giacomoHablado = sceneData.giacomoHablado || existingFlags.giacomoHablado || false;
+      flags.terciopeloRecogido = sceneData.terciopeloRecogido || existingFlags.terciopeloRecogido || false;
+      flags.notaStrappavoltiRecogida = sceneData.notaStrappavoltiRecogida || existingFlags.notaStrappavoltiRecogida || false;
     } else if (sceneKey === 'Scene_Sotano') {
       flags.freeExplorationUnlocked = true;  // Si está en sótano, ya desbloqueó exploración
       // Mantener notaRecogida del save existente
       flags.notaRecogida = existingFlags.notaRecogida || false;
+      flags.piccoloHablado = sceneData.piccoloHablado || existingFlags.piccoloHablado || false;
+      flags.botonRecogido = sceneData.botonRecogido || existingFlags.botonRecogido || false;
     }
 
     return flags;

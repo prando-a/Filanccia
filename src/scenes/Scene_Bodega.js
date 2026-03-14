@@ -235,8 +235,14 @@ export default class Scene_Bodega extends Phaser.Scene {
     const notaX = this.mapOffsetX + notaPosX * this.mapScale;
     const notaY = this.mapOffsetY + notaPosY * this.mapScale;
 
+    // Variables de estado persistente
+    this.globalFlags = this.loadData.globalFlags || {};
+    this.giacomoHablado = this.globalFlags.giacomoHablado || false;
+    this.terciopeloRecogido = this.globalFlags.terciopeloRecogido || false;
+    this.notaStrappavoltiRecogida = this.globalFlags.notaStrappavoltiRecogida || false;
+
     // Verificar si la nota ya fue recogida (desde save)
-    const notaYaRecogida = this.fromSave && this.loadData.globalFlags?.notaRecogida;
+    const notaYaRecogida = this.notaStrappavoltiRecogida;
 
     // Sprite de la nota (generado con PixelLab) - SIN glow
     // Solo crear si no fue recogida previamente
@@ -250,6 +256,18 @@ export default class Scene_Bodega extends Phaser.Scene {
 
     this.notaRecogida = notaYaRecogida;
     this.hintSoundPlayed = notaYaRecogida;  // Si ya fue recogida, no reproducir hint
+
+    // ========== NPC GIACOMO ==========
+    const giacomoPosX = 350; // Izquierda de la bodega, visible
+    const giacomoPosY = 280;
+    const giacomoX = this.mapOffsetX + giacomoPosX * this.mapScale;
+    const giacomoY = this.mapOffsetY + giacomoPosY * this.mapScale;
+
+    this.giacomo = this.add.sprite(giacomoX, giacomoY, 'giacomo_idle')
+      .setOrigin(0.5, 1)
+      .setDepth(giacomoY)
+      .setScale(1.1);
+    this.giacomo.play('giacomo_nervous_anim');
     this.hintDistance = 100;       // Distancia para activar el hint sonoro
 
     // Cargar sonido hint (si existe)
@@ -324,6 +342,19 @@ export default class Scene_Bodega extends Phaser.Scene {
       padding: { x: 8, y: 4 }
     }).setOrigin(0.5).setDepth(1002).setVisible(false);
 
+    // Hint para Giacomo
+    this.giacomoHint = this.add.text(0, 0, '[E] Hablar', {
+      fontSize: '12px', color: '#ffffff', backgroundColor: '#000000aa', padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(1002).setVisible(false);
+
+    // Configurar Inventario UI
+    this.setupInventoryUI();
+
+    // Dialog flags
+    this.dialogueActive = false;
+    this.dialogueStep = 0;
+    this.dialogueElements = [];
+
     // Settings UI
     this.settingsUI = new SettingsUI(this);
 
@@ -339,6 +370,8 @@ export default class Scene_Bodega extends Phaser.Scene {
     this.input.keyboard.on('keydown-ESC', () => {
       if (this.settingsUI?.isVisible()) {
         this.settingsUI.toggle();
+      } else if (this.inventoryVisible) {
+        this.toggleInventory();
       } else if (this.waitingForInput) {
         this.waitingForInput = false;
         this.thoughtBox.setVisible(false);
@@ -348,9 +381,10 @@ export default class Scene_Bodega extends Phaser.Scene {
     });
     // Tecla E para interactuar
     this.input.keyboard.on('keydown-E', () => this.handleInteraction());
+    this.input.keyboard.on('keydown-R', () => this.toggleInventory());
     this.input.on('pointerdown', (pointer) => {
-      // No interactuar si el panel de ajustes está abierto
-      if (!this.settingsUI?.isVisible()) {
+      // No interactuar si hay UI abierta
+      if (!this.settingsUI?.isVisible() && !this.inventoryVisible && !this.dialogueActive) {
         this.handleInteraction();
       }
     });
@@ -370,6 +404,18 @@ export default class Scene_Bodega extends Phaser.Scene {
     if (this.waitingForInput) {
       this.waitingForInput = false;
       this.thoughtBox.setVisible(false);
+      return;
+    }
+
+    if (this.dialogueActive || this.inventoryVisible) return;
+
+    // Verificar si está cerca de Giacomo
+    const distGiacomo = Phaser.Math.Distance.Between(
+      this.marlo.x, this.marlo.y,
+      this.giacomo.x, this.giacomo.y
+    );
+    if (distGiacomo < 60) {
+      this.interactuarGiacomo();
       return;
     }
 
@@ -407,6 +453,7 @@ export default class Scene_Bodega extends Phaser.Scene {
   recogerNota() {
     if (this.notaRecogida || !this.notaMisteriosa) return;
     this.notaRecogida = true;
+    this.notaStrappavoltiRecogida = true;
 
     // Animación de recoger
     this.tweens.add({
@@ -425,7 +472,8 @@ export default class Scene_Bodega extends Phaser.Scene {
 
     // Mostrar pensamiento
     this.time.delayedCall(600, () => {
-      this.showThought('Una nota... "El rostro es la llave. La máscara es la prisión."');
+      this.showThought('Una nota... "Eres curioso, pequeño. Eso es bueno."');
+      this.updateInventoryView();
     });
   }
 
@@ -452,13 +500,331 @@ export default class Scene_Bodega extends Phaser.Scene {
       y > col.y && y < col.y + col.height;
   }
 
+  // ============================================
+  // SISTEMA DE DIÁLOGO INTERACTIVO (GIACOMO)
+  // ============================================
+
+  interactuarGiacomo() {
+    if (this.giacomoHablado) {
+      // Dialogo simple follow up
+      this.showSimpleDialogue("Giacomo: 'Ya te dije todo lo que sé, déjame en paz.'");
+    } else {
+      this.startGiacomoDialogue();
+    }
+  }
+
+  showSimpleDialogue(text) {
+    if (this.dialogueActive) return;
+    this.dialogueActive = true;
+    this.clearDialogue();
+    
+    // Si estamos hablando con Giacomo después de la primera vez
+    // detenemos su animación de todas formas durante el thought bubble
+    if (this.giacomo && this.giacomo.anims) {
+        this.giacomo.stop();
+        this.giacomo.setTexture('giacomo_idle');
+    }
+
+    // Bubble
+    const cam = this.cameras.main;
+    this.minigameDialogueBubble = this.add.text(cam.width / 2, 160, text, {
+      fontFamily: 'Arial', fontSize: '16px', color: '#FFFFFF', backgroundColor: '#000000aa', padding: { x: 12, y: 8 }
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(20000);
+
+    // Auto-hide
+    this.time.delayedCall(3000, () => {
+      if (this.minigameDialogueBubble) {
+        this.minigameDialogueBubble.destroy();
+        this.minigameDialogueBubble = null;
+      }
+      this.dialogueActive = false;
+
+      // Reanudar la animación de Giacomo si estábamos a su lado
+       if (this.giacomo && this.giacomo.anims) {
+          this.giacomo.play('giacomo_nervous_anim');
+       }
+    });
+  }
+
+  startGiacomoDialogue() {
+    this.dialogueActive = true;
+    this.marlo.stop();
+    this.marlo.setTexture(`marlo_idle_east`);
+    
+    // Detener la animación nerviosa de Giacomo y ponerlo idle
+    if (this.giacomo && this.giacomo.anims) {
+      this.giacomo.stop();
+      this.giacomo.setTexture('giacomo_idle');
+    }
+
+    this.dialogueStep = 0;
+    this.dialogueElements = [];
+
+    this.dialogueConfig = [
+      { speaker: 'Giacomo', text: "¡Chist! Baja la voz, niño. Hay oídos en todas partes.", options: null },
+      {
+        speaker: 'Giacomo', text: "Estaba aquí cuando ocurrió. Vi a un hombre sin rostro bajar horas antes.",
+        options: [
+          { text: "¿Llevaba algo consigo?", response: "No vi su rostro, pero... llevaba algo envuelto en terciopelo. Pesado. No sé qué era." },
+          { text: "¿Qué hacía un hombre aquí abajo?", response: "Este lugar es un nido de secretos. Apenas lo vi pasar..." }
+        ]
+      },
+      { speaker: 'Giacomo', text: "Si te vio hablar conmigo, estamos perdidos. Toma esto. Lo dejó caer.", options: null },
+      { speaker: 'Giacomo', text: "Y aléjate de las sombras. No todas las máscaras se llevan en el rostro.", options: null }
+    ];
+
+    this.showDialogueStep();
+  }
+
+  showDialogueStep() {
+    this.clearDialogue();
+    const step = this.dialogueConfig[this.dialogueStep];
+    if (!step) {
+      this.endGiacomoDialogue();
+      return;
+    }
+
+    const { width, height } = this.scale;
+    const overlay = this.add.rectangle(0, 0, width, height, 0x000000, 0.6).setOrigin(0).setDepth(10000);
+    this.dialogueElements.push(overlay);
+
+    const boxWidth = 500;
+    const boxX = (width - boxWidth) / 2;
+    const boxY = 120;
+
+    const tempText = this.add.text(0, 0, step.text, {
+      fontFamily: 'Arial', fontSize: '18px', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
+    }).setVisible(false);
+    const textHeight = tempText.height;
+    tempText.destroy();
+
+    const headerHeight = 40;
+    const optionsHeight = step.options ? (step.options.length * 38 + 20) : 40;
+    const totalBoxHeight = headerHeight + textHeight + optionsHeight + 30;
+
+    const dialogueBox = this.add.rectangle(boxX + boxWidth / 2, boxY + totalBoxHeight / 2, boxWidth, totalBoxHeight, 0x1a1a1a, 0.95)
+      .setStrokeStyle(2, 0xffd700).setDepth(10001);
+    this.dialogueElements.push(dialogueBox);
+
+    const speakerTxt = this.add.text(boxX + 20, boxY + 15, `${step.speaker}:`, {
+      fontFamily: 'Arial', fontSize: '18px', color: '#FFD700', fontStyle: 'bold'
+    }).setDepth(10002);
+    this.dialogueElements.push(speakerTxt);
+
+    const contentTxt = this.add.text(boxX + 20, boxY + 45, step.text, {
+      fontFamily: 'Arial', fontSize: '18px', color: '#FFFFFF', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
+    }).setDepth(10002);
+    this.dialogueElements.push(contentTxt);
+
+    const optionsStartY = boxY + 45 + textHeight + 15;
+
+    if (step.options) {
+      this.selectedOption = 0;
+      this.currentOptions = step.options;
+      this.optionButtons = [];
+
+      step.options.forEach((opt, i) => {
+        const optY = optionsStartY + i * 38;
+        const optBtn = this.add.text(boxX + 30, optY, `➤ ${opt.text}`, {
+          fontFamily: 'Arial', fontSize: '16px', color: '#FFD700', backgroundColor: '#2d2d2d', padding: { x: 8, y: 4 }
+        }).setDepth(10002).setInteractive().on('pointerover', () => {
+          this.selectedOption = i;
+          this.updateOptionHighlight();
+        }).on('pointerdown', () => this.selectOption());
+
+        this.dialogueElements.push(optBtn);
+        this.optionButtons.push(optBtn);
+      });
+
+      this.updateOptionHighlight();
+
+      this.keyUpHandler = () => { this.selectedOption = Math.max(0, this.selectedOption - 1); this.updateOptionHighlight(); };
+      this.keyDownHandler = () => { this.selectedOption = Math.min(step.options.length - 1, this.selectedOption + 1); this.updateOptionHighlight(); };
+      this.keySelectHandler = () => this.selectOption();
+
+      this.input.keyboard.on('keydown-UP', this.keyUpHandler);
+      this.input.keyboard.on('keydown-DOWN', this.keyDownHandler);
+      this.input.keyboard.on('keydown-ENTER', this.keySelectHandler);
+      this.input.keyboard.on('keydown-SPACE', this.keySelectHandler);
+    } else {
+      const continueTxt = this.add.text(boxX + boxWidth - 100, optionsStartY, '[Continuar]', {
+        fontFamily: 'Arial', fontSize: '14px', color: '#AAAAAA', fontStyle: 'italic'
+      }).setDepth(10002).setInteractive().on('pointerdown', () => this.nextDialogueStep());
+      this.dialogueElements.push(continueTxt);
+
+      this.input.keyboard.once('keydown-SPACE', () => {
+        if (this.dialogueActive && !this.dialogueConfig[this.dialogueStep]?.options) {
+          this.nextDialogueStep();
+        }
+      });
+    }
+  }
+
+  showDialogueResponse(response) {
+    this.clearDialogue();
+    const { width, height } = this.scale;
+
+    const overlay = this.add.rectangle(0, 0, width, height, 0x000000, 0.6).setOrigin(0).setDepth(10000);
+    this.dialogueElements.push(overlay);
+
+    const boxWidth = 500;
+    const boxX = (width - boxWidth) / 2;
+    const boxY = 150;
+
+    const dialogueBox = this.add.rectangle(boxX + boxWidth / 2, boxY + 50, boxWidth, 100, 0x1a1a1a, 0.95)
+      .setStrokeStyle(2, 0xffd700).setDepth(10001);
+    this.dialogueElements.push(dialogueBox);
+
+    const speakerTxt = this.add.text(boxX + 20, boxY + 15, 'Giacomo:', {
+      fontFamily: 'Arial', fontSize: '18px', color: '#FFD700', fontStyle: 'bold'
+    }).setDepth(10002);
+    this.dialogueElements.push(speakerTxt);
+
+    const contentTxt = this.add.text(boxX + 20, boxY + 45, response, {
+      fontFamily: 'Arial', fontSize: '18px', color: '#FFFFFF', wordWrap: { width: boxWidth - 40 }
+    }).setDepth(10002);
+    this.dialogueElements.push(contentTxt);
+
+    const continueTxt = this.add.text(boxX + boxWidth - 100, boxY + 70, '[Continuar]', {
+      fontFamily: 'Arial', fontSize: '14px', color: '#AAAAAA', fontStyle: 'italic'
+    }).setDepth(10002).setInteractive().on('pointerdown', () => this.nextDialogueStep());
+    this.dialogueElements.push(continueTxt);
+
+    this.input.keyboard.once('keydown-SPACE', () => this.nextDialogueStep());
+  }
+
+  nextDialogueStep() {
+    this.dialogueStep++;
+    if (this.dialogueStep < this.dialogueConfig.length) {
+      this.showDialogueStep();
+    } else {
+      this.endGiacomoDialogue();
+    }
+  }
+
+  clearDialogue() {
+    if (this.keyUpHandler) this.input.keyboard.off('keydown-UP', this.keyUpHandler);
+    if (this.keyDownHandler) this.input.keyboard.off('keydown-DOWN', this.keyDownHandler);
+    if (this.keySelectHandler) {
+      this.input.keyboard.off('keydown-ENTER', this.keySelectHandler);
+      this.input.keyboard.off('keydown-SPACE', this.keySelectHandler);
+    }
+    this.keyUpHandler = null;
+    this.keyDownHandler = null;
+    this.keySelectHandler = null;
+
+    if (this.dialogueElements) {
+      this.dialogueElements.forEach(el => el.destroy());
+      this.dialogueElements = [];
+    }
+    this.optionButtons = [];
+    this.currentOptions = null;
+  }
+
+  updateOptionHighlight() {
+    if (!this.optionButtons) return;
+    this.optionButtons.forEach((btn, i) => {
+      if (i === this.selectedOption) {
+        btn.setStyle({ color: '#FFA500', backgroundColor: '#3d3d3d' });
+      } else {
+        btn.setStyle({ color: '#FFD700', backgroundColor: '#2d2d2d' });
+      }
+    });
+  }
+
+  selectOption() {
+    if (!this.currentOptions || this.selectedOption < 0) return;
+    const opt = this.currentOptions[this.selectedOption];
+    if (opt) {
+      this.showDialogueResponse(opt.response);
+    }
+  }
+
+  endGiacomoDialogue() {
+    this.clearDialogue();
+    this.dialogueActive = false;
+    this.giacomoHablado = true;
+    this.terciopeloRecogido = true;
+    this.updateInventoryView();
+
+    // Mostramos pensamiento para dar feedback del objeto recibido
+    this.showThought('He conseguido un... ¿Trozo de terciopelo?');
+    
+    // Reanudar la animación de Giacomo si no hay minigameDialogueBubble activo tapándolo (showthought se encarga)
+    if (!this.minigameDialogueBubble && this.giacomo && this.giacomo.anims) {
+        this.giacomo.play('giacomo_nervous_anim');
+    }
+  }
+
+  // ============================================
+  // INVENTARIO / PISTAS UI
+  // ============================================
+
+  setupInventoryUI() {
+    const { width, height } = this.scale;
+    this.inventoryVisible = false;
+    this.inventoryPanel = this.add.container(width / 2, height / 2).setDepth(20000).setVisible(false);
+
+    // Background
+    const bg = this.add.rectangle(0, 0, 400, 300, 0x111111, 0.9).setStrokeStyle(2, 0xd0a050);
+    const title = this.add.text(0, -130, 'PISTAS Y OBJETOS', {
+      fontFamily: 'Arial', fontSize: '20px', color: '#d0a050', fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    this.itemsText = this.add.text(-180, -90, '', {
+      fontFamily: 'Arial', fontSize: '16px', color: '#ffffff', lineSpacing: 10
+    });
+
+    const closeTip = this.add.text(0, 130, '[R] o [ESC] Cerrar', {
+      fontFamily: 'Arial', fontSize: '12px', color: '#aaaaaa'
+    }).setOrigin(0.5);
+
+    this.inventoryPanel.add([bg, title, this.itemsText, closeTip]);
+  }
+
+  toggleInventory() {
+    if (this.settingsUI?.isVisible() || this.dialogueActive) return;
+
+    this.inventoryVisible = !this.inventoryVisible;
+    if (this.inventoryVisible) {
+      this.updateInventoryView();
+      this.inventoryPanel.setVisible(true);
+      if (this.thoughtBox) this.thoughtBox.setVisible(false);
+      this.waitingForInput = false;
+    } else {
+      this.inventoryPanel.setVisible(false);
+    }
+  }
+
+  updateInventoryView() {
+    let items = '';
+    if (this.terciopeloRecogido) {
+      items += '- Trozo de Terciopelo: Un trozo de tela oscura. Muy grueso.\n\n';
+    }
+    if (this.notaStrappavoltiRecogida) {
+      items += '- Nota Misteriosa: "Eres curioso, pequeño. Eso es bueno."\n\n';
+    }
+
+    if (items === '') {
+      items = 'No tienes ninguna pista todavía...';
+    }
+
+    if (this.itemsText) {
+      this.itemsText.setText(items);
+    }
+  }
+
   update() {
     // Validar marloSpeed al inicio
     if (typeof this.marloSpeed !== 'number' || isNaN(this.marloSpeed)) {
       this.marloSpeed = 150;
     }
 
-    if (this.waitingForInput || this.exiting) return;
+    if (this.waitingForInput || this.exiting || this.dialogueActive || this.inventoryVisible) {
+      this.marlo.stop();
+      if (!this.dialogueActive) this.marlo.setTexture(`marlo_idle_${this.marloDirection}`);
+      return;
+    }
 
     // Movimiento
     let vx = 0;
@@ -523,6 +889,18 @@ export default class Scene_Bodega extends Phaser.Scene {
     // ============================================
     // ACTUALIZAR HINTS DE PROXIMIDAD
     // ============================================
+
+    // Hint de Giacomo
+    const distGiacomo = Phaser.Math.Distance.Between(
+      this.marlo.x, this.marlo.y,
+      this.giacomo.x, this.giacomo.y
+    );
+    if (distGiacomo < 60) {
+      this.giacomoHint.setPosition(this.giacomo.x, this.giacomo.y - 60);
+      this.giacomoHint.setVisible(true);
+    } else {
+      this.giacomoHint.setVisible(false);
+    }
 
     // Hint de la nota
     if (!this.notaRecogida && this.notaMisteriosa) {
@@ -609,7 +987,7 @@ export default class Scene_Bodega extends Phaser.Scene {
     this.cameras.main.fadeOut(1000, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
       // Volver a Scene_1_4 en modo exploración libre
-      this.scene.start('Scene_1_4', { fromBodega: true });
+      this.scene.start('Scene_1_4', { fromBodega: true, globalFlags: this.getMergedGlobalFlags() });
     });
   }
 
@@ -623,7 +1001,7 @@ export default class Scene_Bodega extends Phaser.Scene {
     this.time.delayedCall(1500, () => {
       this.cameras.main.fadeOut(1000, 0, 0, 0);
       this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start('Scene_Sotano');
+        this.scene.start('Scene_Sotano', { globalFlags: this.getMergedGlobalFlags() });
       });
     });
   }
@@ -637,7 +1015,7 @@ export default class Scene_Bodega extends Phaser.Scene {
     this.time.delayedCall(1500, () => {
       this.cameras.main.fadeOut(1000, 0, 0, 0);
       this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.scene.start('Scene_Armeria');
+        this.scene.start('Scene_Armeria', { globalFlags: this.getMergedGlobalFlags() });
       });
     });
   }
@@ -651,10 +1029,24 @@ export default class Scene_Bodega extends Phaser.Scene {
     }
   }
 
+  // Combinar los flags globales previos con el estado actual
+  getMergedGlobalFlags() {
+    return {
+      ...this.globalFlags,
+      notaRecogida: this.notaRecogida,
+      giacomoHablado: this.giacomoHablado,
+      terciopeloRecogido: this.terciopeloRecogido,
+      notaStrappavoltiRecogida: this.notaStrappavoltiRecogida
+    };
+  }
+
   // Datos específicos de esta escena para guardar
   getSaveData() {
     return {
-      notaRecogida: this.notaRecogida
+      notaRecogida: this.notaRecogida,
+      giacomoHablado: this.giacomoHablado,
+      terciopeloRecogido: this.terciopeloRecogido,
+      notaStrappavoltiRecogida: this.notaStrappavoltiRecogida
     };
   }
 }

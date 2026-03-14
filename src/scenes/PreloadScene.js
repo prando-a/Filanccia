@@ -101,6 +101,10 @@ export default class PreloadScene extends Phaser.Scene {
     // ----- ALABARDIERI -----
     this.load.image('alabardiere', `${charPath}/alabardieriIdleSouth.png`);
 
+    // ----- GIACOMO -----
+    this.load.image('giacomo_idle', `${charPath}/giacomoSouth.png`);
+    this.load.spritesheet('giacomo_nervous', `${charPath}/giacomoNervous.png`, { frameWidth: 64, frameHeight: 64 });
+
     // ----- ALCALDE (Mayor) -----
     this.load.image('mayor_stand', `${charPath}/town_mayor/mayor-stand.png`);
     this.load.image('mayor_son', `${charPath}/town_mayor/mayor-son.png`);
@@ -223,6 +227,14 @@ export default class PreloadScene extends Phaser.Scene {
       frames: this.anims.generateFrameNumbers('marlo_put_mask', { start: 0, end: 15 }),
       frameRate: 8,
       repeat: 0
+    });
+
+    // ----- GIACOMO ANIMATIONS -----
+    this.anims.create({
+      key: 'giacomo_nervous_anim',
+      frames: this.anims.generateFrameNumbers('giacomo_nervous', { start: 0, end: 15 }),
+      frameRate: 8,
+      repeat: -1
     });
 
     // ----- FATHER ANIMATIONS -----

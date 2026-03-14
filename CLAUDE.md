@@ -46,7 +46,7 @@ All code comments in **Spanish**. Placeholders before logic. Logic before art.
 | 1-2 | Central plaza (Mayor's speech) | ✅ |
 | 1-3 | Palace Hall (Ballo Mascherato) | ✅ |
 | 1-4 | Palace Hall — murder discovered, investigation begins | ✅ |
-| Bodega | Wine cellar — explorable after murder | 🔧 Active |
+| Bodega | Wine cellar — explorable after murder | ✅ |
 | Sotano | Underground/basement — explorable after murder | 🔧 Active |
 | Armeria | Armory — explorable after murder | 🔧 Active |
 
