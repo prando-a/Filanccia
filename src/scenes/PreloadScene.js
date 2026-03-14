@@ -236,7 +236,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.anims.create({
       key: 'giacomo_nervous_anim',
       frames: this.anims.generateFrameNumbers('giacomo_nervous', { start: 0, end: 15 }),
-      frameRate: 8,
+      frameRate: 4,
       repeat: -1
     });
 
