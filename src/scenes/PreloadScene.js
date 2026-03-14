@@ -105,6 +105,9 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('giacomo_idle', `${charPath}/giacomoSouth.png`);
     this.load.spritesheet('giacomo_nervous', `${charPath}/giacomoNervous.png`, { frameWidth: 64, frameHeight: 64 });
 
+    // ----- PICCOLO -----
+    this.load.image('piccolo_idle', `${charPath}/piccoloSouth.png`);
+
     // ----- ALCALDE (Mayor) -----
     this.load.image('mayor_stand', `${charPath}/town_mayor/mayor-stand.png`);
     this.load.image('mayor_son', `${charPath}/town_mayor/mayor-son.png`);

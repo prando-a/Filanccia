@@ -189,16 +189,18 @@ export default class Scene_Sotano extends Phaser.Scene {
     // ============================================
     // NPC PICCOLO
     // ============================================
-    
+
     // ========== NPC PICCOLO (ajustar posición aquí) ==========
     const piccoloPosX = 80;  // Izquierda
-    const piccoloPosY = 220; // Abajo
+    const piccoloPosY = 240; // Abajo
     const piccoloX = this.mapOffsetX + piccoloPosX * this.mapScale;
     const piccoloY = this.mapOffsetY + piccoloPosY * this.mapScale;
 
-    this.piccolo = this.add.rectangle(piccoloX, piccoloY, 16, 32, 0xaaaaaa)
-        .setOrigin(0.5, 1)
-        .setDepth(piccoloY);
+    this.piccolo = this.add.image(piccoloX, piccoloY, 'piccolo_idle')
+      .setOrigin(0.5, 1)
+      .setScale(this.mapScale)
+      .setDepth(piccoloY)
+      .setScale(1.2);
     this.hintDistance = 90; // Distancia para activar hints
 
     this.piccoloHint = this.add.text(0, 0, '[E] Hablar', {
@@ -211,9 +213,9 @@ export default class Scene_Sotano extends Phaser.Scene {
     // ============================================
     // WALL SCRATCHES (Marcas en la pared)
     // ============================================
-    
+
     // ========== MARCAS (ajustar posición aquí) ==========
-    const scratchesPosX = 250; 
+    const scratchesPosX = 250;
     const scratchesPosY = 120; // Arriba en la pared
     const scratchesX = this.mapOffsetX + scratchesPosX * this.mapScale;
     const scratchesY = this.mapOffsetY + scratchesPosY * this.mapScale;
@@ -235,12 +237,16 @@ export default class Scene_Sotano extends Phaser.Scene {
     // ============================================
     // DIALOGUE SYSTEM (Variables)
     // ============================================
-    
+
     this.dialogueActive = false;
-    this.dialogueStep = 0;
-    this.dialogueConfig = [];
     this.dialogueElements = [];
     this.optionButtons = [];
+    this.currentOptions = null;
+    this.currentNode = null;
+    this.dialogueTree = null;
+    this.keyUpHandler = null;
+    this.keyDownHandler = null;
+    this.keySelectHandler = null;
 
     // ============================================
     // UI
@@ -437,6 +443,48 @@ export default class Scene_Sotano extends Phaser.Scene {
   }
 
   // ==========================================
+  // INTERACCIÓN CON EL ENTORNO
+  // ==========================================
+
+  handleInteraction() {
+    if (this.exiting) return;
+    if (this.dialogueActive || this.inventoryVisible || this.settingsUI?.isVisible()) return;
+
+    // Piccolo
+    if (this.piccolo) {
+      const distPiccolo = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.piccolo.x, this.piccolo.y);
+      if (distPiccolo < this.hintDistance) {
+        this.interactuarPiccolo();
+        return;
+      }
+    }
+
+    // Marcas en la pared
+    const distScratches = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.scratchesZone.x, this.scratchesZone.y);
+    if (distScratches < this.scratchesZone.radius) {
+      this.examinarMarcas();
+      return;
+    }
+
+    // Escalera de salida
+    if (this.nearExit) {
+      this.volverABodega();
+    }
+  }
+
+  interactuarPiccolo() {
+    if (this.piccoloHablado) {
+      this.showSimpleDialogue("Piccolo: 'Ya te dije todo lo que sé. Aléjate de las sombras.'");
+    } else {
+      this.startPiccoloDialogue();
+    }
+  }
+
+  examinarMarcas() {
+    this.showThought('No es el primero... hay más marcas. Muchas más.');
+  }
+
+  // ==========================================
   // FEEDBACK VISUAL Y PENSAMIENTOS
   // ==========================================
 
@@ -449,7 +497,7 @@ export default class Scene_Sotano extends Phaser.Scene {
     if (this.dialogueActive) return;
     this.dialogueActive = true;
     this.clearDialogue();
-    
+
     const cam = this.cameras.main;
     this.minigameDialogueBubble = this.add.text(cam.width / 2, 160, text, {
       fontFamily: 'Arial', fontSize: '16px', color: '#FFFFFF', backgroundColor: '#000000aa', padding: { x: 12, y: 8 }
@@ -465,92 +513,233 @@ export default class Scene_Sotano extends Phaser.Scene {
   }
 
   // ==========================================
-  // DIÁLOGOS DE PICCOLO (Lineal, sin ramas)
+  // DIÁLOGOS DE PICCOLO (Árbol de decisiones)
   // ==========================================
 
   startPiccoloDialogue() {
     this.dialogueActive = true;
     this.marlo.stop();
-    this.marlo.setTexture(`marlo_idle_west`); // Mirando hacia Piccolo (asumiendo que está a la izquierda)
-
-    this.dialogueStep = 0;
+    this.marlo.setTexture('marlo_idle_west');
     this.dialogueElements = [];
+    this.optionButtons = [];
 
-    // [Marlo] ¿Eres tú quien vive aquí abajo? -> Implícito, Piccolo responde directo
-    this.dialogueConfig = [
-      { speaker: 'Piccolo', text: "A veces. Es más seguro que arriba durante el carnaval." },
-      { speaker: 'Piccolo', text: "Conozco cada pasillo de este palacio. Lo he visto muchas veces." },
-      { speaker: 'Piccolo', text: "Al hombre sin rostro. Baja aquí. No busca dinero." },
-      { speaker: 'Piccolo', text: "Busca algo de dentro de las personas. Algo que no se puede ver." },
-      { speaker: 'Piccolo', text: "Toma. Encontré esto cuando él pasó. Es de su abrigo." }
-    ];
+    // Árbol de diálogo: cada nodo tiene speaker, text, y options[] o next
+    this.dialogueTree = {
+      intro: {
+        speaker: 'Piccolo',
+        text: 'A veces. Las sombras son mejores compañía que la gente de arriba.',
+        options: [
+          { text: '¿No tienes miedo de estar solo aquí?', next: 'miedo' },
+          { text: '¿Has visto algo extraño esta noche?', next: 'extrano' }
+        ]
+      },
+      miedo: {
+        speaker: 'Piccolo',
+        text: '¿Miedo? El miedo vive arriba, disfrazado de máscaras y aplausos. Aquí al menos las sombras son honestas.',
+        next: 'conocer_palacio'
+      },
+      extrano: {
+        speaker: 'Piccolo',
+        text: 'Todo el carnaval es extraño. Pero sí... esta noche más que otras. Esta noche huele diferente.',
+        next: 'conocer_palacio'
+      },
+      conocer_palacio: {
+        speaker: 'Piccolo',
+        text: 'Conozco cada pasillo de este palacio. Lo he visto muchas veces. Al hombre sin rostro. Esta noche bajó aquí.',
+        options: [
+          { text: '¿Cómo es? ¿Lo reconocerías?', next: 'descripcion' },
+          { text: '¿Suele bajar aquí a menudo?', next: 'patron' }
+        ]
+      },
+      descripcion: {
+        speaker: 'Piccolo',
+        text: 'No tiene rostro que puedas recordar. Es como intentar recordar el vacío. Cada vez que lo ves... ya no estás seguro de lo que viste.',
+        next: 'que_busca'
+      },
+      patron: {
+        speaker: 'Piccolo',
+        text: 'Siempre en noches especiales. Bodas. Funerales. Carnavales. Como si se alimentara de lo que los demás sienten.',
+        next: 'que_busca'
+      },
+      que_busca: {
+        speaker: 'Piccolo',
+        text: 'No busca dinero. No busca poder. Busca algo de dentro de las personas. Algo que no se puede ver. Que no se puede tocar. Solo... sentir.',
+        options: [
+          { text: '¿Qué clase de cosa puede ser esa?', next: 'clase_cosa' },
+          { text: '¿Y tú? ¿Te ha mirado a ti alguna vez?', next: 'vio_piccolo' }
+        ]
+      },
+      clase_cosa: {
+        speaker: 'Piccolo',
+        text: 'No lo sé con palabras. Pero cuando él pasa cerca... algo en ti se siente más pequeño. Como si te mirara desde dentro.',
+        next: 'boton_intro'
+      },
+      vio_piccolo: {
+        speaker: 'Piccolo',
+        text: '...\nUna vez. Me miró a mí. Pero se fue.\n\nSupongo que no encontró lo que buscaba en mí.',
+        next: 'boton_intro'
+      },
+      boton_intro: {
+        speaker: 'Piccolo',
+        text: 'Toma. Encontré esto cuando él pasó. Es de su abrigo.',
+        options: [
+          { text: '¿Por qué me lo das a mí?', next: 'por_que_marlo' },
+          { text: '¿Qué significa ese símbolo grabado?', next: 'simbolo' }
+        ]
+      },
+      por_que_marlo: {
+        speaker: 'Piccolo',
+        text: 'Porque tú haces preguntas. Los otros que estuvieron aquí huyeron cuando mencioné su nombre. Tú... buscas entender. Eso te hace diferente. O más peligroso.',
+        next: 'fin'
+      },
+      simbolo: {
+        speaker: 'Piccolo',
+        text: 'No lo sé. Pero el hombre sin rostro también hace preguntas. Solo que las suyas... las hace con sangre.',
+        next: 'fin'
+      },
+      fin: {
+        speaker: 'Piccolo',
+        text: 'Aléjate de las partes oscuras del palacio esta noche. Hay cosas que incluso yo evito.',
+        next: null
+      }
+    };
 
-    this.showDialogueStep();
+    this.showDialogueNode('intro');
   }
 
-  showDialogueStep() {
+  showDialogueNode(nodeKey) {
     this.clearDialogue();
-    const step = this.dialogueConfig[this.dialogueStep];
-    if (!step) {
+    this.currentNode = nodeKey;
+    const node = this.dialogueTree[nodeKey];
+    if (!node) {
       this.endPiccoloDialogue();
       return;
     }
 
     const { width, height } = this.scale;
-    const overlay = this.add.rectangle(0, 0, width, height, 0x000000, 0.6).setOrigin(0).setDepth(10000);
+    const overlay = this.add.rectangle(0, 0, width, height, 0x000000, 0.65).setOrigin(0).setDepth(10000);
     this.dialogueElements.push(overlay);
 
-    const boxWidth = 500;
+    const boxWidth = 520;
     const boxX = (width - boxWidth) / 2;
-    const boxY = 120;
+    const boxY = 100;
 
-    const tempText = this.add.text(0, 0, step.text, {
-      fontFamily: 'Arial', fontSize: '18px', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
+    // Medir altura del texto
+    const tempText = this.add.text(0, 0, node.text, {
+      fontFamily: 'Arial', fontSize: '17px', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
     }).setVisible(false);
     const textHeight = tempText.height;
     tempText.destroy();
 
-    const headerHeight = 40;
-    const totalBoxHeight = headerHeight + textHeight + 40; // 40 = espacio para continuar
+    const headerHeight = 45;
+    const optionsHeight = node.options ? (node.options.length * 40 + 20) : 38;
+    const totalBoxHeight = headerHeight + textHeight + optionsHeight + 15;
 
-    const dialogueBox = this.add.rectangle(boxX + boxWidth / 2, boxY + totalBoxHeight / 2, boxWidth, totalBoxHeight, 0x1a1a1a, 0.95)
-      .setStrokeStyle(2, 0xffd700).setDepth(10001);
+    // Caja con color oscuro azulado (diferente a Giacomo que es dorado)
+    const dialogueBox = this.add.rectangle(boxX + boxWidth / 2, boxY + totalBoxHeight / 2, boxWidth, totalBoxHeight, 0x0d1b2a, 0.96)
+      .setStrokeStyle(2, 0x7ba3c4).setDepth(10001);
     this.dialogueElements.push(dialogueBox);
 
-    const speakerTxt = this.add.text(boxX + 20, boxY + 15, `${step.speaker}:`, {
-      fontFamily: 'Arial', fontSize: '18px', color: '#B0C4DE', fontStyle: 'bold' // Color distinto para Piccolo
+    // Speaker en azul grisáceo (color de Piccolo)
+    const speakerTxt = this.add.text(boxX + 20, boxY + 12, `${node.speaker}:`, {
+      fontFamily: 'Arial', fontSize: '17px', color: '#B0C4DE', fontStyle: 'bold'
     }).setDepth(10002);
     this.dialogueElements.push(speakerTxt);
 
-    const contentTxt = this.add.text(boxX + 20, boxY + 45, step.text, {
-      fontFamily: 'Arial', fontSize: '18px', color: '#FFFFFF', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
+    const contentTxt = this.add.text(boxX + 20, boxY + 42, node.text, {
+      fontFamily: 'Arial', fontSize: '17px', color: '#E8E8E8', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
     }).setDepth(10002);
     this.dialogueElements.push(contentTxt);
 
-    const continueTxt = this.add.text(boxX + boxWidth - 100, boxY + 45 + textHeight + 5, '[Continuar]', {
-      fontFamily: 'Arial', fontSize: '14px', color: '#AAAAAA', fontStyle: 'italic'
-    }).setDepth(10002).setInteractive().on('pointerdown', () => this.nextDialogueStep());
-    this.dialogueElements.push(continueTxt);
+    const optionsStartY = boxY + 42 + textHeight + 15;
 
-    this.input.keyboard.once('keydown-SPACE', () => {
-      if (this.dialogueActive) this.nextDialogueStep();
+    if (node.options) {
+      this.selectedOption = 0;
+      this.currentOptions = node.options;
+      this.optionButtons = [];
+
+      node.options.forEach((opt, i) => {
+        const optY = optionsStartY + i * 40;
+        const optBtn = this.add.text(boxX + 30, optY, `➤ ${opt.text}`, {
+          fontFamily: 'Arial', fontSize: '15px', color: '#7ba3c4',
+          backgroundColor: '#1a2a38', padding: { x: 8, y: 5 }
+        }).setDepth(10002).setInteractive()
+          .on('pointerover', () => { this.selectedOption = i; this.updateOptionHighlight(); })
+          .on('pointerdown', () => this.selectOption());
+
+        this.dialogueElements.push(optBtn);
+        this.optionButtons.push(optBtn);
+      });
+
+      this.updateOptionHighlight();
+
+      this.keyUpHandler = () => { this.selectedOption = Math.max(0, this.selectedOption - 1); this.updateOptionHighlight(); };
+      this.keyDownHandler = () => { this.selectedOption = Math.min(node.options.length - 1, this.selectedOption + 1); this.updateOptionHighlight(); };
+      this.keySelectHandler = () => this.selectOption();
+
+      this.input.keyboard.on('keydown-UP', this.keyUpHandler);
+      this.input.keyboard.on('keydown-DOWN', this.keyDownHandler);
+      this.input.keyboard.on('keydown-ENTER', this.keySelectHandler);
+      this.input.keyboard.on('keydown-SPACE', this.keySelectHandler);
+    } else {
+      // Nodo lineal — botón continuar
+      const continueTxt = this.add.text(boxX + boxWidth - 110, optionsStartY, '[Continuar]', {
+        fontFamily: 'Arial', fontSize: '13px', color: '#888888', fontStyle: 'italic'
+      }).setDepth(10002).setInteractive().on('pointerdown', () => this.nextPiccoloNode());
+      this.dialogueElements.push(continueTxt);
+
+      this.input.keyboard.once('keydown-SPACE', () => {
+        if (this.dialogueActive) this.nextPiccoloNode();
+      });
+    }
+  }
+
+  nextPiccoloNode() {
+    const node = this.dialogueTree?.[this.currentNode];
+    if (!node || !node.next) {
+      this.endPiccoloDialogue();
+    } else {
+      this.showDialogueNode(node.next);
+    }
+  }
+
+  updateOptionHighlight() {
+    if (!this.optionButtons) return;
+    this.optionButtons.forEach((btn, i) => {
+      if (i === this.selectedOption) {
+        btn.setStyle({ color: '#ffffff', backgroundColor: '#2a3f52' });
+      } else {
+        btn.setStyle({ color: '#7ba3c4', backgroundColor: '#1a2a38' });
+      }
     });
   }
 
-  nextDialogueStep() {
-    this.dialogueStep++;
-    if (this.dialogueStep < this.dialogueConfig.length) {
-      this.showDialogueStep();
-    } else {
-      this.endPiccoloDialogue();
+  selectOption() {
+    if (!this.currentOptions || this.selectedOption < 0) return;
+    const opt = this.currentOptions[this.selectedOption];
+    if (opt) {
+      this.showDialogueNode(opt.next);
     }
   }
 
   clearDialogue() {
+    // Limpiar listeners de teclado
+    if (this.keyUpHandler) this.input.keyboard.off('keydown-UP', this.keyUpHandler);
+    if (this.keyDownHandler) this.input.keyboard.off('keydown-DOWN', this.keyDownHandler);
+    if (this.keySelectHandler) {
+      this.input.keyboard.off('keydown-ENTER', this.keySelectHandler);
+      this.input.keyboard.off('keydown-SPACE', this.keySelectHandler);
+    }
+    this.keyUpHandler = null;
+    this.keyDownHandler = null;
+    this.keySelectHandler = null;
+
     if (this.dialogueElements) {
       this.dialogueElements.forEach(el => el.destroy());
       this.dialogueElements = [];
     }
+    this.optionButtons = [];
+    this.currentOptions = null;
   }
 
   endPiccoloDialogue() {
@@ -559,10 +748,10 @@ export default class Scene_Sotano extends Phaser.Scene {
     this.piccoloHablado = true;
     this.botonRecogido = true;
     this.updateInventoryView();
-    
+
     // Mostramos pensamiento para dar feedback del objeto recibido y aplicamos el efecto atmosférico
     this.showThought('He conseguido un... ¿Botón de ópalo?');
-    
+
     this.time.delayedCall(2500, () => {
       this.triggerFlickerEffect();
     });
@@ -592,7 +781,7 @@ export default class Scene_Sotano extends Phaser.Scene {
     const { width, height } = this.scale;
     this.inventoryVisible = false;
     this.inventoryPanel = this.add.container(width / 2, height / 2).setDepth(20000).setVisible(false);
-    
+
     const bg = this.add.rectangle(0, 0, 400, 300, 0x111111, 0.9).setStrokeStyle(2, 0xd0a050);
     const title = this.add.text(0, -130, 'PISTAS Y OBJETOS', {
       fontFamily: 'Arial', fontSize: '20px', color: '#FFD700', fontStyle: 'bold'
@@ -611,7 +800,7 @@ export default class Scene_Sotano extends Phaser.Scene {
 
   toggleInventory() {
     if (this.settingsUI?.isVisible() || this.dialogueActive) return;
-    
+
     this.inventoryVisible = !this.inventoryVisible;
     if (this.inventoryVisible) {
       this.updateInventoryView();
@@ -623,7 +812,7 @@ export default class Scene_Sotano extends Phaser.Scene {
 
   updateInventoryView() {
     let items = '';
-    
+
     // Revisamos variables de otras escenas cargadas en globalFlags por si acaso, 
     // y las propias de la escena
     if (this.globalFlags.terciopeloRecogido) {
@@ -635,11 +824,11 @@ export default class Scene_Sotano extends Phaser.Scene {
     if (this.globalFlags.notaStrappavoltiRecogida) {
       items += '- Nota Misteriosa: "Eres curioso, pequeño. Eso es bueno."\n\n';
     }
-    
+
     if (items === '') {
       items = 'No tienes ninguna pista todavía...';
     }
-    
+
     if (this.itemsText) {
       this.itemsText.setText(items);
     }
@@ -680,6 +869,13 @@ export default class Scene_Sotano extends Phaser.Scene {
   shutdown() {
     this.input.keyboard.off('keydown-ESC');
     this.input.keyboard.off('keydown-E');
+    this.input.keyboard.off('keydown-R');
+    if (this.keyUpHandler) this.input.keyboard.off('keydown-UP', this.keyUpHandler);
+    if (this.keyDownHandler) this.input.keyboard.off('keydown-DOWN', this.keyDownHandler);
+    if (this.keySelectHandler) {
+      this.input.keyboard.off('keydown-ENTER', this.keySelectHandler);
+      this.input.keyboard.off('keydown-SPACE', this.keySelectHandler);
+    }
     this.input.off('pointerdown');
     this.tweens.killAll();
   }
