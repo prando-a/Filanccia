@@ -1,7 +1,8 @@
 # FILANCCIA — Narrativa: Principios, Diálogos y Diseño
 
 > Documento de referencia para sesiones de escritura con DeepSeek.
-> Estado: diálogos implementados extraídos del código. Diseños pendientes marcados con 📋.
+> Diálogos de las secciones IV y V son la versión DEFINITIVA enriquecida por DeepSeek (2026-03-14).
+> Los diálogos marcados con ✍️ difieren del código actual y deben actualizarse en el JS correspondiente.
 
 ---
 
@@ -25,77 +26,94 @@
 
 ## II. ESTRUCTURA DAN HARMON
 
-| Paso | Escena      | Beat                              | NPC principal        | Objeto clave         | Estado |
-|------|-------------|-----------------------------------|----------------------|----------------------|--------|
-| 1    | 1-0         | Zona de confort — baño de Marlo   | Madre (voz)          | —                    | ✅     |
-| 2    | 1-1         | Deseo — salida al carnaval        | —                    | —                    | ✅     |
-| 3    | 1-2 / 1-3   | Umbral — plaza + Ballo Mascherato | Alcalde, Hijo        | —                    | ✅     |
-| 4    | 1-4         | Adaptarse — asesinato descubierto | Padres, multitud     | —                    | ✅     |
-| 5    | Bodega      | Encontrar — testigo asustado      | Giacomo              | trozo de terciopelo  | ✅     |
-| 6    | Sótano      | Tomar — santuario oscuro          | Piccolo              | botón de ópalo       | ✅     |
-| 7    | Armería     | Regreso — prueba silenciada       | Rafaello + Guardia   | sello de lacre       | 🔧     |
-| 8    | 1-4 return  | Consecuencias — ciudad que no escucha | Padres           | —                    | 📋     |
-| Ep.  | Armería rev.| Rafaello da espada. Fin Cap. 1    | Rafaello             | espada pequeña       | 📋     |
+| Paso | Escena       | Beat                               | NPC principal       | Objeto clave        | Estado |
+|------|--------------|------------------------------------|---------------------|---------------------|--------|
+| 1    | 1-0          | Zona de confort — baño de Marlo    | Madre (voz)         | —                   | ✅ ✍️  |
+| 2    | 1-1          | Deseo — salida al carnaval         | —                   | —                   | ✅ ✍️  |
+| 3    | 1-2 / 1-3    | Umbral — plaza + Ballo Mascherato  | Alcalde, Hijo       | —                   | ✅ ✍️  |
+| 4    | 1-4          | Adaptarse — asesinato descubierto  | Padres, multitud    | —                   | ✅ ✍️  |
+| 5    | Bodega       | Encontrar — testigo asustado       | Giacomo             | trozo de terciopelo | ✅ ✍️  |
+| 6    | Sótano       | Tomar — santuario oscuro           | Piccolo             | botón de ópalo      | ✅ ✍️  |
+| 7    | Armería      | Regreso — prueba silenciada        | Rafaello + Guardia  | sello de lacre      | 🔧 ✍️  |
+| 8    | 1-4 return   | Consecuencias — ciudad que no escucha | Padres           | —                   | 📋     |
+| Ep.  | Armería rev. | Rafaello da espada. Fin Cap. 1     | Rafaello            | espada pequeña      | 📋     |
 
+**✍️ = diálogo definitivo en este doc difiere del código actual → actualizar JS**
 **Cadena de pistas:** `todasPistasRecogidas = terciopeloRecogido && botonRecogido && selloRecogido`
 
 ---
 
 ## III. PERSONAJES
 
-- **Marlo** (12): Empático, curioso, ingenuo. Su inocencia es fuerza y vulnerabilidad. No huye de la injusticia.
-- **Strappavolti** ("Arranca-caras"): Sin emociones visibles. Asesina por razones filosóficas — pone a prueba la pureza. Fascinado por Marlo (no huye). Perturbado porque Marlo siente lo que él no puede.
-- **Giacomo**: Bodeguero mayor. 20 años de cómplice silencioso del palacio. Habló esta noche, pero apenas.
-- **Piccolo** (9-10): Niño de la calle. Vive en sótanos durante el carnaval. Habla de Strappavolti como fenómeno natural.
-- **Rafaello**: Capitán de la guardia. 20 años al servicio. Honor vs lealtad institucional. Confiar en Marlo es su acto más ilógico.
-- **Padres de Marlo**: Amor real que no puede ver la verdad. Representan el mundo que no quiere escuchar.
-- **Hijo del Alcalde**: Asesinado. Sin rostro. El crimen que lo desencadena todo.
+- **Marlo** (12): Empático, curioso, ingenuo. Su inocencia es fuerza y vulnerabilidad. No huye de la injusticia. Voz: fragmentada, emocional, de niño extraordinariamente sensible — nunca detective adulto.
+- **Strappavolti** ("Arranca-caras"): Sin emociones visibles. Asesina por razones filosóficas — pone a prueba la pureza. Fascinado por Marlo (no huye). Perturbado porque Marlo siente lo que él no puede. Deja mensajes fríos, precisos.
+- **Giacomo**: Bodeguero mayor. 20 años de cómplice silencioso del palacio. Esta noche habló por primera y quizás última vez. Carga con el peso de haber callado.
+- **Piccolo** (9-10): Niño de la calle. Vive en sótanos durante el carnaval. Habla de Strappavolti con respeto involuntario. Strappavolti lo miró, lo llamó "vacío pero limpio" y lo dejó ir. ¿Descartado o elegido como mensajero?
+- **Rafaello**: Capitán de la guardia. 20 años al servicio del palacio. Voz casi burocrática — militar que abandona el protocolo por primera vez. Confiar en Marlo es el acto más ilógico de su vida.
+- **Padres de Marlo**: Amor real que no puede ver la verdad. El padre casi reconoce el símbolo de Strappavolti — y se retracta. Representan el mundo que actúa desde el miedo.
+- **Hijo del Alcalde**: Asesinado. Sin rostro. El crimen que lo desencadena todo. Humanizarlo antes del asesinato es esencial.
 
 ---
 
-## IV. DIÁLOGOS IMPLEMENTADOS
+## IV. DIÁLOGOS DEFINITIVOS (versión enriquecida)
 
-### 1-0 — Casa de Marlo (baño)
-
-```
-[Madre]  ¡Marlo! ¿Todavía estás ahí? ¡El carnaval del centenario no espera a nadie!
-[Marlo]  Ya casi estoy, mamá. Solo me falta... la máscara.
-[Madre]  Tu padre ya está en la puerta. El Alcalde dará su discurso en menos de una hora.
-[Madre]  Dicen que anunciará algo importante esta noche. ¡No podemos perdérnoslo!
-[Marlo]  ¡Ya voy! Solo necesito un momento más...
-```
-
----
-
-### 1-1 — Camino a la plaza
+### 1-0 — Casa de Marlo (baño) ✍️
 
 ```
-[AMBIENTE] "Las calles de Filanccia rebosan de gente..."
+[Madre]  (VOZ DESDE AFUERA) ¡Marlo, tesoro! ¡La ciudad no se queda quieta por nuestro capricho! ¡Tu padre ya hace sonar las llaves!
+[Marlo]  (SUSURRANDO ANTE EL ESPEJO) Es como si… desapareciera un poco.
+[Madre]  ¡El discurso del Alcalde! Dicen que hasta los gatos del canal se pondrán de gala. Es una noche para confiar en él, como siempre.
+[Marlo]  (TOCANDO LA MÁSCARA) La comisura… está un poco torcida. Como una sonrisa triste.
+[Madre]  ¡Ya basta de muecas! Bajo la máscara, esta noche todos somos un solo corazón para Filanccia. ¡Ven!
+[Marlo]  Voy… Solo quería que estuviera perfecta.
 ```
 
 ---
 
-### 1-2 — Plaza central (discurso del Alcalde)
+### 1-1 — Camino a la plaza ✍️
+
+*Fragmentos atmosféricos, aparecen superpuestos mientras Marlo camina:*
 
 ```
-[Alcalde] ¡Bienvenidos, queridos filenccianos! ¡Bienvenidos a la celebración del centenario de nuestra amada ciudad!
-[Alcalde] Hace cien años, nuestros ancestros fundaron Filanccia sobre los principios de la prosperidad y la tradición.
-[Alcalde] Esta noche, bajo las máscaras del carnaval, todos somos iguales. Nobles y plebeyos, unidos en la celebración.
-[Alcalde] Pero antes de que comience la fiesta, tengo un anuncio especial que hacer en el palacio...
-[Alcalde] ¡Os espero a todos en el gran salón! ¡Y ahora... QUE COMIENCE EL CARNAVAL!
+Los ojos de cristal de cien máscaras siguen a nadie y a todos. La luna se enreda en los canales.
+```
+```
+Un violín llora una tarantela entre risas ahogadas. El aire huele a dulce de almendra y humedad de piedra.
+```
+```
+Entre dos arlequines, un espacio vacío se mueve contra la corriente de la multitud. Luego desaparece.
+```
+```
+Las sombras de los balcones son tan profundas que podrían esconder rostros. O la ausencia de ellos.
 ```
 
 ---
 
-### 1-3 — Ballo Mascherato (palacio)
+### 1-2 — Plaza central (discurso del Alcalde) ✍️
 
 ```
-[Noble]   ¡Qué espléndido baile! El Alcalde se ha superado este año.
-[Dama]    Las máscaras son preciosas. Dicen que las trajo de Venecia especialmente para esta noche.
-[Noble]   ¿Habéis oído los rumores? Parece que el Alcalde tiene un anuncio importante.
-[Dama]    Todos hablan de ello. Algunos dicen que nombrará a su sucesor esta noche.
-[Noble]   Era de esperar. El Alcalde ya no es joven, y su hijo ha demostrado ser capaz.
+[Alcalde] ¡Filanccianos! ¡Mirad a vuestro alrededor! Cien años de historia os contemplan desde cada mascarón, desde cada piedra.
+[Alcalde] Esta noche, el carnaval nos recuerda su gran lección: bajo la careta, el noble y el pescador son iguales. ¡Qué hermosa ficción para mantener la paz!
+[Alcalde] Celebramos, sí, pero también renovamos nuestro pacto: lealtad a la ciudad, obediencia a su ley, fe en quien os guía. Mirad a vuestros hijos, el verdadero futuro...
+[Alcalde] (UNA PAUSA LIGERAMENTE LARGA) ...el futuro que debemos proteger a cualquier precio. ¡Y para eso, os espero en el palacio! Tengo palabras que darán forma a los próximos cien años.
+[Alcalde] ¡Que la máscara oculte vuestras dudas y el vino ahogue vuestros temores! ¡QUE COMIENCE EL CARNAVAL!
+```
 
+---
+
+### 1-3 — Ballo Mascherato (palacio) ✍️
+
+**Nobles al llegar (pre-discurso):**
+```
+[Noble Anciano]   (VOZ RONCA) Otro baile, otro discurso. Mis rodillas solo aguantan por el buen vino del Alcalde.
+[Dama Joven]      (VOZ ÁSPERA) Dicen que el anuncio no es de sucesión, sino de purga. Alguien ha estado husmeando en los libros del puerto.
+[Otro Noble]      (CARCAJADA FINGIDA) ¡Tonterías! Es para presentar a su hijo. Un muchacho blando como el pan de ayer. La ciudad necesita puño de hierro, no terciopelo.
+[Comerciante]     (VOZ BAJA) Sea lo que sea, los precios del azafrán subirán mañana. Siempre suben tras sus "anuncios importantes".
+[Dama Anciana]    (SUSURRANDO) ¿Veis a Rafaello, el capitán? Mira al balcón, no al Alcalde. Algo tiene atado en la sombra.
+```
+
+**Discurso del Alcalde (anuncio de sucesión):**
+```
 [Alcalde] ¡Estimados invitados! Por favor, un momento de atención...
 [Alcalde] Hace cien años, nuestros ancestros fundaron esta ciudad con un sueño.
 [Alcalde] Un sueño de prosperidad, de cultura, de una vida mejor para todos.
@@ -104,172 +122,179 @@
 [Alcalde] Pero todo líder debe pensar en el futuro. En quién continuará su obra.
 [Alcalde] He gobernado esta ciudad durante veinte años, y ha sido el mayor honor de mi vida.
 [Alcalde] Pero ha llegado el momento de preparar la transición hacia una nueva era.
-[Alcalde] Por ello, esta noche, ante todos vosotros, anuncio oficialmente...
-[Alcalde] ¡Que mi hijo será mi sucesor como Alcalde de Filanccia!
+[Alcalde] ...y por eso, con el corazón lleno de un orgullo que vosotros, padres, entenderéis, le paso el testigo. ¡A mi sangre, a mi hijo!
 
 [ El hijo del Alcalde es presentado ]
 
-[Alcalde]  ¡Él llevará el legado de nuestra familia y guiará a Filanccia hacia su próximo siglo de gloria!
+[Hijo del Alcalde] (VOZ CLARA, UN TEMBLOR LEVE) Padre... ciudadanos. Solo he querido, siempre, escuchar el rumor de los canales y vuestras voces con el mismo respeto. Prometo... ser digno de esta máscara que me entregáis.
+[Alcalde]          ¡Él llevará el legado de nuestra familia y guiará a Filanccia hacia su próximo siglo de gloria!
+
 [Noble]    ¡Bravo! ¡Una elección excelente!
 [Dama]     ¡El joven señor será un gran líder! ¡Lo lleva en la sangre!
 [Ciudadano] ¡Viva el futuro Alcalde! ¡Viva Filanccia!
 [Noble]    La dinastía continúa. Filanccia está en buenas manos.
 [Voz]      ...aunque algunos dicen que es demasiado joven para el cargo...
 [Otra voz] ¡Silencio! No es momento para dudas. Es una noche de celebración.
-
-[Hijo]    Gracias, padre. Gracias a todos por vuestra confianza.
-[Hijo]    Sé que tengo grandes zapatos que llenar. Mi padre ha sido un líder ejemplar.
-[Hijo]    Pero os prometo que dedicaré cada día de mi vida al servicio de Filanccia.
-[Hijo]    Continuaré las tradiciones que nos han hecho grandes...
-[Hijo]    Y trabajaré para construir un futuro aún más brillante para todos nosotros.
-[Hijo]    ¡Por Filanccia! ¡Por el centenario! ¡Y por los próximos cien años de prosperidad!
-
 [Multitud] ¡¡¡VIVA!!! ¡¡¡VIVA EL FUTURO ALCALDE!!!
 [Alcalde]  ¡Y ahora, que continúe la celebración! ¡Que la música no pare hasta el amanecer!
 ```
 
----
-
-### 1-4 — El asesinato (descubrimiento)
-
+**Observación de Marlo (texto ambiental, solo él lo nota):**
 ```
-[Ciudadano]  ¡Ha muerto! ¡El hijo del Alcalde ha muerto!
-[Ciudadana]  ¡No puede ser! ¡Estaba con nosotros hace apenas unos minutos!
-[Ciudadano]  ¡Dios mío! ¡Es horrible! ¡Mirad la sangre!
-[Ciudadana]  ¡Su rostro! ¡Le han arrancado el rostro!
-[Ciudadano]  ¡Un demonio! ¡Ha sido obra de un demonio!
-[Ciudadana]  ¡Los guardias! ¡Que alguien llame a los guardias!
-
-[ Los guardias intervienen ]
-
-[Madre]  Marlo, tenemos que salir de aquí inmediatamente. Esto no es seguro.
-[Padre]  Tu madre tiene razón. Vámonos de aquí, hijo.
-[Marlo]  Esperad... necesito un momento.
-[Madre]  ¡Marlo! No es momento para curiosear. Un hombre ha muerto.
-[Marlo]  Lo sé, mamá. Es solo que... algo no está bien aquí.
-[Padre]  Claro que no está bien. Han asesinado al heredero del Alcalde en pleno carnaval.
-[Marlo]  No, me refiero a... el rostro. ¿Por qué llevarse su rostro?
-[Madre]  No lo sé y no quiero saberlo. Nos vamos ahora mismo.
-[Marlo]  Dadme un segundo. Olvidé algo en el salón... enseguida os alcanzo.
-[Padre]  No tardes, Marlo. Te esperamos en la entrada.
-
-[Marlo 💭] No puedo irme así. Necesito ver esto de cerca.
-[Marlo 💭] El hijo del Alcalde... sin vida, sin rostro. Esto es una pesadilla.
-[Marlo 💭] Hace apenas unos minutos estaba en el escenario, recibiendo aplausos...
-[Marlo 💭] ¿Quién podría hacer algo tan horrible? ¿Y por qué arrancarle el rostro?
-[Marlo 💭] En el carnaval todos llevamos máscaras para ocultar quiénes somos...
-[Marlo 💭] Pero él... ya no tiene nada que ocultar. Le han quitado todo.
-[Marlo 💭] Esto no es un crimen común. Hay algo ritual, algo simbólico en todo esto.
-[Marlo 💭] Los guardias no van a descubrir nada. Nunca lo hacen.
-[Marlo 💭] Tengo que investigar por mi cuenta. Quizás en la bodega encuentre alguna pista...
+[Marlo observa] Entre todas las máscaras que miran al escenario, hay una, tras una columna, que no se mueve. No respira. Solo espera.
 ```
 
 ---
 
-### Bodega — Giacomo
+### 1-4 — El asesinato (descubrimiento e investigación) ✍️
+
+**Reacciones de la multitud (voces diferenciadas):**
+```
+[Voz de Hombre Joven]  (AHOGADA) ¡Sangre! ¡Hay tanta sangre en el mármol!
+[Voz de Mujer Mayor]   (REPULSIÓN PURA) ¡Santo cielo, le han... deshecho! ¡Apartad a los niños!
+[Voz de Hombre Culto]  (MIEDO FRÍO) Esto no es un robo. Esto es un mensaje. Y el destinatario no es el Alcalde... es todos nosotros.
+[Voz de Comerciante]   (CÍNICA, EN UN SUSURRO GRITADO) Con el heredero muerto, los contratos del muelle... se vuelven a discutir.
+[Voz de Guardia]       (DESDE LA DISTANCIA) ¡Guardias! ¡Cerrad las puertas! ¡Que no salga nadie! (UNA PAUSA) ¡Demasiado tarde!
+[Niño que Llora]       (AGUDO, DESCONSOLADO) ¡Su cara! ¡¡Le han quitado la cara!!
+```
+
+**Diálogo Marlo–padres:**
+```
+[Madre]  (AGARRANDO A MARLO) Marlo, no mires. Por favor, no mires. Vámonos.
+[Padre]  (VOZ TENSA) La guardia lo resolverá. No es asunto nuestro. Vamos.
+[Marlo]  (VOZ VACÍA, MIRANDO FIJO) Pero él... está solo ahora.
+[Madre]  ¡Marlo!
+[Marlo]  Todos gritan... pero nadie se acerca. Nadie le tapa... eso. Es como si ya no fuera una persona.
+[Padre]  Son cosas de adultos, hijo. Cosas horribles. Ven.
+[Marlo]  (RETROCEDIENDO UN PASO) Mi pañuelo... se me cayó en el salón. Os alcanzo en la puerta. Lo prometo.
+[Madre]  ¡Marlo, no!
+[Padre]  (RESIGNADO) Un minuto. Solo uno. O voy a buscarte yo.
+```
+
+**Pensamientos de Marlo (fragmentados, durante investigación):**
+```
+[Marlo 💭] Tanta ropa fina… y él en el suelo. Solo.
+[Marlo 💭] ¿Dónde está su mirada? No puedo encontrarla.
+[Marlo 💭] Hace un rato reía. Ahora es… esto. ¿Adónde se fue lo que reía?
+[Marlo 💭] Todos tienen máscara. Pero a él se la quitaron. La de verdad.
+[Marlo 💭] (UN ESTREMECIMIENTO) Hace frío aquí. Un frío que no es del aire.
+[Marlo 💭] Los guardias… empujan a la gente. No miran al cuerpo. Buscan a alguien con la culpa encima.
+[Marlo 💭] Pero la culpa no se lleva puesta.
+[Marlo 💭] Hay un olor… a vinagre y metal. Viene de allá abajo. De la oscuridad.
+[Marlo 💭] (UN IMPULSO FÍSICO) No puedo dejarlo así. Tengo que… saber. Aunque sea un poco. Sé que está mal. Pero tengo que...
+```
+
+---
+
+### Bodega — Giacomo ✍️
 
 ```
-[OBJETO — Nota misteriosa, plantada por Strappavolti]
-[Marlo 💭] Una nota... "Eres curioso, pequeño. Eso es bueno."
+[OBJETO — Nota de Strappavolti, en el cuaderno junto a la entrada]
+[Marlo 💭] Una nota... clavada con un alfiler de ópalo. "Eres curioso, pequeño. Eso es bueno." La letra es precisa, fría. No parece escrita con prisa.
 
 [PRIMER CONTACTO]
-[Marlo]   ¿Hay alguien ahí escondido?
-[Giacomo] ¡Chist! Baja la voz, niño. Hay oídos en todas partes.
+[Marlo]   ¿Hay alguien ahí escondido? Entre las sombras...
+[Giacomo] (voz ronca, desde detrás de un tonel enorme) ¡Chist! Baja la voz hasta el susurro. En estas piedras, hasta el miedo tiene ecos. Y ellos los escuchan a todos.
 [Giacomo] Estaba aquí cuando ocurrió. Vi a un hombre sin rostro bajar horas antes.
 
 [RAMA A — "¿Llevaba algo consigo?"]
-[Giacomo] No vi su rostro, pero... llevaba algo envuelto en terciopelo. Pesado. No sé qué era.
+[Giacomo] (respira hondo, como si el aire le pesara) No vi su rostro... porque no lo tenía. Pero sí. Llevaba un fardo. Envuelto en terciopelo color vino viejo. Algo pesado... y blando. Demasiado blando para ser piedra. (pausa) Veinte años llevo viendo paquetes bajar por esta escalera. Este era diferente. Sabía lo que era. Y callé.
 
 [RAMA B — "¿Qué hacía un hombre aquí abajo?"]
-[Giacomo] Este lugar es un nido de secretos. Apenas lo vi pasar...
+[Giacomo] Esta bodega no guarda solo vino. Guarda secretos. Los míos. Los de ellos. Él... simplemente caminaba. Como si las paredes se apartaran para él. Como si este laberinto fuera su salón. No tenía prisa. Eso fue lo más terrible.
 
-[CONTINÚA — tras rama]
-[Giacomo] Si te vio hablar conmigo, estamos perdidos. Toma esto. Lo dejó caer.
-[Giacomo] Y aléjate de las sombras. No todas las máscaras se llevan en el rostro.
-→ Da: trozo de terciopelo
+[CONTINÚA — tras cualquier rama]
+[Giacomo] Si te vio cruzar mi mirada, estamos muertos. Los dos. (ruido de tela rasgándose) Toma. Esto. Se le desprendió al pasar. Lo guardé... no sé por qué. Quizás para recordarme que alguna vez tuve valor. O para probarme que ya no lo tengo.
+[Giacomo] Aléjate de las sombras, niño. No todas las máscaras se llevan en el rostro. Algunas se llevan en el alma, y esas son las que nunca se quitan.
+→ Da: trozo de terciopelo (color vino viejo, con un borde dorado deshilachado)
 
 [SUBSIGUIENTE — si Marlo vuelve a hablar]
-[Giacomo] Ya te dije todo lo que sé, déjame en paz.
+[Giacomo] Ya te dije todo lo que guardaba. Y me pesa más que veinte años de silencio. Déjame en paz. Déjame con mi vino y mi cobardía. Es lo único que me queda.
 
-[OBJETO recogido]
-[Marlo 💭] He conseguido un... ¿Trozo de terciopelo?
+[ELEMENTO AMBIENTAL ADICIONAL — examinar la pared junto a los barriles]
+[Marlo 💭] En la piedra, a la altura de los ojos, hay una marca. No es un arañazo casual. Es un símbolo grabado con cuidado: un óvalo perfecto, vacío en el centro. Alrededor, líneas finas como lágrimas que caen. Reciente. El polvo no lo ha cubierto aún. Strappavolti estuvo aquí... y dejó su firma.
 ```
 
 ---
 
-### Sótano — Piccolo
+### Sótano — Piccolo ✍️
 
 ```
 [PRIMER CONTACTO]
-[Marlo]   ¿Eres tú quien vive aquí abajo?
-[Piccolo] A veces. Las sombras son mejores compañía que la gente de arriba.
+[Marlo]   ¿Eres tú quien vive aquí abajo? En esta oscuridad...
+[Piccolo] (su voz llega desde múltiples direcciones, eco en la piedra) Vivo donde la luz no pregunta nombres. Las sombras son mejores compañías; no exigen sonrisas.
 
 [RAMA A — "¿No tienes miedo de estar solo aquí?"]
-[Piccolo] ¿Miedo? El miedo vive arriba, disfrazado de máscaras y aplausos. Aquí al menos las sombras son honestas.
+[Piccolo] ¿Miedo? El miedo vive arriba, disfrazado de máscaras y aplausos. Aquí, al menos, las sombras son honestas. No prometen lo que no son.
 
 [RAMA B — "¿Has visto algo extraño esta noche?"]
-[Piccolo] Todo el carnaval es extraño. Pero sí... esta noche más que otras. Esta noche huele diferente.
+[Piccolo] Todo el carnaval es extraño. Pero sí... esta noche respira diferente. El aire huele a metal frío. A espejo roto.
 
 [CONTINÚA]
-[Piccolo] Conozco cada pasillo de este palacio. Lo he visto muchas veces. Al hombre sin rostro. Esta noche bajó aquí.
+[Piccolo] Conozco cada grieta de este palacio. Lo he visto. Muchas veces. Al hombre que no debería tener rostro. Esta noche bajó aquí. No para esconderse. Para esperar.
 
 [RAMA C — "¿Cómo es? ¿Lo reconocerías?"]
-[Piccolo] No tiene rostro que puedas recordar. Es como intentar recordar el vacío. Cada vez que lo ves... ya no estás seguro de lo que viste.
+[Piccolo] No tiene rostro que puedas recordar. Es como intentar recordar el vacío entre dos notas de música. Sabes que estuvo ahí, pero no puedes sostenerlo. Cada vez que lo ves... te olvidas un poco de tu propio nombre.
 
 [RAMA D — "¿Suele bajar aquí a menudo?"]
-[Piccolo] Siempre en noches especiales. Bodas. Funerales. Carnavales. Como si se alimentara de lo que los demás sienten.
+[Piccolo] Siempre en noches donde el corazón del palacio late fuerte. Bodas. Funerales. Carnavales. Como si se alimentara de lo que los demás derraman sin querer.
 
 [CONTINÚA]
-[Piccolo] No busca dinero. No busca poder. Busca algo de dentro de las personas. Algo que no se puede ver. Que no se puede tocar. Solo... sentir.
+[Piccolo] No busca monedas. No busca poder sobre mapas. Busca algo dentro de las personas. Algo que no se puede ver con linternas. Que no se puede tocar con manos. Solo... se siente. O se deja de sentir.
 
 [RAMA E — "¿Qué clase de cosa puede ser esa?"]
-[Piccolo] No lo sé con palabras. Pero cuando él pasa cerca... algo en ti se siente más pequeño. Como si te mirara desde dentro.
+[Piccolo] No lo sé con palabras. Pero cuando él pasa cerca... algo en ti se encoge. Como si te mirara desde el lugar donde guardas lo que ni tú quieres ver.
 
-[RAMA F — "¿Y tú? ¿Te ha mirado a ti alguna vez?"]
-[Piccolo] ...
-          Una vez. Me miró a mí. Pero se fue.
-          Supongo que no encontró lo que buscaba en mí.
+[RAMA F — "¿Y tú? ¿Te ha mirado a ti alguna vez?"] ✍️ ENRIQUECIDA
+[Piccolo] (Un silencio largo. El eco del agua goteando se hace más presente)
+          Una vez. Hace dos carnavales. Me miró. No a los ojos... a través de ellos.
+          Se quedó quieto. Luego... sonrió. O algo en él hizo la forma de una sonrisa.
+          Dijo: "Vacío. Como yo. Pero limpio."
+          Y se fue.
+          No me tocó. No me preguntó nada.
+          A veces pienso que no fui descartado. Fui... archivado.
 
-[CONTINÚA]
-[Piccolo] Toma. Encontré esto cuando él pasó. Es de su abrigo.
-
-[RAMA G — "¿Por qué me lo das a mí?"]
-[Piccolo] Porque tú haces preguntas. Los otros que estuvieron aquí huyeron cuando mencioné su nombre. Tú... buscas entender. Eso te hace diferente. O más peligroso.
+[RAMA G — "¿Por qué me lo das a mí?"] ✍️ ENRIQUECIDA
+[Piccolo] Porque tú haces preguntas que tienen peso. Los otros que vinieron antes —guardias, nobles con miedo— huyeron cuando el nombre "Strappavolti" rozó el aire. Tú... inclinas la cabeza. Escuchas. Como si estuvieras buscando no solo al hombre, sino a la razón del hueco que deja.
+          Eso te hace diferente.
+          O te hace el próximo.
 
 [RAMA H — "¿Qué significa ese símbolo grabado?"]
-[Piccolo] No lo sé. Pero el hombre sin rostro también hace preguntas. Solo que las suyas... las hace con sangre.
+[Piccolo] No lo sé con certeza. Pero el hombre sin rostro también hace preguntas. Solo que las suyas no usan palabras. Usan cuchillos. Y las respuestas... siempre son silencio.
 
 [CIERRE]
-[Piccolo] Aléjate de las partes oscuras del palacio esta noche. Hay cosas que incluso yo evito.
-→ Da: botón de ópalo
-
-[OBJETO recogido + efecto ambiental]
-[Marlo 💭] He conseguido un... ¿Botón de ópalo?
-[Marlo 💭] Él sabe que estás aquí.
-
-[MARCAS EN LA PARED — examinar]
-[Marlo 💭] No es el primero... hay más marcas. Muchas más.
+[Piccolo] Aléjate de las partes oscuras del palacio esta noche. Hay habitaciones que ni yo me atrevo a soñar.
+→ Da: botón de ópalo (tallado con el símbolo del óvalo y las lágrimas)
 
 [SUBSIGUIENTE]
-[Piccolo] Ya te dije todo lo que sé. Aléjate de las sombras.
+[Piccolo] Ya te dije todo lo que sé. O todo lo que me atrevo a recordar. Aléjate. Antes de que las sombras aprendan tu nombre.
+
+[MARCAS EN LA PARED — examinar] ✍️ AMPLIADO
+[Marlo 💭] No es el primero... hay más marcas. Muchas más.
+[Marlo 💭] Líneas pequeñas, como las que hace un niño para medir su crecimiento. Pero estas no son de crecimiento. Son de cuenta. ¿Cuántos han pasado por aquí? ¿Cuántos han visto lo que yo estoy viendo?
+[Marlo 💭] Algunas marcas están más desgastadas. Otras, frescas. Es un registro. Un diario de piedra. Piccolo dijo que Strappavolti viene en noches especiales... cada marca es una noche. Cada noche, una ausencia.
+[Marlo 💭] En la más reciente, junto a la raya, hay una mancha oscura. No es humedad. Es como si alguien hubiera apoyado una mano temblorosa... o sangrante.
+
+[ELEMENTO AMBIENTAL ADICIONAL — examinar montón de trapos en un rincón] ✍️ NUEVO
+[Marlo 💭] Un pequeño lecho hecho de recortes de terciopelo y seda desechada. No es un nido de rata. Está ordenado, casi cuidadoso. Sobre él, un juguete: una figurita tallada en madera oscura, de un pájaro con las alas rotas. Alguien vive aquí. Alguien que intenta hacer un hogar en la herrumbre. Piccolo... ¿o alguien más antes que él?
 ```
 
 ---
 
-### Armería — Guardia + Rafaello (implementado hasta ahora)
+### Armería — Guardia + Rafaello ✍️
 
 ```
-[ENTRADA — pensamiento de Marlo]
-[Marlo 💭] ¿Qué está pasando? ¿Por qué el capitán de la guardia está vigilado como un rehén?
+[ENTRADA]
+[Marlo 💭] ¿Qué está pasando? ¿Por qué el capitán de la guardia está vigilado como un rehén en su propia armería?
 
-[DIÁLOGO ESCUCHADO DESDE LAS SOMBRAS]
-[Guardia]  El Comité quiere silencio, capitán. Esta noche no existió nada.
-[Rafaello] Encontré el sello. Eso no puede no existir.
-[Guardia]  Entregue el sello o esto se complica para usted, ¿entiende?
-[Rafaello] Llevo veinte años sirviendo a este palacio.
-[Guardia]  Y querrá veinte más. Piénselo.
+[DIÁLOGO ESCUCHADO DESDE LAS SOMBRAS] ✍️ ENRIQUECIDO
+[Guardia]  El Comité quiere silencio, capitán. Esta noche no existió nada. Un accidente. Un desgraciado tropiezo.
+[Rafaello] Encontré el sello del gabinete privado en el suelo, manchado. Eso no puede "no existir".
+[Guardia]  (VOZ BAJA, TENSA) Entregue el sello o esto se complica para usted. Para mí también. ¿Entiende? No son solo sus veinte años los que penden de un hilo.
+[Rafaello] Llevo veinte años sirviendo a este palacio. Juré lealtad a la verdad, no al silencio.
+[Guardia]  (UN SUSPIRO CANSADO) Y querrá veinte más. O una pensión. O un funeral digno. Piénselo. No estamos luchando contra un hombre; estamos nadando contra la corriente de todo un sistema.
 [Rafaello] ...
-[Guardia]  Bien. Haré otra ronda. Cuando vuelva, más le vale tener una respuesta.
+[Guardia]  Bien. Haré otra ronda. Cuando vuelva, más le vale tener una respuesta que podamos los dos digerir.
 
 [GUARDIA TE VE — primera vez]
 [TUTORIAL] "No dejes que te vean los enemigos."
@@ -280,84 +305,117 @@
 [ESTANTERÍA — usar botón de ópalo]
 [Marlo 💭] El botón de ópalo encaja perfectamente. La estantería se mueve...
 
-[RAFAELLO LIBERADO — placeholder actual]
-[Rafaello] ¿Quién eres tú? No importa... gracias.
-[Rafaello] Gracias, niño. Aún no estoy listo. Vuelve pronto.
-```
+[RAFAELLO LIBERADO — árbol de diálogo completo] ✍️ REEMPLAZA PLACEHOLDER ACTUAL
+[Rafaello] (Se frota las muñecas, mira a Marlo con mezcla de incredulidad y alivio) Tú no eres de los guardias. Ni de los sirvientes. Tu ropa es de calle.
+[Marlo]    No. Soy Marlo. Estaba en el salón... vi lo que pasó arriba.
+[Rafaello] Un niño. Por supuesto. (PAUSA LARGA, LO ESTUDIA) La lógica dice que te aleje. Pero la lógica esta noche ya no sirve. ¿Qué sabes exactamente, Marlo?
 
-> ⚠️ **El árbol de diálogo completo de Rafaello está DISEÑADO pero NO implementado.** Ver sección VI.
+→ A) "Vi al hombre sin rostro. Giacomo y Piccolo me hablaron de él."
+→ B) "Sé que el Comité quiere silenciar el asesinato. Que hay miedo."
+
+[Rafaello — si A] (ASIENTE, LENTAMENTE) Esos dos... Giacomo el sombrío, Piccolo el fantasma. Siguen vivos. Bien. Entonces no solo eres curioso; tienes suerte. O algo te protege.
+[Rafaello — si B] El Comité tiene miedo. El miedo hace cosas feas a las instituciones. Las convierte en jaulas de oro con cerraduras oxidadas. Pero el miedo es un arma de doble filo. También hace que los hombres hablen cuando deberían callar.
+
+[PRUEBA DE RAFAELLO]
+[Rafaello] Permíteme una pregunta, Marlo. Por mi propia paz. Strappavolti deja una firma, un aire. Pero solo un objeto físico le pertenece de verdad. De lo que has encontrado. ¿Cuál?
+           A) Una moneda de oro con el perfil del Duque anterior.
+           B) Un guante de terciopelo oscuro, forrado en seda gris.
+           C) Una pluma de máscara de carnaval, teñida de azul noche.
+
+→ FALLA (elige A o C):
+[Rafaello] (SU EXPRESIÓN SE ENDURECE, CON DECEPCIÓN) No estás listo. O yo no estoy listo para confiar. Vuelve cuando las piezas encajen por sí solas en tu cabeza. Por favor.
+
+→ ACIERTA (elige B — conecta con pista de Giacomo):
+[Rafaello] (UN DESTELLO DE RECONOCIMIENTO PROFUNDO) Lo sabías. No es deducción. Es... conexión. Hay algo en ti que él teme. Y al mismo tiempo, algo que admira. Ese guante no es un trofeo; es un recordatorio. Para él, y ahora para ti.
+[Rafaello] (SACA UN PEQUEÑO OBJETO ENVUELTO EN PAÑO DE LINO) Toma. El sello de lacre del gabinete privado. La llave de una puerta que nadie quiere abrir.
+→ Da: sello de lacre (pesado, frío, emblema del palacio en una cara, símbolo geométrico en la otra)
+[Rafaello] Haz algo con él. Yo ya no puedo moverme. Mis pasos están contados. Pero los tuyos... los tuyos aún son invisibles para ellos. Usa esa invisibilidad.
+```
 
 ---
 
 ## V. DETALLES ATMOSFÉRICOS IMPLEMENTADOS
 
-- **Nota de Strappavolti** (Bodega, cuaderno): *"Eres curioso, pequeño. Eso es bueno."*
-- **Marcas en pared** (Sótano, rasguños): *"No es el primero... hay más marcas. Muchas más."*
-- **Armas con símbolo** (Armería): Símbolo geométrico de Strappavolti grabado y tachado en distintas armas. Uno sin tachar — coincide exactamente con el sello de lacre. (Detalle atmosférico, no bloqueante.)
+| Lugar | Elemento | Texto |
+|-------|----------|-------|
+| Bodega | Nota de Strappavolti (cuaderno) | *"Eres curioso, pequeño. Eso es bueno."* (letra precisa, fría, alfiler de ópalo) |
+| Bodega | Marca en la pared ✍️ NUEVO | Óvalo perfecto con líneas como lágrimas. Reciente. Firma de Strappavolti. |
+| Sótano | Marcas en la pared ✍️ AMPLIADO | Registro de visitas. La más reciente tiene mancha oscura, como mano temblorosa. |
+| Sótano | Nido de Piccolo ✍️ NUEVO | Lecho de terciopelo y seda. Pájaro de madera con alas rotas. |
+| Armería | Símbolos en armas | Símbolo geométrico de Strappavolti grabado y tachado. Uno sin tachar — coincide con el sello. |
+| 1-3 | Observación de Marlo ✍️ NUEVO | Máscara tras la columna que no respira. Solo espera. (Strappavolti ya estaba en la sala.) |
 
 ---
 
 ## VI. DISEÑOS PENDIENTES DE IMPLEMENTAR 📋
 
-### Armería — Árbol de diálogo completo con Rafaello (Paso 7)
-
-```
-[Rafaello] Tú no eres de los guardias.
-[Marlo]    No. Soy Marlo. Vi lo que pasó arriba.
-[Rafaello] Un niño. Por supuesto. (pausa) ¿Qué sabes exactamente?
-
-→ A) "Vi al hombre sin rostro. Giacomo y Piccolo me hablaron de él."
-→ B) "Sé que el Comité quiere silenciar el asesinato."
-
-[Rafaello — si A] Esos dos... siguen vivos. Bien. Entonces sabes más de lo que aparentas.
-[Rafaello — si B] El Comité tiene miedo. El miedo hace cosas feas a las instituciones.
-
-[Rafaello] Esta noche encontré tres cosas en la escena del crimen.
-           Solo una pertenece a él. ¿Cuál?
-           A) Una moneda de oro   B) Un guante de terciopelo oscuro   C) Una pluma de carnaval
-
-→ Falla: "No estás listo. Vuelve cuando lo sepas."
-→ Acierta (B — conecta con pista de Giacomo):
-[Rafaello] Lo sabías. Alguien te enseñó bien.
-[Rafaello] No sé por qué confío en un niño. Pero hay algo en ti que él teme.
-           Y al mismo tiempo... admira. Tómalo.
-→ Da: sello de lacre
-[Rafaello] Haz algo con él. Yo ya no puedo hacer nada más esta noche.
-```
-
----
-
 ### 1-4 (return) — Escena de los padres (Paso 8)
 
 ```
-[Marlo 💭] Mamá. Papá. Tengo que contarles lo que he visto.
+[El salón casi vacío. Padres de Marlo lo esperan junto a una columna, sus máscaras colgando sin vida.]
 
-[Marlo]  Mamá, papá. Hay algo que no cuadra. El capitán de la guardia estaba retenido.
-          Encontré esto. Es una señal. El asesino aún está aquí.
-[Madre]  Marlo, ya basta. Estás asustado, es normal. Fue un accidente.
-[Padre]  El palacio está bajo control. Los guardias sabrán qué hacer.
-[Marlo]  ¡Pero lo vi! ¡Hay un guardia corrupto, y el capitán—!
-[Madre]  Marlo. Para. Ya nos vamos a casa.
-[Marlo]  No me voy.
-[Padre]  (pausa) ¿Qué has dicho?
-[Marlo]  He dicho que no me voy. No hasta que alguien escuche.
+[Marlo]   Mamá, papá. Hay algo que no cuadra. No fue un accidente.
+[Madre]   (AGACHÁNDOSE, MANO EN LA MEJILLA DE MARLO) Marlo, cariño, estás pálido. Has tenido un susto terrible. Es normal que la cabeza te juegue trucos.
+[Padre]   (MIRANDO ALREDEDOR, NERVIOSO) Los guardias tienen el control. El protocolo se está siguiendo. Lo mejor es no interferir, hijo.
 
-→ Los guardias irrumpen y expulsan a todos los civiles.
-→ [CUTSCENE] padres escoltados, Marlo empujado al final, puertas cerrándose.
-[Marlo 💭] No terminará aquí.
+[Marlo]   No son trucos. Vi al capitán de la guardia, Rafaello, retenido en la armería. Por uno de los suyos. ¡Lo vi! Encontré esto. (ABRE LA MANO — botón de ópalo) Es una señal. El asesino aún está aquí. Entre nosotros.
+[Madre]   (RETIRA LA MANO COMO SI EL BOTÓN QUEMARA) ¿Dónde has sacado eso? ¡Déjalo!
+[Padre]   (SE INCLINA, MIRA EL BOTÓN. POR UN INSTANTE SU ROSTRO SE QUIEBRA Y APARECE EL DE UN HOMBRE QUE TAMBIÉN VIO COSAS QUE NO DEBÍA) Ese símbolo... (PARPADEA, LA MÁSCARA DEL ADULTO VUELVE) No. Son tonterías. Es una baratija del carnaval.
+[Marlo]   ¡Papá! Tú lo reconociste. Por un segundo, lo reconociste.
+[Padre]   (VOZ ÁSPERA, EL MIEDO HABLA POR ÉL) ¡Marlo, basta! Estás histérico. La investigación la harán hombres que saben lo que hacen, no un niño asustado.
+[Madre]   (CON LÁGRIMAS) Vamos a casa. Ahora. Donde estemos seguros. Donde esto sea solo una mala noche de la que mañana nos reiremos.
+[Marlo]   (RETROCEDE UN PASO) No me voy.
+[Padre]   (PAUSA HELADA) ¿Qué has dicho?
+[Marlo]   (VOZ CLARA, FRÁGIL COMO CRISTAL, PERO FIRME) He dicho que no me voy. No hasta que alguien, alguien con autoridad, escuche. Si me obligáis a irme, os seguiré. Os eludiré. Pero no miraré hacia otro lado. No puedo.
+[Madre]   (SOLLOZO AHOGADO) ¿Qué te han hecho? ¿Qué le han hecho a mi niño?
+[Padre]   (MIRA A MARLO, AL BOTÓN, A LOS GUARDIAS QUE SE ACERCAN. UNA GUERRA EN SUS OJOS. EL MIEDO GANA.) Está... está trastornado por el shock. (ASIENTE A LOS GUARDIAS, UNA SEÑAL MÍNIMA)
+
+[Dos guardias se acercan con rostros impersonales.]
+[Guardia] Señor, señora. El perímetro está sellado. Deben ir a la salida sur. Ahora.
+[Madre]   ¡Marlo, por favor!
+[Padre]   (TOMA DEL BRAZO A MARLO, CON FUERZA, PERO SU MANO TIEMBLA) Vamos.
+
+[Los guardias escoltan a todos. En la gran puerta, los padres son empujados al pasillo iluminado. Un guardia pone una mano en el pecho de Marlo.]
+[Guardia] Tú, niño. Un paso atrás.
+[Marlo]   ¿Por qué?
+[Guardia] Órdenes. Los testigos, a esperar en la galería.
+
+[Las puertas de roble se cierran con ruido sordo y definitivo. Sonido de cerrojos. Marlo queda dentro, solo.]
+[Marlo 💭] Sus manos al alejarse... las vi temblar. No era solo miedo por mí. Era miedo de mí. De lo que represento. Una grieta. Y en esa grieta, me he quedado yo. Solo. Pero no vacío. Lleno de una verdad que pesa más que su abrazo.
 ```
 
 ---
 
-### Armería (revisita) — Epílogo Capítulo 1
+### Armería (revisita) — Epílogo Capítulo 1 (3 versiones, elegir una)
 
 ```
-[Rafaello] Sabía que volverías.
-[Marlo]    ¿Qué hago ahora?
-[Rafaello] (toma una espada pequeña, la pone en las manos de Marlo)
-            ¿Alguna vez has usado una?
-[Marlo]    No.
-[Rafaello] La necesitarás.
+[La armería en penumbra. Rafaello de pie frente a una vitrina abierta. Parece diez años más viejo.]
 
+[Rafaello] Sabía que volverías. Los que tienen esa chispa en los ojos... siempre vuelven. O los encuentran flotando en el canal. (UNA SONRISA AMARGA, SIN HUMOR)
+[Marlo]    Tengo el sello. Tengo las pistas. Pero... ¿qué hago ahora?
+[Rafaello] (SACA UNA CINQUEDEA — daga corta veneciana, ancha, más herramienta ceremonial que arma. La pone en las manos de Marlo. El peso hace que sus brazos cedan un poco.)
+[Marlo]    ¿Alguna vez has usado una?
+[Rafaello] (ASIENTE) No. Solo cuchillos de cocina.
+[Rafaello] Bueno. Esta no es para cortar pan.
+```
+
+**VERSIÓN A — Esperanza (legado):**
+```
+[Rafaello] La llevaba mi maestro. Me la dio el día que decidió que la ley no era solo letra, era acción. Ahora te la doy a ti. No para que mates, Marlo. Para que cortes las mentiras que te quieren atar. Es un legado. Mi último acto de fe. Úsala para abrir camino donde las puertas se han cerrado.
+```
+
+**VERSIÓN B — Advertencia (realidad sombría):**
+```
+[Rafaello] La necesitarás. No para luchar contra Strappavolti — contra él, esto será solo un juguete. La necesitarás para los hombres de carne y hueso que te pondrán las manos encima y dirán "es por tu bien". Para las puertas cerradas. Para las sonrisas falsas. Es una llave, Marlo. Una llave terrible que abre cerraduras de carne y voluntad. Lamento tener que dártela.
+```
+
+**VERSIÓN C — Melancolía (elegía):**
+```
+[Rafaello] (OBSERVA LA HOJA UN MOMENTO, MIRA SU REFLEJO DISTORSIONADO EN EL METAL) Tenía tu edad cuando mi padre me puso una espada en las manos. De madera. Dijo: "Esto es para proteger". La primera vez que usé una de acero... fue para proteger una mentira del palacio. Perdí algo ese día. No la inocencia — eso se va solo. Perdí la creencia. Esta es una elegía, niño. Un recordatorio de que a veces, para encontrar la verdad, hay que ensuciarse las manos con el peso de las herramientas que la niegan. Que pese en tu conciencia como pesa en tus brazos.
+```
+
+**En las tres versiones, Rafaello termina con:**
+```
+[Rafaello] Ahora vete. Por la puerta trasera. Y recuerda: la oscuridad no es tu enemiga. Es tu capa. Aprende a moverte en ella.
 → Fade a negro. Título. Fin Capítulo 1. Prompt de guardado.
 ```
