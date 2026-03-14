@@ -185,6 +185,7 @@ export default class Scene_Sotano extends Phaser.Scene {
     this.globalFlags = this.loadData.globalFlags || {};
     this.piccoloHablado = this.globalFlags.piccoloHablado || false;
     this.botonRecogido = this.globalFlags.botonRecogido || false;
+    this.marcasExaminadas = false;
 
     // ============================================
     // NPC PICCOLO
@@ -228,6 +229,29 @@ export default class Scene_Sotano extends Phaser.Scene {
     };
 
     this.scratchesHint = this.add.text(0, 0, '[E] Examinar marcas', {
+      fontSize: '12px',
+      color: '#ffffff',
+      backgroundColor: '#000000aa',
+      padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(1002).setVisible(false);
+
+    // ============================================
+    // TRAPOS EN UN RINCÓN (nido de Piccolo)
+    // ============================================
+
+    // ========== TRAPOS (ajustar posición aquí) ==========
+    const traposPosX = 390;
+    const traposPosY = 255;
+    const traposX = this.mapOffsetX + traposPosX * this.mapScale;
+    const traposY = this.mapOffsetY + traposPosY * this.mapScale;
+
+    this.traposZone = {
+      x: traposX,
+      y: traposY,
+      radius: 55
+    };
+
+    this.traposHint = this.add.text(0, 0, '[E] Examinar rincón', {
       fontSize: '12px',
       color: '#ffffff',
       backgroundColor: '#000000aa',
@@ -336,6 +360,7 @@ export default class Scene_Sotano extends Phaser.Scene {
       }
       this.piccoloHint.setVisible(false);
       this.scratchesHint.setVisible(false);
+      if (this.traposHint) this.traposHint.setVisible(false);
       if (this.exitHint) this.exitHint.setVisible(false);
       return;
     }
@@ -425,6 +450,15 @@ export default class Scene_Sotano extends Phaser.Scene {
       this.scratchesHint.setVisible(false);
     }
 
+    // Trapos (nido de Piccolo)
+    const distTrapos = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.traposZone.x, this.traposZone.y);
+    if (distTrapos < this.traposZone.radius) {
+      this.traposHint.setPosition(this.traposZone.x, this.traposZone.y - 30);
+      this.traposHint.setVisible(true);
+    } else {
+      this.traposHint.setVisible(false);
+    }
+
     // Mostrar/ocultar hint de salida según proximidad a la escalera
     if (this.escaleraZone) {
       const distEscalera = Phaser.Math.Distance.Between(
@@ -466,6 +500,13 @@ export default class Scene_Sotano extends Phaser.Scene {
       return;
     }
 
+    // Trapos en el rincón
+    const distTrapos = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.traposZone.x, this.traposZone.y);
+    if (distTrapos < this.traposZone.radius) {
+      this.examinarTrapos();
+      return;
+    }
+
     // Escalera de salida
     if (this.nearExit) {
       this.volverABodega();
@@ -474,14 +515,29 @@ export default class Scene_Sotano extends Phaser.Scene {
 
   interactuarPiccolo() {
     if (this.piccoloHablado) {
-      this.showSimpleDialogue("Piccolo: 'Ya te dije todo lo que sé. Aléjate de las sombras.'");
+      this.showSimpleDialogue("Piccolo: 'Ya te dije todo lo que sé. O todo lo que me atrevo a recordar. Aléjate. Antes de que las sombras aprendan tu nombre.'");
     } else {
       this.startPiccoloDialogue();
     }
   }
 
   examinarMarcas() {
+    if (this.marcasExaminadas) return;
+    this.marcasExaminadas = true;
     this.showThought('No es el primero... hay más marcas. Muchas más.');
+    this.time.delayedCall(3500, () => {
+      this.showThought('Líneas pequeñas, como las que hace un niño para medir su crecimiento. Pero estas no son de crecimiento. Son de cuenta. ¿Cuántos han pasado por aquí? ¿Cuántos han visto lo que yo estoy viendo?');
+      this.time.delayedCall(3500, () => {
+        this.showThought('Algunas marcas están más desgastadas. Otras, frescas. Es un registro. Un diario de piedra. Piccolo dijo que Strappavolti viene en noches especiales... cada marca es una noche. Cada noche, una ausencia.');
+        this.time.delayedCall(3500, () => {
+          this.showThought('En la más reciente, junto a la raya, hay una mancha oscura. No es humedad. Es como si alguien hubiera apoyado una mano temblorosa... o sangrante.');
+        });
+      });
+    });
+  }
+
+  examinarTrapos() {
+    this.showThought('Un pequeño lecho hecho de recortes de terciopelo y seda desechada. No es un nido de rata. Está ordenado, casi cuidadoso. Sobre él, un juguete: una figurita tallada en madera oscura, de un pájaro con las alas rotas. Alguien vive aquí. Alguien que intenta hacer un hogar en la herrumbre. Piccolo... ¿o alguien más antes que él?');
   }
 
   // ==========================================
@@ -576,7 +632,7 @@ export default class Scene_Sotano extends Phaser.Scene {
       },
       vio_piccolo: {
         speaker: 'Piccolo',
-        text: '...\nUna vez. Me miró a mí. Pero se fue.\n\nSupongo que no encontró lo que buscaba en mí.',
+        text: '(Un silencio largo. El eco del agua goteando se hace más presente)\nUna vez. Hace dos carnavales. Me miró. No a los ojos... a través de ellos.\nSe quedó quieto. Luego... sonrió. O algo en él hizo la forma de una sonrisa.\nDijo: "Vacío. Como yo. Pero limpio."\nY se fue.\nNo me tocó. No me preguntó nada.\nA veces pienso que no fui descartado. Fui... archivado.',
         next: 'boton_intro'
       },
       boton_intro: {
@@ -589,7 +645,7 @@ export default class Scene_Sotano extends Phaser.Scene {
       },
       por_que_marlo: {
         speaker: 'Piccolo',
-        text: 'Porque tú haces preguntas. Los otros que estuvieron aquí huyeron cuando mencioné su nombre. Tú... buscas entender. Eso te hace diferente. O más peligroso.',
+        text: 'Porque tú haces preguntas que tienen peso. Los otros que vinieron antes —guardias, nobles con miedo— huyeron cuando el nombre "Strappavolti" rozó el aire. Tú... inclinas la cabeza. Escuchas. Como si estuvieras buscando no solo al hombre, sino a la razón del hueco que deja.\nEso te hace diferente.\nO te hace el próximo.',
         next: 'fin'
       },
       simbolo: {

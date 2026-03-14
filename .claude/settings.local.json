@@ -1,8 +1,12 @@
 {
+  "env": {
+    "DEEPSEEK_API_KEY": "sk-ba648ac3638b4e3cbe0e70c15f12aa7f"
+  },
   "permissions": {
     "allow": [
       "mcp__pixellab__create_map_object",
       "mcp__pixellab__get_map_object",
+      "mcp__deepseek__run_deepseek",
       "Bash(curl:*)",
       "Bash(node --check:*)",
       "Bash(grep:*)"

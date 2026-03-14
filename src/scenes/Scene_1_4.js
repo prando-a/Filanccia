@@ -399,27 +399,27 @@ export default class Scene_1_4 extends Phaser.Scene {
         break;
 
       case 1:
-        this.showDialogue('Ciudadano', '¡Ha muerto! ¡El hijo del Alcalde ha muerto!');
+        this.showDialogue('Voz de Hombre Joven', '(AHOGADA) ¡Sangre! ¡Hay tanta sangre en el mármol!');
         break;
 
       case 2:
-        this.showDialogue('Ciudadana', '¡No puede ser! ¡Estaba con nosotros hace apenas unos minutos!');
+        this.showDialogue('Voz de Mujer Mayor', '(REPULSIÓN PURA) ¡Santo cielo, le han... deshecho! ¡Apartad a los niños!');
         break;
 
       case 3:
-        this.showDialogue('Ciudadano', '¡Dios mío! ¡Es horrible! ¡Mirad la sangre!');
+        this.showDialogue('Voz de Hombre Culto', '(MIEDO FRÍO) Esto no es un robo. Esto es un mensaje. Y el destinatario no es el Alcalde... es todos nosotros.');
         break;
 
       case 4:
-        this.showDialogue('Ciudadana', '¡Su rostro! ¡Le han arrancado el rostro!');
+        this.showDialogue('Voz de Comerciante', '(CÍNICA, EN UN SUSURRO GRITADO) Con el heredero muerto, los contratos del muelle... se vuelven a discutir.');
         break;
 
       case 5:
-        this.showDialogue('Ciudadano', '¡Un demonio! ¡Ha sido obra de un demonio!');
+        this.showDialogue('Voz de Guardia', '(DESDE LA DISTANCIA) ¡Guardias! ¡Cerrad las puertas! ¡Que no salga nadie! (UNA PAUSA) ¡Demasiado tarde!');
         break;
 
       case 6:
-        this.showDialogue('Ciudadana', '¡Los guardias! ¡Que alguien llame a los guardias!');
+        this.showDialogue('Niño que Llora', '(AGUDO, DESCONSOLADO) ¡Su cara! ¡¡Le han quitado la cara!!');
         break;
 
       case 7:
@@ -432,50 +432,46 @@ export default class Scene_1_4 extends Phaser.Scene {
         break;
 
       case 8:
-        this.showDialogue('Madre de Marlo', 'Marlo, tenemos que salir de aquí inmediatamente. Esto no es seguro.');
+        this.showDialogue('Madre de Marlo', '(AGARRANDO A MARLO) Marlo, no mires. Por favor, no mires. Vámonos.');
         break;
 
       case 9:
-        this.showDialogue('Padre de Marlo', 'Tu madre tiene razón. Vámonos de aquí, hijo.');
+        this.showDialogue('Padre de Marlo', '(VOZ TENSA) La guardia lo resolverá. No es asunto nuestro. Vamos.');
         break;
 
       case 10:
-        this.showDialogue('Marlo', 'Esperad... necesito un momento.');
+        this.showDialogue('Marlo', '(VOZ VACÍA, MIRANDO FIJO) Pero él... está solo ahora.');
         break;
 
       case 11:
-        this.showDialogue('Madre de Marlo', '¡Marlo! No es momento para curiosear. Un hombre ha muerto.');
+        this.showDialogue('Madre de Marlo', '¡Marlo!');
         break;
 
       case 12:
-        this.showDialogue('Marlo', 'Lo sé, mamá. Es solo que... algo no está bien aquí.');
+        this.showDialogue('Marlo', 'Todos gritan... pero nadie se acerca. Nadie le tapa... eso. Es como si ya no fuera una persona.');
         break;
 
       case 13:
-        this.showDialogue('Padre de Marlo', 'Claro que no está bien. Han asesinado al heredero del Alcalde en pleno carnaval.');
+        this.showDialogue('Padre de Marlo', 'Son cosas de adultos, hijo. Cosas horribles. Ven.');
         break;
 
       case 14:
-        this.showDialogue('Marlo', 'No, me refiero a... el rostro. ¿Por qué llevarse su rostro?');
+        this.showDialogue('Marlo', '(RETROCEDIENDO UN PASO) Mi pañuelo... se me cayó en el salón. Os alcanzo en la puerta. Lo prometo.');
         break;
 
       case 15:
-        this.showDialogue('Madre de Marlo', 'No lo sé y no quiero saberlo. Nos vamos ahora mismo.');
+        this.showDialogue('Madre de Marlo', '¡Marlo, no!');
         break;
 
       case 16:
-        this.showDialogue('Marlo', 'Dadme un segundo. Olvidé algo en el salón... enseguida os alcanzo.');
+        this.showDialogue('Padre de Marlo', '(RESIGNADO) Un minuto. Solo uno. O voy a buscarte yo.');
         break;
 
       case 17:
-        this.showDialogue('Padre de Marlo', 'No tardes, Marlo. Te esperamos en la entrada.');
-        break;
-
-      case 18:
         this.showThought('No puedo irme así. Necesito ver esto de cerca.');
         break;
 
-      case 19:
+      case 18:
         this.startGameplay();
         break;
     }
@@ -686,39 +682,43 @@ export default class Scene_1_4 extends Phaser.Scene {
     switch (this.investigationStep) {
       case 0:
         this.time.delayedCall(500, () => {
-          this.showThought('El hijo del Alcalde... sin vida, sin rostro. Esto es una pesadilla.');
+          this.showThought('Tanta ropa fina… y él en el suelo. Solo.');
           this.investigationStep++;
         });
         break;
       case 1:
-        this.showThought('Hace apenas unos minutos estaba en el escenario, recibiendo aplausos...');
+        this.showThought('¿Dónde está su mirada? No puedo encontrarla.');
         this.investigationStep++;
         break;
       case 2:
-        this.showThought('¿Quién podría hacer algo tan horrible? ¿Y por qué arrancarle el rostro?');
+        this.showThought('Hace un rato reía. Ahora es… esto. ¿Adónde se fue lo que reía?');
         this.investigationStep++;
         break;
       case 3:
-        this.showThought('En el carnaval todos llevamos máscaras para ocultar quiénes somos...');
+        this.showThought('Todos tienen máscara. Pero a él se la quitaron. La de verdad.');
         this.investigationStep++;
         break;
       case 4:
-        this.showThought('Pero él... ya no tiene nada que ocultar. Le han quitado todo.');
+        this.showThought('(UN ESTREMECIMIENTO) Hace frío aquí. Un frío que no es del aire.');
         this.investigationStep++;
         break;
       case 5:
-        this.showThought('Esto no es un crimen común. Hay algo ritual, algo simbólico en todo esto.');
+        this.showThought('Los guardias… empujan a la gente. No miran al cuerpo. Buscan a alguien con la culpa encima.');
         this.investigationStep++;
         break;
       case 6:
-        this.showThought('Los guardias no van a descubrir nada. Nunca lo hacen.');
+        this.showThought('Pero la culpa no se lleva puesta.');
         this.investigationStep++;
         break;
       case 7:
-        this.showThought('Tengo que investigar por mi cuenta. Quizás en la bodega encuentre alguna pista...');
+        this.showThought('Hay un olor… a vinagre y metal. Viene de allá abajo. De la oscuridad.');
         this.investigationStep++;
         break;
       case 8:
+        this.showThought('(UN IMPULSO FÍSICO) No puedo dejarlo así. Tengo que… saber. Aunque sea un poco. Sé que está mal. Pero tengo que...');
+        this.investigationStep++;
+        break;
+      case 9:
         this.thoughtBox.setVisible(false);
         this.startFreeExploration();
         break;

@@ -174,6 +174,15 @@ export default class Scene_Armeria extends Phaser.Scene {
     this.dialogueElements = [];
     this.atrapado = false;
     this.mostrandoAtrapado = false;
+    this.optionButtonsR = [];
+    this.currentOptionsR = null;
+    this.selectedOptionR = 0;
+    this.currentNodeR = null;
+    this.rafaelloTree = null;
+    this.rafaelloSelloDado = false;
+    this.rafaelloKeyUpHandler = null;
+    this.rafaelloKeyDownHandler = null;
+    this.rafaelloKeySelectHandler = null;
 
     // ============================================
     // NPC RAFAELLO (placeholder azul)
@@ -463,7 +472,11 @@ export default class Scene_Armeria extends Phaser.Scene {
     if (this.rafaelloLiberado && this.rafaello) {
       const distR = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.rafaello.x, this.rafaello.y);
       if (distR < 70) {
-        this.showThought('Rafaello: "Gracias, niño. Aún no estoy listo. Vuelve pronto."');
+        if (this.selloRecogido) {
+          this.showThought('Rafaello: "Ahora vete. Por la puerta trasera. Y recuerda: la oscuridad no es tu enemiga. Es tu capa. Aprende a moverte en ella."');
+        } else {
+          this.startRafaelloDialogue();
+        }
         return;
       }
     }
@@ -610,13 +623,13 @@ export default class Scene_Armeria extends Phaser.Scene {
     this.marlo.stop();
     this.marlo.setTexture(`marlo_idle_${this.marloDirection}`);
     this.overheardLines = [
-      { speaker: 'Guardia',  text: 'El Comité quiere silencio, capitán. Esta noche no existió nada.' },
-      { speaker: 'Rafaello', text: 'Encontré el sello. Eso no puede no existir.' },
-      { speaker: 'Guardia',  text: 'Entregue el sello o esto se complica para usted, ¿entiende?' },
-      { speaker: 'Rafaello', text: 'Llevo veinte años sirviendo a este palacio.' },
-      { speaker: 'Guardia',  text: 'Y querrá veinte más. Piénselo.' },
+      { speaker: 'Guardia',  text: 'El Comité quiere silencio, capitán. Esta noche no existió nada. Un accidente. Un desgraciado tropiezo.' },
+      { speaker: 'Rafaello', text: 'Encontré el sello del gabinete privado en el suelo, manchado. Eso no puede "no existir".' },
+      { speaker: 'Guardia',  text: '(VOZ BAJA, TENSA) Entregue el sello o esto se complica para usted. Para mí también. ¿Entiende? No son solo sus veinte años los que penden de un hilo.' },
+      { speaker: 'Rafaello', text: 'Llevo veinte años sirviendo a este palacio. Juré lealtad a la verdad, no al silencio.' },
+      { speaker: 'Guardia',  text: '(UN SUSPIRO CANSADO) Y querrá veinte más. O una pensión. O un funeral digno. Piénselo. No estamos luchando contra un hombre; estamos nadando contra la corriente de todo un sistema.' },
       { speaker: 'Rafaello', text: '...' },
-      { speaker: 'Guardia',  text: 'Bien. Haré otra ronda. Cuando vuelva, más le vale tener una respuesta.' },
+      { speaker: 'Guardia',  text: 'Bien. Haré otra ronda. Cuando vuelva, más le vale tener una respuesta que podamos los dos digerir.' },
     ];
     this.overheardIndex = 0;
     this.showOverheardLine();
@@ -706,6 +719,221 @@ export default class Scene_Armeria extends Phaser.Scene {
     });
   }
 
+  // ==========================================
+  // DIÁLOGOS DE RAFAELLO (Árbol de decisiones)
+  // ==========================================
+
+  startRafaelloDialogue() {
+    this.dialogueActive = true;
+    this.marlo.stop();
+    this.marlo.setTexture('marlo_idle_west');
+    this.dialogueElements = [];
+    this.optionButtonsR = [];
+    this.rafaelloSelloDado = false;
+
+    this.rafaelloTree = {
+      intro: {
+        speaker: 'Rafaello',
+        text: '(Se frota las muñecas, mira a Marlo con mezcla de incredulidad y alivio)\nTú no eres de los guardias. Ni de los sirvientes. Tu ropa es de calle.',
+        options: [
+          { text: 'No. Soy Marlo. Vi lo que pasó. Giacomo y Piccolo me hablaron del hombre sin rostro.', next: 'respuesta_a' },
+          { text: 'Sé que el Comité quiere silenciar el asesinato. Que hay miedo.', next: 'respuesta_b' }
+        ]
+      },
+      respuesta_a: {
+        speaker: 'Rafaello',
+        text: '(ASIENTE, LENTAMENTE) Esos dos... Giacomo el sombrío, Piccolo el fantasma. Siguen vivos. Bien. Entonces no solo eres curioso; tienes suerte. O algo te protege.',
+        next: 'prueba'
+      },
+      respuesta_b: {
+        speaker: 'Rafaello',
+        text: 'El Comité tiene miedo. El miedo hace cosas feas a las instituciones. Las convierte en jaulas de oro con cerraduras oxidadas. Pero el miedo es un arma de doble filo. También hace que los hombres hablen cuando deberían callar.',
+        next: 'prueba'
+      },
+      prueba: {
+        speaker: 'Rafaello',
+        text: 'Permíteme una pregunta, Marlo. Por mi propia paz. Strappavolti deja una firma, un aire. Pero solo un objeto físico le pertenece de verdad. De lo que has encontrado... ¿cuál?',
+        options: [
+          { text: 'Una moneda de oro con el perfil del Duque anterior.', next: 'falla' },
+          { text: 'Un guante de terciopelo oscuro, forrado en seda gris.', next: 'acierta' },
+          { text: 'Una pluma de máscara de carnaval, teñida de azul noche.', next: 'falla' }
+        ]
+      },
+      falla: {
+        speaker: 'Rafaello',
+        text: '(SU EXPRESIÓN SE ENDURECE, CON DECEPCIÓN)\nNo estás listo. O yo no estoy listo para confiar. Vuelve cuando las piezas encajen por sí solas en tu cabeza. Por favor.',
+        next: null
+      },
+      acierta: {
+        speaker: 'Rafaello',
+        text: '(UN DESTELLO DE RECONOCIMIENTO PROFUNDO)\nLo sabías. No es deducción. Es... conexión. Hay algo en ti que él teme. Y al mismo tiempo, algo que admira. Ese guante no es un trofeo; es un recordatorio. Para él, y ahora para ti.',
+        next: 'sello'
+      },
+      sello: {
+        speaker: 'Rafaello',
+        text: '(SACA UN PEQUEÑO OBJETO ENVUELTO EN PAÑO DE LINO)\nToma. El sello de lacre del gabinete privado. La llave de una puerta que nadie quiere abrir.',
+        next: 'despedida'
+      },
+      despedida: {
+        speaker: 'Rafaello',
+        text: 'Haz algo con él. Yo ya no puedo moverme. Mis pasos están contados. Pero los tuyos... los tuyos aún son invisibles para ellos. Usa esa invisibilidad.',
+        next: null
+      }
+    };
+
+    this.showDialogueNodeRafaello('intro');
+  }
+
+  showDialogueNodeRafaello(nodeKey) {
+    // Limpiar diálogo anterior
+    this.clearDialogue();
+    if (this.rafaelloKeyUpHandler) this.input.keyboard.off('keydown-UP', this.rafaelloKeyUpHandler);
+    if (this.rafaelloKeyDownHandler) this.input.keyboard.off('keydown-DOWN', this.rafaelloKeyDownHandler);
+    if (this.rafaelloKeySelectHandler) {
+      this.input.keyboard.off('keydown-ENTER', this.rafaelloKeySelectHandler);
+      this.input.keyboard.off('keydown-SPACE', this.rafaelloKeySelectHandler);
+    }
+    this.rafaelloKeyUpHandler = null;
+    this.rafaelloKeyDownHandler = null;
+    this.rafaelloKeySelectHandler = null;
+
+    this.currentNodeR = nodeKey;
+    const node = this.rafaelloTree[nodeKey];
+    if (!node) {
+      this.endRafaelloDialogue();
+      return;
+    }
+
+    const { width, height } = this.scale;
+    const overlay = this.add.rectangle(0, 0, width, height, 0x000000, 0.65).setOrigin(0).setDepth(10000);
+    this.dialogueElements.push(overlay);
+
+    const boxWidth = 520;
+    const boxX = (width - boxWidth) / 2;
+    const boxY = 100;
+
+    const tempText = this.add.text(0, 0, node.text, {
+      fontFamily: 'Arial', fontSize: '17px', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
+    }).setVisible(false);
+    const textHeight = tempText.height;
+    tempText.destroy();
+
+    const headerHeight = 45;
+    const optionsHeight = node.options ? (node.options.length * 40 + 20) : 38;
+    const totalBoxHeight = headerHeight + textHeight + optionsHeight + 15;
+
+    // Color dorado/bronce para Rafaello (capitán de guardia)
+    const dialogueBox = this.add.rectangle(boxX + boxWidth / 2, boxY + totalBoxHeight / 2, boxWidth, totalBoxHeight, 0x1a1208, 0.96)
+      .setStrokeStyle(2, 0xc49a3c).setDepth(10001);
+    this.dialogueElements.push(dialogueBox);
+
+    const speakerTxt = this.add.text(boxX + 20, boxY + 12, `${node.speaker}:`, {
+      fontFamily: 'Arial', fontSize: '17px', color: '#c49a3c', fontStyle: 'bold'
+    }).setDepth(10002);
+    this.dialogueElements.push(speakerTxt);
+
+    const contentTxt = this.add.text(boxX + 20, boxY + 42, node.text, {
+      fontFamily: 'Arial', fontSize: '17px', color: '#E8E8E8', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
+    }).setDepth(10002);
+    this.dialogueElements.push(contentTxt);
+
+    const optionsStartY = boxY + 42 + textHeight + 15;
+
+    if (node.options) {
+      this.selectedOptionR = 0;
+      this.currentOptionsR = node.options;
+      this.optionButtonsR = [];
+
+      node.options.forEach((opt, i) => {
+        const optY = optionsStartY + i * 40;
+        const optBtn = this.add.text(boxX + 30, optY, `➤ ${opt.text}`, {
+          fontFamily: 'Arial', fontSize: '15px', color: '#c49a3c',
+          backgroundColor: '#2a1e08', padding: { x: 8, y: 5 }
+        }).setDepth(10002).setInteractive()
+          .on('pointerover', () => { this.selectedOptionR = i; this.updateOptionHighlightRafaello(); })
+          .on('pointerdown', () => this.selectOptionRafaello());
+
+        this.dialogueElements.push(optBtn);
+        this.optionButtonsR.push(optBtn);
+      });
+
+      this.updateOptionHighlightRafaello();
+
+      this.rafaelloKeyUpHandler = () => { this.selectedOptionR = Math.max(0, this.selectedOptionR - 1); this.updateOptionHighlightRafaello(); };
+      this.rafaelloKeyDownHandler = () => { this.selectedOptionR = Math.min(node.options.length - 1, this.selectedOptionR + 1); this.updateOptionHighlightRafaello(); };
+      this.rafaelloKeySelectHandler = () => this.selectOptionRafaello();
+
+      this.input.keyboard.on('keydown-UP', this.rafaelloKeyUpHandler);
+      this.input.keyboard.on('keydown-DOWN', this.rafaelloKeyDownHandler);
+      this.input.keyboard.on('keydown-ENTER', this.rafaelloKeySelectHandler);
+      this.input.keyboard.on('keydown-SPACE', this.rafaelloKeySelectHandler);
+    } else {
+      // Marcar sello como dado al llegar al nodo 'sello'
+      if (nodeKey === 'sello') {
+        this.rafaelloSelloDado = true;
+      }
+
+      const continueTxt = this.add.text(boxX + boxWidth - 110, optionsStartY, '[Continuar]', {
+        fontFamily: 'Arial', fontSize: '13px', color: '#888888', fontStyle: 'italic'
+      }).setDepth(10002).setInteractive().on('pointerdown', () => this.nextRafaelloNode());
+      this.dialogueElements.push(continueTxt);
+
+      this.input.keyboard.once('keydown-SPACE', () => {
+        if (this.dialogueActive) this.nextRafaelloNode();
+      });
+    }
+  }
+
+  nextRafaelloNode() {
+    const node = this.rafaelloTree?.[this.currentNodeR];
+    if (!node || !node.next) {
+      this.endRafaelloDialogue();
+    } else {
+      this.showDialogueNodeRafaello(node.next);
+    }
+  }
+
+  updateOptionHighlightRafaello() {
+    if (!this.optionButtonsR) return;
+    this.optionButtonsR.forEach((btn, i) => {
+      if (i === this.selectedOptionR) {
+        btn.setStyle({ color: '#ffffff', backgroundColor: '#3d2f10' });
+      } else {
+        btn.setStyle({ color: '#c49a3c', backgroundColor: '#2a1e08' });
+      }
+    });
+  }
+
+  selectOptionRafaello() {
+    if (!this.currentOptionsR || this.selectedOptionR < 0) return;
+    const opt = this.currentOptionsR[this.selectedOptionR];
+    if (opt) {
+      this.showDialogueNodeRafaello(opt.next);
+    }
+  }
+
+  endRafaelloDialogue() {
+    // Limpiar teclado
+    if (this.rafaelloKeyUpHandler) this.input.keyboard.off('keydown-UP', this.rafaelloKeyUpHandler);
+    if (this.rafaelloKeyDownHandler) this.input.keyboard.off('keydown-DOWN', this.rafaelloKeyDownHandler);
+    if (this.rafaelloKeySelectHandler) {
+      this.input.keyboard.off('keydown-ENTER', this.rafaelloKeySelectHandler);
+      this.input.keyboard.off('keydown-SPACE', this.rafaelloKeySelectHandler);
+    }
+    this.rafaelloKeyUpHandler = null;
+    this.rafaelloKeyDownHandler = null;
+    this.rafaelloKeySelectHandler = null;
+    this.clearDialogue();
+    this.dialogueActive = false;
+
+    if (this.rafaelloSelloDado) {
+      this.selloRecogido = true;
+      this.time.delayedCall(500, () => {
+        this.showThought('El sello de lacre... frío y pesado en mi mano. La llave de una puerta que nadie quiere abrir.');
+      });
+    }
+  }
+
   volverABodega() {
     if (this.exiting) return;
     this.exiting = true;
@@ -730,6 +958,12 @@ export default class Scene_Armeria extends Phaser.Scene {
     this.input.keyboard.off('keydown-ESC');
     this.input.keyboard.off('keydown-E');
     this.input.keyboard.off('keydown-SPACE');
+    if (this.rafaelloKeyUpHandler) this.input.keyboard.off('keydown-UP', this.rafaelloKeyUpHandler);
+    if (this.rafaelloKeyDownHandler) this.input.keyboard.off('keydown-DOWN', this.rafaelloKeyDownHandler);
+    if (this.rafaelloKeySelectHandler) {
+      this.input.keyboard.off('keydown-ENTER', this.rafaelloKeySelectHandler);
+      this.input.keyboard.off('keydown-SPACE', this.rafaelloKeySelectHandler);
+    }
     this.tweens.killAll();
   }
 

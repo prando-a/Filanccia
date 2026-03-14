@@ -33,22 +33,26 @@ All code comments in **Spanish**. Placeholders before logic. Logic before art.
 
 ## Tools & Config
 
-- **DeepSeek agent:** `.claude/.mcp.json` + `DEEPSEEK_API_KEY` in `.env` (already set)
+- **DeepSeek agent:** `.mcp.json` (project root) + key in `.claude/settings.local.json` under `env`. Tool: `mcp__deepseek__run_deepseek`. Skill: `/deepseek-narrative <target>`.
 - **PixelLab MCP:** pixel art generation (characters, tiles, tilesets)
 - **Reference impl:** `referencia/` (5 Días con Dio) — Y-sorting, Occluders, Dialogue
 
 ## Scene Map
 
-| Scene | Location | Status |
-|-------|----------|--------|
-| 1-0 | Marlo's bathroom | ✅ |
-| 1-1 | Street to plaza | ✅ |
-| 1-2 | Central plaza (Mayor's speech) | ✅ |
-| 1-3 | Palace Hall (Ballo Mascherato) | ✅ |
-| 1-4 | Palace Hall — murder discovered, investigation begins | ✅ |
-| Bodega | Wine cellar — explorable after murder | ✅ |
-| Sotano | Underground/basement — explorable after murder | 🔧 Active |
-| Armeria | Armory — explorable after murder | 🔧 Active |
+| Scene | File | Status |
+|-------|------|--------|
+| 1-0 | `Scene_1_0.js` | ✅ logic — ✍️ dialogue update needed |
+| 1-1 | `Scene_1_1.js` | ✅ logic — ✍️ dialogue update needed |
+| 1-2 | `Scene_1_2.js` | ✅ logic — ✍️ dialogue update needed |
+| 1-3 | `Scene_1_3.js` | ✅ logic — ✍️ dialogue update needed |
+| 1-4 | `Scene_1_4.js` | ✅ logic — ✍️ dialogue update needed |
+| Bodega | `Scene_Bodega.js` | ✅ logic — ✍️ dialogue update needed |
+| Sotano | `Scene_Sotano.js` | ✅ logic — ✍️ dialogue update needed |
+| Armeria | `Scene_Armeria.js` | 🔧 bugs + ✍️ Rafaello tree not yet implemented |
+| 1-4 (return) | `Scene_1_4.js` | 📋 Designed — not coded |
+| Armeria (return) | `Scene_Armeria.js` | 📋 Designed — not coded |
 
-Dan Harmon steps 1-4 complete. Steps 5-8 in design — player explores Bodega/Sotano/Armeria after murder.
-See `docs/NARRATIVE_PROPOSAL.md` for full scripts, characters, pending decisions. Edit it after decisions and chages made.
+**✍️ = definitive dialogue in `docs/NARRATIVE_PROPOSAL.md` differs from current code.**
+
+Dan Harmon steps 1-6 complete. Step 7 (Armeria) in progress. Steps 7-8 + epilogue fully designed.
+All definitive scripts (enriched by DeepSeek 2026-03-14) in `docs/NARRATIVE_PROPOSAL.md` — read Section IV for implemented scenes, Section VI for pending ones.
