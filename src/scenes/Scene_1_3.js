@@ -338,23 +338,23 @@ export default class Scene_1_3 extends Phaser.Scene {
       // ============================================
 
       case 1:
-        this.showDialogue('Noble', '¡Qué espléndido baile! El Alcalde se ha superado este año.');
+        this.showDialogue('Noble Anciano', 'Otro baile, otro discurso. Mis rodillas solo aguantan por el buen vino del Alcalde.');
         break;
 
       case 2:
-        this.showDialogue('Dama', 'Las máscaras son preciosas. Dicen que las trajo de Venecia especialmente para esta noche.');
+        this.showDialogue('Dama Joven', 'Dicen que el anuncio no es de sucesión, sino de purga. Alguien ha estado husmeando en los libros del puerto.');
         break;
 
       case 3:
-        this.showDialogue('Noble', '¿Habéis oído los rumores? Parece que el Alcalde tiene un anuncio importante.');
+        this.showDialogue('Otro Noble', '¡Tonterías! Es para presentar a su hijo. Un muchacho blando como el pan de ayer. La ciudad necesita puño de hierro, no terciopelo.');
         break;
 
       case 4:
-        this.showDialogue('Dama', 'Todos hablan de ello. Algunos dicen que nombrará a su sucesor esta noche.');
+        this.showDialogue('Comerciante', 'Sea lo que sea, los precios del azafrán subirán mañana. Siempre suben tras sus "anuncios importantes".');
         break;
 
       case 5:
-        this.showDialogue('Noble', 'Era de esperar. El Alcalde ya no es joven, y su hijo ha demostrado ser capaz.');
+        this.showDialogue('Dama Anciana', '¿Veis a Rafaello, el capitán? Mira al balcón, no al Alcalde. Algo tiene atado en la sombra.');
         break;
 
       case 6:
@@ -475,7 +475,7 @@ export default class Scene_1_3 extends Phaser.Scene {
       // ============================================
 
       case 26:
-        this.showDialogue('Hijo del Alcalde', 'Gracias, padre. Gracias a todos por vuestra confianza.');
+        this.showDialogue('Hijo del Alcalde', '(VOZ CLARA, UN TEMBLOR LEVE) Padre... ciudadanos. Solo he querido, siempre, escuchar el rumor de los canales y vuestras voces con el mismo respeto. Prometo... ser digno de esta máscara que me entregáis.');
         break;
 
       case 27:
@@ -558,6 +558,35 @@ export default class Scene_1_3 extends Phaser.Scene {
           });
         });
       }
+    });
+
+    // Observación de Marlo - Strappavolti ya estaba en la sala
+    this.time.delayedCall(800, () => {
+      const marloObs = this.add.text(width / 2, height * 0.52,
+        '"Entre todas las máscaras que miran al escenario,\nhay una, tras una columna, que no se mueve.\nNo respira. Solo espera."', {
+        fontSize: '13px',
+        color: '#aaffaa',
+        fontStyle: 'italic',
+        backgroundColor: '#00000088',
+        padding: { x: 10, y: 6 },
+        align: 'center'
+      }).setOrigin(0.5).setAlpha(0).setDepth(500);
+
+      this.tweens.add({
+        targets: marloObs,
+        alpha: 1,
+        duration: 600,
+        onComplete: () => {
+          this.time.delayedCall(3500, () => {
+            this.tweens.add({
+              targets: marloObs,
+              alpha: 0,
+              duration: 600,
+              onComplete: () => marloObs.destroy()
+            });
+          });
+        }
+      });
     });
   }
 

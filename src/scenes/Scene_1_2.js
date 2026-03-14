@@ -240,24 +240,23 @@ export default class Scene_1_2 extends Phaser.Scene {
         break;
 
       case 1:
-        // Primer diálogo del Alcalde
-        this.showDialogue('Alcalde', '¡Bienvenidos, queridos filenccianos! ¡Bienvenidos a la celebración del centenario de nuestra amada ciudad!');
+        this.showDialogue('Alcalde', '¡Filanccianos! ¡Mirad a vuestro alrededor! Cien años de historia os contemplan desde cada mascarón, desde cada piedra.');
         break;
 
       case 2:
-        this.showDialogue('Alcalde', 'Hace cien años, nuestros ancestros fundaron Filanccia sobre los principios de la prosperidad y la tradición.');
+        this.showDialogue('Alcalde', 'Esta noche, el carnaval nos recuerda su gran lección: bajo la careta, el noble y el pescador son iguales. ¡Qué hermosa ficción para mantener la paz!');
         break;
 
       case 3:
-        this.showDialogue('Alcalde', 'Esta noche, bajo las máscaras del carnaval, todos somos iguales. Nobles y plebeyos, unidos en la celebración.');
+        this.showDialogue('Alcalde', 'Celebramos, sí, pero también renovamos nuestro pacto: lealtad a la ciudad, obediencia a su ley, fe en quien os guía. Mirad a vuestros hijos, el verdadero futuro...');
         break;
 
       case 4:
-        this.showDialogue('Alcalde', 'Pero antes de que comience la fiesta, tengo un anuncio especial que hacer en el palacio...');
+        this.showDialogue('Alcalde', '...el futuro que debemos proteger a cualquier precio. ¡Y para eso, os espero en el palacio! Tengo palabras que darán forma a los próximos cien años.');
         break;
 
       case 5:
-        this.showDialogue('Alcalde', '¡Os espero a todos en el gran salón! ¡Y ahora... QUE COMIENCE EL CARNAVAL!');
+        this.showDialogue('Alcalde', '¡Que la máscara oculte vuestras dudas y el vino ahogue vuestros temores! ¡QUE COMIENCE EL CARNAVAL!');
         break;
 
       case 6:

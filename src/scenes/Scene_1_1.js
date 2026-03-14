@@ -103,8 +103,20 @@ export default class Scene_1_1 extends Phaser.Scene {
 
     this.cameras.main.fadeIn(1000, 0, 0, 0);
 
-    this.time.delayedCall(1500, () => {
-      this.showAmbientText('Las calles de Filanccia rebosan de gente...');
+    this.time.delayedCall(500, () => {
+      this.showAmbientText('Los ojos de cristal de cien máscaras siguen a nadie y a todos. La luna se enreda en los canales.');
+    });
+
+    this.time.delayedCall(2200, () => {
+      this.showAmbientText('Un violín llora una tarantela entre risas ahogadas. El aire huele a dulce de almendra y humedad de piedra.');
+    });
+
+    this.time.delayedCall(4000, () => {
+      this.showAmbientText('Entre dos arlequines, un espacio vacío se mueve contra la corriente de la multitud. Luego desaparece.');
+    });
+
+    this.time.delayedCall(5800, () => {
+      this.showAmbientText('Las sombras de los balcones son tan profundas que podrían esconder rostros. O la ausencia de ellos.');
     });
 
     // Saltar escena con SPACE

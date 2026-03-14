@@ -507,7 +507,7 @@ export default class Scene_Bodega extends Phaser.Scene {
   interactuarGiacomo() {
     if (this.giacomoHablado) {
       // Dialogo simple follow up
-      this.showSimpleDialogue("Giacomo: 'Ya te dije todo lo que sé, déjame en paz.'");
+      this.showSimpleDialogue("Giacomo: 'Ya te dije todo lo que guardaba. Y me pesa más que veinte años de silencio. Déjame en paz. Déjame con mi vino y mi cobardía. Es lo único que me queda.'");
     } else {
       this.startGiacomoDialogue();
     }
@@ -561,16 +561,16 @@ export default class Scene_Bodega extends Phaser.Scene {
     this.dialogueElements = [];
 
     this.dialogueConfig = [
-      { speaker: 'Giacomo', text: "¡Chist! Baja la voz, niño. Hay oídos en todas partes.", options: null },
+      { speaker: 'Giacomo', text: "¡Chist! Baja la voz hasta el susurro. En estas piedras, hasta el miedo tiene ecos. Y ellos los escuchan a todos.", options: null },
       {
         speaker: 'Giacomo', text: "Estaba aquí cuando ocurrió. Vi a un hombre sin rostro bajar horas antes.",
         options: [
-          { text: "¿Llevaba algo consigo?", response: "No vi su rostro, pero... llevaba algo envuelto en terciopelo. Pesado. No sé qué era." },
-          { text: "¿Qué hacía un hombre aquí abajo?", response: "Este lugar es un nido de secretos. Apenas lo vi pasar..." }
+          { text: "¿Llevaba algo consigo?", response: "No vi su rostro... porque no lo tenía. Pero sí. Llevaba un fardo. Envuelto en terciopelo color vino viejo. Algo pesado... y blando. Demasiado blando para ser piedra. Veinte años llevo viendo paquetes bajar por esta escalera. Este era diferente. Sabía lo que era. Y callé." },
+          { text: "¿Qué hacía un hombre aquí abajo?", response: "Esta bodega no guarda solo vino. Guarda secretos. Los míos. Los de ellos. Él... simplemente caminaba. Como si las paredes se apartaran para él. Como si este laberinto fuera su salón. No tenía prisa. Eso fue lo más terrible." }
         ]
       },
-      { speaker: 'Giacomo', text: "Si te vio hablar conmigo, estamos perdidos. Toma esto. Lo dejó caer.", options: null },
-      { speaker: 'Giacomo', text: "Y aléjate de las sombras. No todas las máscaras se llevan en el rostro.", options: null }
+      { speaker: 'Giacomo', text: "Si te vio cruzar mi mirada, estamos muertos. Los dos. Toma. Esto. Se le desprendió al pasar. Lo guardé... no sé por qué. Quizás para recordarme que alguna vez tuve valor. O para probarme que ya no lo tengo.", options: null },
+      { speaker: 'Giacomo', text: "Aléjate de las sombras, niño. No todas las máscaras se llevan en el rostro. Algunas se llevan en el alma, y esas son las que nunca se quitan.", options: null }
     ];
 
     this.showDialogueStep();

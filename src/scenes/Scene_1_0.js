@@ -239,7 +239,7 @@ export default class Scene_1_0 extends Phaser.Scene {
 
       case 2:
         // Madre habla
-        this.showDialogue('Madre', '¡Marlo! ¿Todavía estás ahí? ¡El carnaval del centenario no espera a nadie!');
+        this.showDialogue('Madre', '¡Marlo, tesoro! ¡La ciudad no se queda quieta por nuestro capricho! ¡Tu padre ya hace sonar las llaves!');
         break;
 
       case 3:
@@ -254,17 +254,17 @@ export default class Scene_1_0 extends Phaser.Scene {
 
       case 4:
         // Marlo responde
-        this.showDialogue('Marlo', 'Ya casi estoy, mamá. Solo me falta... la máscara.');
+        this.showDialogue('Marlo', '(SUSURRANDO ANTE EL ESPEJO) Es como si… desapareciera un poco.');
         break;
 
       case 5:
-        // Madre insiste
-        this.showDialogue('Madre', 'Tu padre ya está en la puerta. El Alcalde dará su discurso en menos de una hora.');
+        // Madre - referencia al Alcalde
+        this.showDialogue('Madre', '¡El discurso del Alcalde! Dicen que hasta los gatos del canal se pondrán de gala. Es una noche para confiar en él, como siempre.');
         break;
 
       case 6:
-        // Madre añade
-        this.showDialogue('Madre', 'Dicen que anunciará algo importante esta noche. ¡No podemos perdérnoslo!');
+        // Marlo ante el espejo
+        this.showDialogue('Marlo', '(TOCANDO LA MÁSCARA) La comisura… está un poco torcida. Como una sonrisa triste.');
         break;
 
       case 7:
@@ -278,11 +278,16 @@ export default class Scene_1_0 extends Phaser.Scene {
         break;
 
       case 8:
-        // Marlo responde (madre ya se fue)
-        this.showDialogue('Marlo', '¡Ya voy! Solo necesito un momento más...');
+        // Madre - última llamada
+        this.showDialogue('Madre', '¡Ya basta de muecas! Bajo la máscara, esta noche todos somos un solo corazón para Filanccia. ¡Ven!');
         break;
 
       case 9:
+        // Marlo - última frase antes de salir
+        this.showDialogue('Marlo', 'Voy… Solo quería que estuviera perfecta.');
+        break;
+
+      case 10:
         // Marlo vuelve a mirar al espejo
         this.isAnimating = true;
         this.marloTurn('espejo', () => {
@@ -292,7 +297,7 @@ export default class Scene_1_0 extends Phaser.Scene {
         });
         break;
 
-      case 10:
+      case 11:
         // Pausa antes de la cinemática
         this.isAnimating = true;
         this.time.delayedCall(500, () => {
@@ -302,7 +307,7 @@ export default class Scene_1_0 extends Phaser.Scene {
         });
         break;
 
-      case 11:
+      case 12:
         // Cinemática: colocarse la máscara
         this.isAnimating = true;
         this.cinematicaMascara(() => {
@@ -312,7 +317,7 @@ export default class Scene_1_0 extends Phaser.Scene {
         });
         break;
 
-      case 12:
+      case 13:
         // Iniciar gameplay
         this.startGameplay();
         break;
