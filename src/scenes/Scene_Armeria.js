@@ -159,6 +159,88 @@ export default class Scene_Armeria extends Phaser.Scene {
     this.marloDirection = 'south';
 
     // ============================================
+    // STATE FLAGS
+    // ============================================
+
+    this.globalFlags = this.loadData.globalFlags || {};
+    this.rafaelloLiberado = this.globalFlags.rafaelloLiberado || false;
+    this.selloRecogido = this.globalFlags.selloRecogido || false;
+    this.primeraVezAtrapado = this.globalFlags.primeraVezAtrapado !== undefined
+      ? this.globalFlags.primeraVezAtrapado : true; // true = aún no ha sido atrapado nunca
+    this.escuchadoDialogo = this.globalFlags.escuchadoDialogo || false;
+    this.estanteriaAbierta = this.rafaelloLiberado; // si ya liberó a Rafaello, la puerta ya está abierta
+
+    this.dialogueActive = false;
+    this.dialogueElements = [];
+    this.atrapado = false;
+    this.mostrandoAtrapado = false;
+
+    // ============================================
+    // NPC RAFAELLO (placeholder azul)
+    // ============================================
+
+    // ===== RAFAELLO (ajustar posición aquí) =====
+    const rafaelloPosX = 430;
+    const rafaelloPosY = 155;
+    // ============================================
+    const rafaelloX = this.mapOffsetX + rafaelloPosX * this.mapScale;
+    const rafaelloY = this.mapOffsetY + rafaelloPosY * this.mapScale;
+
+    this.rafaello = this.add.rectangle(rafaelloX, rafaelloY, 20, 40, 0x3a6bc9)
+      .setOrigin(0.5, 1)
+      .setDepth(rafaelloY);
+
+    this.rafaelloHint = this.add.text(0, 0, '[E] Hablar con Rafaello', {
+      fontSize: '12px', color: '#ffffff', backgroundColor: '#000000aa', padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(1002).setVisible(false);
+
+    // ============================================
+    // GUARDIA CORRUPTO (placeholder rojo oscuro)
+    // ============================================
+
+    // Patrulla: 0=junto a Rafaello, 1=centro sala, 2=estantería (puerta secreta)
+    this.guardiaWaypoints = [
+      { x: this.mapOffsetX + 375 * this.mapScale, y: this.mapOffsetY + 165 * this.mapScale },
+      { x: this.mapOffsetX + 265 * this.mapScale, y: this.mapOffsetY + 200 * this.mapScale },
+      { x: this.mapOffsetX + 100 * this.mapScale, y: this.mapOffsetY + 175 * this.mapScale },
+    ];
+    this.guardiaWaypointIndex = 0;
+    this.guardiaSpeed = 52;          // px/s
+    this.guardiaDetectionRadius = 78;
+    this.guardiaState = 'patrol';    // 'patrol' | 'exited'
+    this.guardiaExitDuration = 5000; // ms ausente antes de regresar
+    this.guardiaExitTimer = 0;
+
+    // Guardia no existe si Rafaello ya fue liberado
+    if (!this.rafaelloLiberado) {
+      const g0 = this.guardiaWaypoints[0];
+      this.guardia = this.add.rectangle(g0.x, g0.y, 20, 40, 0x8b1a1a)
+        .setOrigin(0.5, 1)
+        .setDepth(g0.y);
+    } else {
+      this.guardia = null;
+      this.guardiaState = 'exited';
+    }
+
+    // ============================================
+    // ESTANTERÍA / PUERTA SECRETA
+    // ============================================
+
+    // ===== ESTANTERÍA (ajustar posición aquí) =====
+    const estanteriaPosX = 82;
+    const estanteriaPosY = 165;
+    // ==============================================
+    this.estanteriaZone = {
+      x: this.mapOffsetX + estanteriaPosX * this.mapScale,
+      y: this.mapOffsetY + estanteriaPosY * this.mapScale,
+      radius: 55
+    };
+
+    this.estanteriaHint = this.add.text(0, 0, '[E] Examinar estantería', {
+      fontSize: '12px', color: '#ffffff', backgroundColor: '#000000aa', padding: { x: 8, y: 4 }
+    }).setOrigin(0.5).setDepth(1002).setVisible(false);
+
+    // ============================================
     // UI
     // ============================================
 
@@ -203,8 +285,13 @@ export default class Scene_Armeria extends Phaser.Scene {
     this.exiting = false;
     this.nearExit = false;
 
-    // Fade in
+    // Fade in y pensamiento de entrada
     this.cameras.main.fadeIn(1000, 0, 0, 0);
+    this.cameras.main.once('camerafadeincomplete', () => {
+      if (!this.rafaelloLiberado) {
+        this.showThought('¿Qué está pasando? ¿Por qué el capitán de la guardia está vigilado como un rehén?');
+      }
+    });
   }
 
   checkCollision(x, y, radius = 16) {
@@ -225,11 +312,28 @@ export default class Scene_Armeria extends Phaser.Scene {
   }
 
   update() {
-    if (this.exiting) return;
+    if (this.exiting || this.mostrandoAtrapado) return;
 
     // Validar marloSpeed al inicio
     if (typeof this.marloSpeed !== 'number' || isNaN(this.marloSpeed)) {
       this.marloSpeed = 150;
+    }
+
+    const delta = this.game.loop.delta / 1000;
+
+    // Actualizar guardia (siempre, aunque Marlo esté bloqueado)
+    if (this.guardia && !this.rafaelloLiberado) {
+      this.updateGuardia(delta);
+    }
+
+    // Congelar a Marlo si hay diálogo o está siendo atrapado
+    if (this.dialogueActive || this.atrapado) {
+      this.marlo.stop();
+      this.marlo.setTexture(`marlo_idle_${this.marloDirection}`);
+      this.exitHint.setVisible(false);
+      this.rafaelloHint.setVisible(false);
+      this.estanteriaHint.setVisible(false);
+      return;
     }
 
     // Movimiento
@@ -266,7 +370,6 @@ export default class Scene_Armeria extends Phaser.Scene {
       vy *= 0.707;
     }
 
-    const delta = this.game.loop.delta / 1000;
     const newX = this.marlo.x + vx * this.marloSpeed * delta;
     const newY = this.marlo.y + vy * this.marloSpeed * delta;
 
@@ -295,16 +398,11 @@ export default class Scene_Armeria extends Phaser.Scene {
 
     this.marlo.setDepth(this.marlo.y);
 
-    // Mostrar/ocultar hint de salida segun proximidad a la zona de salida
+    // Hint salida a bodega
     if (this.exitBodegaZone) {
       const exitCenterX = this.exitBodegaZone.x + this.exitBodegaZone.width / 2;
       const exitCenterY = this.exitBodegaZone.y + this.exitBodegaZone.height / 2;
-      const distExit = Phaser.Math.Distance.Between(
-        this.marlo.x, this.marlo.y,
-        exitCenterX, exitCenterY
-      );
-
-      // Mostrar hint cuando esta cerca (radio de 60 pixels)
+      const distExit = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, exitCenterX, exitCenterY);
       this.nearExit = distExit < 60;
       if (this.nearExit) {
         this.exitHint.setPosition(exitCenterX, exitCenterY - 30);
@@ -313,13 +411,299 @@ export default class Scene_Armeria extends Phaser.Scene {
         this.exitHint.setVisible(false);
       }
     }
+
+    // Hint Rafaello (solo si ya fue liberado)
+    if (this.rafaelloLiberado && this.rafaello) {
+      const distR = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.rafaello.x, this.rafaello.y);
+      if (distR < 70) {
+        this.rafaelloHint.setPosition(this.rafaello.x, this.rafaello.y - 50);
+        this.rafaelloHint.setVisible(true);
+      } else {
+        this.rafaelloHint.setVisible(false);
+      }
+    }
+
+    // Hint estantería (solo visible cuando el guardia ha salido y la puerta aún no está abierta)
+    if (this.guardiaState === 'exited' && !this.estanteriaAbierta) {
+      const distE = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.estanteriaZone.x, this.estanteriaZone.y);
+      if (distE < this.estanteriaZone.radius) {
+        this.estanteriaHint.setPosition(this.estanteriaZone.x, this.estanteriaZone.y - 30);
+        this.estanteriaHint.setVisible(true);
+      } else {
+        this.estanteriaHint.setVisible(false);
+      }
+    } else {
+      this.estanteriaHint.setVisible(false);
+    }
+
+    // Detección del guardia
+    if (this.guardia && !this.rafaelloLiberado) {
+      this.checkDeteccion();
+    }
+
+    // Diálogo escuchado (proximitad al guardia en waypoint 0)
+    if (!this.escuchadoDialogo && !this.rafaelloLiberado) {
+      this.checkEscucha();
+    }
   }
 
   handleInteraction() {
-    // Si esta cerca de la salida, volver a bodega
+    if (this.exiting || this.atrapado || this.dialogueActive) return;
+
+    // Estantería / puerta secreta (solo cuando guardia está fuera)
+    if (this.guardiaState === 'exited' && !this.estanteriaAbierta) {
+      const distE = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.estanteriaZone.x, this.estanteriaZone.y);
+      if (distE < this.estanteriaZone.radius) {
+        this.interactEstanteria();
+        return;
+      }
+    }
+
+    // Rafaello (solo si ya fue liberado)
+    if (this.rafaelloLiberado && this.rafaello) {
+      const distR = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.rafaello.x, this.rafaello.y);
+      if (distR < 70) {
+        this.showThought('Rafaello: "Gracias, niño. Aún no estoy listo. Vuelve pronto."');
+        return;
+      }
+    }
+
+    // Salida a bodega
     if (this.nearExit) {
       this.volverABodega();
     }
+  }
+
+  // ==========================================
+  // GUARDIA CORRUPTO — PATRULLA
+  // ==========================================
+
+  updateGuardia(delta) {
+    if (this.guardiaState === 'exited') {
+      this.guardiaExitTimer -= delta * 1000;
+      if (this.guardiaExitTimer <= 0) {
+        // Regresa desde la estantería
+        this.guardiaState = 'patrol';
+        this.guardiaWaypointIndex = 2;
+        this.guardia.setVisible(true);
+      }
+      return;
+    }
+
+    const target = this.guardiaWaypoints[this.guardiaWaypointIndex];
+    const dist = Phaser.Math.Distance.Between(this.guardia.x, this.guardia.y, target.x, target.y);
+
+    if (dist < 8) {
+      if (this.guardiaWaypointIndex === 2) {
+        // Llegó a la estantería — sale por la puerta secreta
+        this.guardia.setVisible(false);
+        this.guardiaState = 'exited';
+        this.guardiaExitTimer = this.guardiaExitDuration;
+        this.guardiaWaypointIndex = 0;
+      } else {
+        this.guardiaWaypointIndex = (this.guardiaWaypointIndex + 1) % this.guardiaWaypoints.length;
+      }
+    } else {
+      const angle = Phaser.Math.Angle.Between(this.guardia.x, this.guardia.y, target.x, target.y);
+      this.guardia.x += Math.cos(angle) * this.guardiaSpeed * delta;
+      this.guardia.y += Math.sin(angle) * this.guardiaSpeed * delta;
+      this.guardia.setDepth(this.guardia.y);
+    }
+  }
+
+  checkDeteccion() {
+    if (this.guardiaState === 'exited' || this.atrapado || this.dialogueActive) return;
+    const dist = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.guardia.x, this.guardia.y);
+    if (dist < this.guardiaDetectionRadius) {
+      this.atraparMarlo();
+    }
+  }
+
+  checkEscucha() {
+    if (this.escuchadoDialogo || this.dialogueActive || this.guardiaState === 'exited') return;
+    // Marlo escucha si está cerca pero no tan cerca como para ser detectado,
+    // y el guardia está en el waypoint 0 (junto a Rafaello)
+    if (this.guardiaWaypointIndex !== 0) return;
+    const distGuardia = Phaser.Math.Distance.Between(this.marlo.x, this.marlo.y, this.guardia.x, this.guardia.y);
+    if (distGuardia > this.guardiaDetectionRadius && distGuardia < 160) {
+      this.escuchadoDialogo = true;
+      this.startOverheardDialogue();
+    }
+  }
+
+  // ==========================================
+  // GUARDIA CORRUPTO — DETECCIÓN Y RESPAWN
+  // ==========================================
+
+  atraparMarlo() {
+    if (this.atrapado) return;
+    this.atrapado = true;
+    this.mostrandoAtrapado = true;
+    this.marlo.stop();
+    this.marlo.setTexture(`marlo_idle_${this.marloDirection}`);
+    this.cameras.main.fadeOut(600, 0, 0, 0);
+    this.cameras.main.once('camerafadeoutcomplete', () => {
+      this.mostrarMensajeAtrapado();
+    });
+  }
+
+  mostrarMensajeAtrapado() {
+    const { width, height } = this.scale;
+    this.cameras.main.fadeIn(600, 0, 0, 0);
+    const msgs = [];
+
+    // Primera vez: mostrar tutorial
+    if (this.primeraVezAtrapado) {
+      this.primeraVezAtrapado = false;
+      msgs.push(this.add.text(width / 2, height / 2 - 35,
+        'No dejes que te vean los enemigos.',
+        { fontFamily: 'Arial', fontSize: '20px', color: '#ff4444', fontStyle: 'bold', align: 'center' }
+      ).setOrigin(0.5).setDepth(20000));
+    }
+
+    msgs.push(this.add.text(width / 2, height / 2 + 15,
+      'El guardia te ha visto...',
+      { fontFamily: 'Arial', fontSize: '16px', color: '#cccccc', align: 'center' }
+    ).setOrigin(0.5).setDepth(20000));
+
+    this.time.delayedCall(2500, () => {
+      msgs.forEach(m => m.destroy());
+      this.respawnMarlo();
+    });
+  }
+
+  respawnMarlo() {
+    // Volver al spawn point
+    const objectLayer = this.armeriaMap.getObjectLayer('colliders');
+    let spawnX = this.mapOffsetX + 224 * this.mapScale;
+    let spawnY = this.mapOffsetY + 265 * this.mapScale;
+    if (objectLayer) {
+      const sp = objectLayer.objects.find(o => o.name === 'spawn');
+      if (sp) {
+        spawnX = this.mapOffsetX + sp.x * this.mapScale;
+        spawnY = this.mapOffsetY + sp.y * this.mapScale;
+      }
+    }
+    this.marlo.x = spawnX;
+    this.marlo.y = spawnY;
+    this.marloDirection = 'south';
+    this.marlo.setTexture('marlo_idle_south');
+
+    // Resetear guardia al primer waypoint
+    const g0 = this.guardiaWaypoints[0];
+    this.guardia.x = g0.x;
+    this.guardia.y = g0.y;
+    this.guardia.setVisible(true);
+    this.guardiaState = 'patrol';
+    this.guardiaWaypointIndex = 0;
+
+    this.atrapado = false;
+    this.mostrandoAtrapado = false;
+  }
+
+  // ==========================================
+  // DIÁLOGO ESCUCHADO (guardia ↔ Rafaello)
+  // ==========================================
+
+  startOverheardDialogue() {
+    this.dialogueActive = true;
+    this.marlo.stop();
+    this.marlo.setTexture(`marlo_idle_${this.marloDirection}`);
+    this.overheardLines = [
+      { speaker: 'Guardia',  text: 'El Comité quiere silencio, capitán. Esta noche no existió nada.' },
+      { speaker: 'Rafaello', text: 'Encontré el sello. Eso no puede no existir.' },
+      { speaker: 'Guardia',  text: 'Entregue el sello o esto se complica para usted, ¿entiende?' },
+      { speaker: 'Rafaello', text: 'Llevo veinte años sirviendo a este palacio.' },
+      { speaker: 'Guardia',  text: 'Y querrá veinte más. Piénselo.' },
+      { speaker: 'Rafaello', text: '...' },
+      { speaker: 'Guardia',  text: 'Bien. Haré otra ronda. Cuando vuelva, más le vale tener una respuesta.' },
+    ];
+    this.overheardIndex = 0;
+    this.showOverheardLine();
+  }
+
+  showOverheardLine() {
+    this.clearDialogue();
+    const line = this.overheardLines[this.overheardIndex];
+    if (!line) {
+      this.endOverheardDialogue();
+      return;
+    }
+
+    const { width } = this.scale;
+    const color = line.speaker === 'Guardia' ? '#cc4444' : '#7ba3c4';
+
+    const bubble = this.add.text(width / 2, 185, `${line.speaker}: "${line.text}"`, {
+      fontFamily: 'Arial', fontSize: '16px', color: color,
+      backgroundColor: '#000000cc', padding: { x: 14, y: 8 },
+      wordWrap: { width: 520 }, align: 'center'
+    }).setOrigin(0.5).setDepth(10000);
+    this.dialogueElements.push(bubble);
+
+    const hint = this.add.text(width / 2, bubble.y + bubble.height / 2 + 20, '[Espacio] Continuar', {
+      fontFamily: 'Arial', fontSize: '12px', color: '#888888', fontStyle: 'italic'
+    }).setOrigin(0.5).setDepth(10000);
+    this.dialogueElements.push(hint);
+
+    this.input.keyboard.once('keydown-SPACE', () => {
+      if (this.dialogueActive) {
+        this.overheardIndex++;
+        this.showOverheardLine();
+      }
+    });
+  }
+
+  endOverheardDialogue() {
+    this.clearDialogue();
+    this.dialogueActive = false;
+    this.showThought('Rafaello está retenido. Necesito encontrar la forma de llegar hasta él.');
+  }
+
+  // ==========================================
+  // ESTANTERÍA / PUERTA SECRETA
+  // ==========================================
+
+  interactEstanteria() {
+    if (!this.globalFlags.botonRecogido) {
+      this.showThought('Hay un mecanismo extraño en la madera... necesito algo que encaje.');
+      return;
+    }
+    // El botón de ópalo encaja con el símbolo de la cerradura
+    this.estanteriaAbierta = true;
+    this.rafaelloLiberado = true;
+    if (this.guardia) this.guardia.setVisible(false); // Guardia ya no regresa
+    this.showThought('El botón de ópalo encaja perfectamente. La estantería se mueve...');
+    this.time.delayedCall(3500, () => {
+      this.showThought('Rafaello: "¿Quién eres tú? No importa... gracias."');
+    });
+  }
+
+  // ==========================================
+  // FEEDBACK VISUAL
+  // ==========================================
+
+  clearDialogue() {
+    if (this.dialogueElements) {
+      this.dialogueElements.forEach(el => el.destroy());
+      this.dialogueElements = [];
+    }
+  }
+
+  showThought(text) {
+    if (this.dialogueActive) return;
+    this.dialogueActive = true;
+    this.clearDialogue();
+    const { width } = this.scale;
+    const bubble = this.add.text(width / 2, 165, text, {
+      fontFamily: 'Arial', fontSize: '16px', color: '#aaffaa', fontStyle: 'italic',
+      backgroundColor: '#000000aa', padding: { x: 12, y: 8 },
+      wordWrap: { width: 520 }, align: 'center'
+    }).setOrigin(0.5).setDepth(20000);
+    this.dialogueElements.push(bubble);
+    this.time.delayedCall(3000, () => {
+      this.clearDialogue();
+      this.dialogueActive = false;
+    });
   }
 
   volverABodega() {
@@ -328,18 +712,33 @@ export default class Scene_Armeria extends Phaser.Scene {
 
     this.cameras.main.fadeOut(1000, 0, 0, 0);
     this.cameras.main.once('camerafadeoutcomplete', () => {
-      this.scene.start('Scene_Bodega', { fromArmeria: true, globalFlags: this.loadData.globalFlags });
+      this.scene.start('Scene_Bodega', { fromArmeria: true, globalFlags: this.getMergedGlobalFlags() });
     });
+  }
+
+  getMergedGlobalFlags() {
+    return {
+      ...this.globalFlags,
+      rafaelloLiberado: this.rafaelloLiberado,
+      selloRecogido: this.selloRecogido,
+      escuchadoDialogo: this.escuchadoDialogo,
+      primeraVezAtrapado: this.primeraVezAtrapado,
+    };
   }
 
   shutdown() {
     this.input.keyboard.off('keydown-ESC');
     this.input.keyboard.off('keydown-E');
+    this.input.keyboard.off('keydown-SPACE');
+    this.tweens.killAll();
   }
 
-  // Datos especificos de esta escena para guardar
-  // Placeholder para futuros items/flags
   getSaveData() {
-    return {};
+    return {
+      rafaelloLiberado: this.rafaelloLiberado,
+      selloRecogido: this.selloRecogido,
+      escuchadoDialogo: this.escuchadoDialogo,
+      primeraVezAtrapado: this.primeraVezAtrapado,
+    };
   }
 }
