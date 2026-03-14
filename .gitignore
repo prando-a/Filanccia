@@ -22,5 +22,8 @@ npm-debug.log*
 *.tmp
 *.temp
 
-# Reference project (if you want to exclude it from commits)
-# referencia/
+# Files
+.env
+.claude/
+LOG.md
+CLAUDE.md
