@@ -3,6 +3,7 @@
 // El Alcalde da el discurso inaugural del carnaval
 
 import SettingsUI from '../ui/SettingsUI.js';
+import TypewriterText from '../utils/TypewriterText.js';
 
 export default class Scene_1_2 extends Phaser.Scene {
   constructor() {
@@ -138,25 +139,25 @@ export default class Scene_1_2 extends Phaser.Scene {
     // CAJA DE DIÁLOGO
     // ============================================
 
-    this.dialogueBox = this.add.container(centerX, height - 80);
+    this.dialogueBox = this.add.container(centerX, height - 95);
     this.dialogueBox.setVisible(false).setDepth(1000);
 
-    const boxBg = this.add.rectangle(0, 0, width - 60, 120, 0x000000, 0.85);
+    const boxBg = this.add.rectangle(0, 0, width - 60, 150, 0x000000, 0.85);
     boxBg.setStrokeStyle(2, 0xffffff);
 
-    this.speakerText = this.add.text(-width / 2 + 50, -40, '', {
+    this.speakerText = this.add.text(-width / 2 + 50, -55, '', {
       fontSize: '16px',
       color: '#ffd700',
       fontStyle: 'bold'
     });
 
-    this.dialogueText = this.add.text(-width / 2 + 50, -15, '', {
+    this.dialogueText = this.add.text(-width / 2 + 50, -30, '', {
       fontSize: '18px',
       color: '#ffffff',
       wordWrap: { width: width - 100 }
     });
 
-    this.continueHint = this.add.text(width / 2 - 70, 40, '[ESPACIO]', {
+    this.continueHint = this.add.text(width / 2 - 70, 55, '[ESPACIO]', {
       fontSize: '12px',
       color: '#888888'
     });
@@ -210,6 +211,12 @@ export default class Scene_1_2 extends Phaser.Scene {
   }
 
   handleInput() {
+    // Si el typewriter está escribiendo, saltar al final
+    if (this._typewriter && this._typewriter.isTyping) {
+      this._typewriter.skip();
+      return;
+    }
+
     if (this.waitingForInput && !this.isAnimating) {
       this.waitingForInput = false;
       this.dialogueBox.setVisible(false);
@@ -220,9 +227,17 @@ export default class Scene_1_2 extends Phaser.Scene {
 
   showDialogue(speaker, text) {
     this.speakerText.setText(speaker);
-    this.dialogueText.setText(text);
     this.dialogueBox.setVisible(true);
-    this.waitingForInput = true;
+    this.continueHint.setVisible(false);
+
+    if (this._typewriter) this._typewriter.destroy();
+    this._typewriter = new TypewriterText(this, this.dialogueText, text, {
+      charDelay: 30,
+      onComplete: () => {
+        this.continueHint.setVisible(true);
+        this.waitingForInput = true;
+      }
+    });
   }
 
   runSequence() {

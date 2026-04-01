@@ -1,17 +1,25 @@
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Filanccia</title>
   <style>
-    html, body { margin: 0; height: 100%; background: #000; }
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      background: #000;
+    }
+
     body {
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
     }
+
     #game-container {
       width: 800px;
       height: 600px;
@@ -21,29 +29,39 @@
       align-items: center;
       justify-content: center;
     }
-    canvas { max-width: none; max-height: none; }
-    #game-container, canvas {
+
+    canvas {
+      max-width: none;
+      max-height: none;
+    }
+
+    #game-container,
+    canvas {
       touch-action: none;
       -webkit-user-select: none;
       user-select: none;
     }
+
     /* Responsive: adapta al viewport manteniendo 4:3 */
-    @media (max-width: 900px), (max-height: 700px) {
+    @media (max-width: 900px),
+    (max-height: 700px) {
       #game-container {
         width: min(100vw, calc(100vh * 4 / 3));
         height: min(100vh, calc(100vw * 3 / 4));
       }
     }
+
     /* Custom font - block until loaded */
     @font-face {
       font-family: 'GameFont';
-      src: url('./assets/fonts/gameFont.ttf') format('truetype');
+      src: url('src/assets/fonts/gameFont.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
       font-display: block;
     }
   </style>
 </head>
+
 <body>
   <div id="game-container"></div>
 
@@ -54,4 +72,5 @@
   <!-- Game entry point -->
   <script type="module" src="./src/main.js"></script>
 </body>
+
 </html>

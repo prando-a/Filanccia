@@ -3,6 +3,7 @@
 // Accesible desde la bodega
 
 import SettingsUI from '../ui/SettingsUI.js';
+import TypewriterText from '../utils/TypewriterText.js';
 
 export default class Scene_Armeria extends Phaser.Scene {
   constructor() {
@@ -696,6 +697,14 @@ export default class Scene_Armeria extends Phaser.Scene {
   // ==========================================
 
   clearDialogue() {
+    // Limpiar typewriter
+    if (this._typewriter) { this._typewriter.destroy(); this._typewriter = null; }
+    if (this._skipHandler) {
+      this.input.keyboard.off('keydown-SPACE', this._skipHandler);
+      this.input.off('pointerdown', this._skipHandler);
+      this._skipHandler = null;
+    }
+
     if (this.dialogueElements) {
       this.dialogueElements.forEach(el => el.destroy());
       this.dialogueElements = [];
@@ -710,7 +719,7 @@ export default class Scene_Armeria extends Phaser.Scene {
     const bubble = this.add.text(width / 2, 165, text, {
       fontFamily: 'Arial', fontSize: '16px', color: '#aaffaa', fontStyle: 'italic',
       backgroundColor: '#000000aa', padding: { x: 12, y: 8 },
-      wordWrap: { width: 520 }, align: 'center'
+      wordWrap: { width: 500 }, align: 'center'
     }).setOrigin(0.5).setDepth(20000);
     this.dialogueElements.push(bubble);
     this.time.delayedCall(3000, () => {
@@ -832,12 +841,33 @@ export default class Scene_Armeria extends Phaser.Scene {
     }).setDepth(10002);
     this.dialogueElements.push(speakerTxt);
 
-    const contentTxt = this.add.text(boxX + 20, boxY + 42, node.text, {
+    const contentTxt = this.add.text(boxX + 20, boxY + 42, '', {
       fontFamily: 'Arial', fontSize: '17px', color: '#E8E8E8', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
     }).setDepth(10002);
     this.dialogueElements.push(contentTxt);
 
     const optionsStartY = boxY + 42 + textHeight + 15;
+
+    // Typewriter — controles aparecen al terminar
+    if (this._typewriter) this._typewriter.destroy();
+    this._typewriter = new TypewriterText(this, contentTxt, node.text, {
+      charDelay: 30,
+      onComplete: () => this._showRafaelloNodeControls(node, nodeKey, boxX, boxWidth, optionsStartY)
+    });
+
+    this._skipHandler = () => {
+      if (this._typewriter && this._typewriter.isTyping) this._typewriter.skip();
+    };
+    this.input.keyboard.on('keydown-SPACE', this._skipHandler);
+    this.input.on('pointerdown', this._skipHandler);
+  }
+
+  _showRafaelloNodeControls(node, nodeKey, boxX, boxWidth, optionsStartY) {
+    if (this._skipHandler) {
+      this.input.keyboard.off('keydown-SPACE', this._skipHandler);
+      this.input.off('pointerdown', this._skipHandler);
+      this._skipHandler = null;
+    }
 
     if (node.options) {
       this.selectedOptionR = 0;
@@ -868,7 +898,6 @@ export default class Scene_Armeria extends Phaser.Scene {
       this.input.keyboard.on('keydown-ENTER', this.rafaelloKeySelectHandler);
       this.input.keyboard.on('keydown-SPACE', this.rafaelloKeySelectHandler);
     } else {
-      // Marcar sello como dado al llegar al nodo 'sello'
       if (nodeKey === 'sello') {
         this.rafaelloSelloDado = true;
       }

@@ -26,6 +26,53 @@
         }, 
         {
          "draworder":"topdown",
+         "id":3,
+         "name":"npc_paths",
+         "objects":[
+                {
+                 "ellipse":true,
+                 "height":32,
+                 "id":18,
+                 "name":"start",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":364,
+                 "y":133.333333333333
+                }, 
+                {
+                 "ellipse":true,
+                 "height":32,
+                 "id":19,
+                 "name":"end",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":124,
+                 "y":132.666666666667
+                }, 
+                {
+                 "ellipse":true,
+                 "height":32,
+                 "id":20,
+                 "name":"handcuffed",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":405.333333333333,
+                 "y":125.333333333333
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
          "id":2,
          "name":"colliders",
          "objects":[
@@ -151,7 +198,7 @@
                  "y":85.3333
                 }, 
                 {
-                 "height":65.9999666666666,
+                 "height":66,
                  "id":13,
                  "name":"",
                  "rotation":0,
@@ -162,7 +209,7 @@
                  "y":186.667
                 }, 
                 {
-                 "height":105.333333333333,
+                 "height":105.333,
                  "id":14,
                  "name":"",
                  "rotation":0,
@@ -170,7 +217,7 @@
                  "visible":true,
                  "width":190,
                  "x":286.667,
-                 "y":243.333666666667
+                 "y":243.334
                 }, 
                 {
                  "height":105.333,
@@ -211,8 +258,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":3,
- "nextobjectid":18,
+ "nextlayerid":4,
+ "nextobjectid":21,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

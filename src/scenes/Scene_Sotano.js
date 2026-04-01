@@ -3,6 +3,7 @@
 // Accesible a través de la trampilla
 
 import SettingsUI from '../ui/SettingsUI.js';
+import TypewriterText from '../utils/TypewriterText.js';
 
 export default class Scene_Sotano extends Phaser.Scene {
   constructor() {
@@ -556,7 +557,8 @@ export default class Scene_Sotano extends Phaser.Scene {
 
     const cam = this.cameras.main;
     this.minigameDialogueBubble = this.add.text(cam.width / 2, 160, text, {
-      fontFamily: 'Arial', fontSize: '16px', color: '#FFFFFF', backgroundColor: '#000000aa', padding: { x: 12, y: 8 }
+      fontFamily: 'Arial', fontSize: '16px', color: '#FFFFFF', backgroundColor: '#000000aa',
+      padding: { x: 12, y: 8 }, wordWrap: { width: 500 }, align: 'center'
     }).setOrigin(0.5).setScrollFactor(0).setDepth(20000);
 
     this.time.delayedCall(3000, () => {
@@ -702,12 +704,33 @@ export default class Scene_Sotano extends Phaser.Scene {
     }).setDepth(10002);
     this.dialogueElements.push(speakerTxt);
 
-    const contentTxt = this.add.text(boxX + 20, boxY + 42, node.text, {
+    const contentTxt = this.add.text(boxX + 20, boxY + 42, '', {
       fontFamily: 'Arial', fontSize: '17px', color: '#E8E8E8', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
     }).setDepth(10002);
     this.dialogueElements.push(contentTxt);
 
     const optionsStartY = boxY + 42 + textHeight + 15;
+
+    // Typewriter — controles aparecen al terminar
+    if (this._typewriter) this._typewriter.destroy();
+    this._typewriter = new TypewriterText(this, contentTxt, node.text, {
+      charDelay: 30,
+      onComplete: () => this._showDialogueNodeControls(node, boxX, boxWidth, optionsStartY)
+    });
+
+    this._skipHandler = () => {
+      if (this._typewriter && this._typewriter.isTyping) this._typewriter.skip();
+    };
+    this.input.keyboard.on('keydown-SPACE', this._skipHandler);
+    this.input.on('pointerdown', this._skipHandler);
+  }
+
+  _showDialogueNodeControls(node, boxX, boxWidth, optionsStartY) {
+    if (this._skipHandler) {
+      this.input.keyboard.off('keydown-SPACE', this._skipHandler);
+      this.input.off('pointerdown', this._skipHandler);
+      this._skipHandler = null;
+    }
 
     if (node.options) {
       this.selectedOption = 0;
@@ -738,7 +761,6 @@ export default class Scene_Sotano extends Phaser.Scene {
       this.input.keyboard.on('keydown-ENTER', this.keySelectHandler);
       this.input.keyboard.on('keydown-SPACE', this.keySelectHandler);
     } else {
-      // Nodo lineal — botón continuar
       const continueTxt = this.add.text(boxX + boxWidth - 110, optionsStartY, '[Continuar]', {
         fontFamily: 'Arial', fontSize: '13px', color: '#888888', fontStyle: 'italic'
       }).setDepth(10002).setInteractive().on('pointerdown', () => this.nextPiccoloNode());
@@ -779,6 +801,14 @@ export default class Scene_Sotano extends Phaser.Scene {
   }
 
   clearDialogue() {
+    // Limpiar typewriter
+    if (this._typewriter) { this._typewriter.destroy(); this._typewriter = null; }
+    if (this._skipHandler) {
+      this.input.keyboard.off('keydown-SPACE', this._skipHandler);
+      this.input.off('pointerdown', this._skipHandler);
+      this._skipHandler = null;
+    }
+
     // Limpiar listeners de teclado
     if (this.keyUpHandler) this.input.keyboard.off('keydown-UP', this.keyUpHandler);
     if (this.keyDownHandler) this.input.keyboard.off('keydown-DOWN', this.keyDownHandler);

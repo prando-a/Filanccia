@@ -3,6 +3,7 @@
 // Marlo explora la bodega en busca de pistas
 
 import SettingsUI from '../ui/SettingsUI.js';
+import TypewriterText from '../utils/TypewriterText.js';
 
 export default class Scene_Bodega extends Phaser.Scene {
   constructor() {
@@ -291,17 +292,18 @@ export default class Scene_Bodega extends Phaser.Scene {
     }).setOrigin(0.5).setDepth(1000);
 
     // Caja de pensamiento
-    this.thoughtBox = this.add.container(centerX, height - 80);
+    this.thoughtBox = this.add.container(centerX, height - 95);
     this.thoughtBox.setVisible(false).setDepth(1000);
 
-    const thoughtBg = this.add.rectangle(0, 0, width - 60, 100, 0x000000, 0.7);
+    const thoughtBg = this.add.rectangle(0, 0, width - 60, 130, 0x000000, 0.7);
     thoughtBg.setStrokeStyle(2, 0x4a7c4e);
 
     this.thoughtText = this.add.text(0, 0, '', {
       fontSize: '18px',
       color: '#aaffaa',
       fontStyle: 'italic',
-      align: 'center'
+      align: 'center',
+      wordWrap: { width: width - 120 }
     }).setOrigin(0.5);
 
     this.thoughtBox.add([thoughtBg, this.thoughtText]);
@@ -372,6 +374,8 @@ export default class Scene_Bodega extends Phaser.Scene {
         this.settingsUI.toggle();
       } else if (this.inventoryVisible) {
         this.toggleInventory();
+      } else if (this._typewriter && this._typewriter.isTyping) {
+        this._typewriter.skip();
       } else if (this.waitingForInput) {
         this.waitingForInput = false;
         this.thoughtBox.setVisible(false);
@@ -400,6 +404,12 @@ export default class Scene_Bodega extends Phaser.Scene {
 
   handleInteraction() {
     if (this.exiting) return;
+
+    // Si el typewriter está escribiendo, saltar al final
+    if (this._typewriter && this._typewriter.isTyping) {
+      this._typewriter.skip();
+      return;
+    }
 
     if (this.waitingForInput) {
       this.waitingForInput = false;
@@ -478,9 +488,15 @@ export default class Scene_Bodega extends Phaser.Scene {
   }
 
   showThought(text) {
-    this.thoughtText.setText(`"${text}"`);
     this.thoughtBox.setVisible(true);
-    this.waitingForInput = true;
+
+    if (this._typewriter) this._typewriter.destroy();
+    this._typewriter = new TypewriterText(this, this.thoughtText, `"${text}"`, {
+      charDelay: 30,
+      onComplete: () => {
+        this.waitingForInput = true;
+      }
+    });
   }
 
   checkCollision(x, y, radius = 16) {
@@ -528,7 +544,8 @@ export default class Scene_Bodega extends Phaser.Scene {
     // Bubble
     const cam = this.cameras.main;
     this.minigameDialogueBubble = this.add.text(cam.width / 2, 160, text, {
-      fontFamily: 'Arial', fontSize: '16px', color: '#FFFFFF', backgroundColor: '#000000aa', padding: { x: 12, y: 8 }
+      fontFamily: 'Arial', fontSize: '16px', color: '#FFFFFF', backgroundColor: '#000000aa',
+      padding: { x: 12, y: 8 }, wordWrap: { width: 500 }, align: 'center'
     }).setOrigin(0.5).setScrollFactor(0).setDepth(20000);
 
     // Auto-hide
@@ -611,12 +628,35 @@ export default class Scene_Bodega extends Phaser.Scene {
     }).setDepth(10002);
     this.dialogueElements.push(speakerTxt);
 
-    const contentTxt = this.add.text(boxX + 20, boxY + 45, step.text, {
+    const contentTxt = this.add.text(boxX + 20, boxY + 45, '', {
       fontFamily: 'Arial', fontSize: '18px', color: '#FFFFFF', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
     }).setDepth(10002);
     this.dialogueElements.push(contentTxt);
 
     const optionsStartY = boxY + 45 + textHeight + 15;
+
+    // Efecto typewriter — las opciones aparecen al terminar
+    if (this._typewriter) this._typewriter.destroy();
+    this._typewriter = new TypewriterText(this, contentTxt, step.text, {
+      charDelay: 30,
+      onComplete: () => this._showDialogueStepControls(step, boxX, boxWidth, optionsStartY)
+    });
+
+    // Saltar typewriter con SPACE o click
+    this._skipHandler = () => {
+      if (this._typewriter && this._typewriter.isTyping) this._typewriter.skip();
+    };
+    this.input.keyboard.on('keydown-SPACE', this._skipHandler);
+    this.input.on('pointerdown', this._skipHandler);
+  }
+
+  _showDialogueStepControls(step, boxX, boxWidth, optionsStartY) {
+    // Limpiar skip handlers
+    if (this._skipHandler) {
+      this.input.keyboard.off('keydown-SPACE', this._skipHandler);
+      this.input.off('pointerdown', this._skipHandler);
+      this._skipHandler = null;
+    }
 
     if (step.options) {
       this.selectedOption = 0;
@@ -669,9 +709,19 @@ export default class Scene_Bodega extends Phaser.Scene {
 
     const boxWidth = 500;
     const boxX = (width - boxWidth) / 2;
-    const boxY = 150;
+    const boxY = 120;
 
-    const dialogueBox = this.add.rectangle(boxX + boxWidth / 2, boxY + 50, boxWidth, 100, 0x1a1a1a, 0.95)
+    // Medir altura real del texto para evitar overflow
+    const tempText = this.add.text(0, 0, response, {
+      fontFamily: 'Arial', fontSize: '18px', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
+    }).setVisible(false);
+    const textHeight = tempText.height;
+    tempText.destroy();
+
+    const headerHeight = 40;
+    const totalBoxHeight = headerHeight + textHeight + 50;
+
+    const dialogueBox = this.add.rectangle(boxX + boxWidth / 2, boxY + totalBoxHeight / 2, boxWidth, totalBoxHeight, 0x1a1a1a, 0.95)
       .setStrokeStyle(2, 0xffd700).setDepth(10001);
     this.dialogueElements.push(dialogueBox);
 
@@ -680,17 +730,38 @@ export default class Scene_Bodega extends Phaser.Scene {
     }).setDepth(10002);
     this.dialogueElements.push(speakerTxt);
 
-    const contentTxt = this.add.text(boxX + 20, boxY + 45, response, {
-      fontFamily: 'Arial', fontSize: '18px', color: '#FFFFFF', wordWrap: { width: boxWidth - 40 }
+    const contentTxt = this.add.text(boxX + 20, boxY + 45, '', {
+      fontFamily: 'Arial', fontSize: '18px', color: '#FFFFFF', lineSpacing: 8, wordWrap: { width: boxWidth - 40 }
     }).setDepth(10002);
     this.dialogueElements.push(contentTxt);
 
-    const continueTxt = this.add.text(boxX + boxWidth - 100, boxY + 70, '[Continuar]', {
-      fontFamily: 'Arial', fontSize: '14px', color: '#AAAAAA', fontStyle: 'italic'
-    }).setDepth(10002).setInteractive().on('pointerdown', () => this.nextDialogueStep());
-    this.dialogueElements.push(continueTxt);
+    const continueY = boxY + 45 + textHeight + 10;
 
-    this.input.keyboard.once('keydown-SPACE', () => this.nextDialogueStep());
+    // Typewriter con [Continuar] al terminar
+    if (this._typewriter) this._typewriter.destroy();
+    this._typewriter = new TypewriterText(this, contentTxt, response, {
+      charDelay: 30,
+      onComplete: () => {
+        if (this._skipHandler) {
+          this.input.keyboard.off('keydown-SPACE', this._skipHandler);
+          this.input.off('pointerdown', this._skipHandler);
+          this._skipHandler = null;
+        }
+
+        const continueTxt = this.add.text(boxX + boxWidth - 100, continueY, '[Continuar]', {
+          fontFamily: 'Arial', fontSize: '14px', color: '#AAAAAA', fontStyle: 'italic'
+        }).setDepth(10002).setInteractive().on('pointerdown', () => this.nextDialogueStep());
+        this.dialogueElements.push(continueTxt);
+
+        this.input.keyboard.once('keydown-SPACE', () => this.nextDialogueStep());
+      }
+    });
+
+    this._skipHandler = () => {
+      if (this._typewriter && this._typewriter.isTyping) this._typewriter.skip();
+    };
+    this.input.keyboard.on('keydown-SPACE', this._skipHandler);
+    this.input.on('pointerdown', this._skipHandler);
   }
 
   nextDialogueStep() {
@@ -703,6 +774,14 @@ export default class Scene_Bodega extends Phaser.Scene {
   }
 
   clearDialogue() {
+    // Limpiar typewriter
+    if (this._typewriter) { this._typewriter.destroy(); this._typewriter = null; }
+    if (this._skipHandler) {
+      this.input.keyboard.off('keydown-SPACE', this._skipHandler);
+      this.input.off('pointerdown', this._skipHandler);
+      this._skipHandler = null;
+    }
+
     if (this.keyUpHandler) this.input.keyboard.off('keydown-UP', this.keyUpHandler);
     if (this.keyDownHandler) this.input.keyboard.off('keydown-DOWN', this.keyDownHandler);
     if (this.keySelectHandler) {

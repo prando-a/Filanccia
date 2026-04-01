@@ -48,6 +48,10 @@ export default class PreloadScene extends Phaser.Scene {
 
     const charPath = 'src/assets/characters';
 
+    // ----- RETRATOS -----
+    this.load.image('marlo_portrait', `${charPath}/marlo_portrait.png`);
+    this.load.image('mother_portrait', `${charPath}/mother_portrait.png`);
+
     // ----- MARLO -----
     // Idle (4 direcciones) - con máscara (por defecto)
     this.load.image('marlo_idle_south', `${charPath}/marloIdleSouth.png`);
