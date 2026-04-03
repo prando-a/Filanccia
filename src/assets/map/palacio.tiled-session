@@ -24,6 +24,7 @@
         },
         "armeria.tmx": {
             "expandedObjectLayers": [
+                3,
                 2
             ],
             "scale": 1.5,
@@ -130,9 +131,9 @@
     ],
     "project": "palacio.tiled-project",
     "recentFiles": [
-        "scene1.tmx",
         "armeria.json",
         "armeria.tmx",
+        "scene1.tmx",
         "bodega.tmx",
         "sotano.json",
         "bodega.json",

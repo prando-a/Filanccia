@@ -107,15 +107,15 @@ export default class Scene_1_1 extends Phaser.Scene {
       this.showAmbientText('Los ojos de cristal de cien máscaras siguen a nadie y a todos. La luna se enreda en los canales.');
     });
 
-    this.time.delayedCall(2200, () => {
+    this.time.delayedCall(7000, () => {
       this.showAmbientText('Un violín llora una tarantela entre risas ahogadas. El aire huele a dulce de almendra y humedad de piedra.');
     });
 
-    this.time.delayedCall(4000, () => {
+    this.time.delayedCall(13500, () => {
       this.showAmbientText('Entre dos arlequines, un espacio vacío se mueve contra la corriente de la multitud. Luego desaparece.');
     });
 
-    this.time.delayedCall(5800, () => {
+    this.time.delayedCall(20000, () => {
       this.showAmbientText('Las sombras de los balcones son tan profundas que podrían esconder rostros. O la ausencia de ellos.');
     });
 
@@ -196,7 +196,9 @@ export default class Scene_1_1 extends Phaser.Scene {
       color: '#cccccc',
       fontStyle: 'italic',
       backgroundColor: '#00000088',
-      padding: { x: 12, y: 6 }
+      padding: { x: 12, y: 6 },
+      wordWrap: { width: width - 80 },
+      align: 'center'
     }).setOrigin(0.5).setAlpha(0).setDepth(1000);
 
     this.tweens.add({
@@ -204,7 +206,7 @@ export default class Scene_1_1 extends Phaser.Scene {
       alpha: 1,
       duration: 800,
       onComplete: () => {
-        this.time.delayedCall(3000, () => {
+        this.time.delayedCall(4500, () => {
           this.tweens.add({
             targets: ambientText,
             alpha: 0,
