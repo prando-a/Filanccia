@@ -77,6 +77,17 @@
         "palacio.tmx#interior1": {
             "scaleInDock": 1
         },
+        "plaza.json": {
+            "scale": 1.0073958333333333,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 479.95036707682766,
+                "y": 570.2822872505428
+            }
+        },
+        "plaza.json#bodega": {
+            "scaleInDock": 1
+        },
         "scene1.tmx": {
             "scale": 11,
             "selectedLayer": 0,

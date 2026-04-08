@@ -17,7 +17,7 @@ export default class Scene_1_1 extends Phaser.Scene {
     // CONFIGURACIÓN
     // ============================================
 
-    this.totalDuration = 8000; // Duración total de la escena en ms
+    this.totalDuration = 30000; // Duración total de la escena en ms
     this.elapsedTime = 0;
     this.isEnding = false;
 
@@ -128,34 +128,34 @@ export default class Scene_1_1 extends Phaser.Scene {
   createScrollingGround() {
     const { width, height } = this.scale;
 
-    // Usar el tilemap para crear filas de adoquines
     const plazaMap = this.make.tilemap({ key: 'plaza_map' });
     const tileset = plazaMap.addTilesetImage('bodega', 'tileset_bodega');
 
-    // Escalar para cubrir ancho
     const actualTileWidth = 21 * 32;
     const scaleX = width / actualTileWidth;
 
-    // Crear múltiples copias del tilemap para scroll infinito
-    const mapHeight = plazaMap.heightInPixels;
-    const startY = height * 0.3; // Donde empieza el suelo
+    const mapHeight = plazaMap.heightInPixels; // 640px (20 rows × 32px)
+    const startY = height * 0.3;
 
-    // Necesitamos suficientes copias para cubrir desde startY hasta más allá de la pantalla
-    const numCopies = Math.ceil((height - startY + mapHeight) / mapHeight) + 1;
+    // Espaciar copias con solapamiento para tapar gaps de renderizado sub-pixel
+    const spacing = mapHeight - 4;
+    const numCopies = Math.ceil((height - startY + spacing) / spacing) + 1;
 
     this.groundTiles = [];
     for (let i = 0; i < numCopies; i++) {
       const tileMap = this.make.tilemap({ key: 'plaza_map' });
       const ts = tileMap.addTilesetImage('bodega', 'tileset_bodega');
-      const layer = tileMap.createLayer('Capa de patrones 1', ts, 0, startY + i * mapHeight);
+      const initialY = Math.round(startY - spacing + i * spacing);
+      const layer = tileMap.createLayer('Capa de patrones 1', ts, 0, initialY);
       layer.setScale(scaleX, 1);
       layer.setDepth(1);
       this.groundTiles.push(layer);
     }
 
     this.groundStartY = startY;
-    this.groundMapHeight = mapHeight;
+    this.groundSpacing = spacing;
     this.groundScrollSpeed = 2;
+    this.groundScrollOffset = 0;
   }
 
   createNPCs() {
@@ -234,22 +234,16 @@ export default class Scene_1_1 extends Phaser.Scene {
   }
 
   updateGround(delta) {
-    const { height } = this.scale;
+    const speedFactor = delta / 16.667;
+    this.groundScrollOffset += this.groundScrollSpeed * speedFactor;
 
-    // Mover todos los tiles hacia abajo
-    this.groundTiles.forEach(tile => {
-      tile.y += this.groundScrollSpeed;
+    const numTiles = this.groundTiles.length;
+    const totalCycle = numTiles * this.groundSpacing;
 
-      // Reciclar cuando sale de pantalla
-      if (tile.y > height + 50) {
-        // Encontrar el tile más arriba
-        let minY = Infinity;
-        this.groundTiles.forEach(t => {
-          if (t.y < minY) minY = t.y;
-        });
-        // Posicionar este tile justo encima
-        tile.y = minY - this.groundMapHeight;
-      }
+    this.groundTiles.forEach((tile, i) => {
+      const basePos = i * this.groundSpacing;
+      const pos = (basePos + this.groundScrollOffset) % totalCycle;
+      tile.y = Math.round(this.groundStartY - this.groundSpacing + pos);
     });
   }
 
@@ -258,8 +252,11 @@ export default class Scene_1_1 extends Phaser.Scene {
     const centerX = width / 2;
     const familyZone = 80;
 
+    // Normalizar velocidad a 60fps
+    const speedFactor = delta / 16.667;
+
     this.npcs.forEach(npc => {
-      npc.y += this.groundScrollSpeed;
+      npc.y += this.groundScrollSpeed * speedFactor;
       npc.setDepth(10 + npc.y);
 
       // Reciclar cuando sale de pantalla (evitando el centro)

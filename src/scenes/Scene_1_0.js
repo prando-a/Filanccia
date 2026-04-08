@@ -223,9 +223,9 @@ export default class Scene_1_0 extends Phaser.Scene {
     }
   }
 
-  showDialogue(speaker, text) {
+  showDialogue(speaker, text, portraitOverride) {
     const { width } = this.scale;
-    const portraitKey = this.portraitMap[speaker];
+    const portraitKey = portraitOverride || this.portraitMap[speaker];
 
     // Mostrar/ocultar retrato y ajustar ancho del texto
     if (portraitKey) {
@@ -306,6 +306,11 @@ export default class Scene_1_0 extends Phaser.Scene {
         break;
 
       case 7:
+        // Madre - última llamada (enfadada, antes de irse)
+        this.showDialogue('Madre', '¡Ya basta de muecas! Bajo la máscara, esta noche todos somos un solo corazón para Filanccia. ¡Ven!', 'mother_portrait_angry');
+        break;
+
+      case 8:
         // La madre sale del lugar
         this.isAnimating = true;
         this.madreSale(() => {
@@ -313,11 +318,6 @@ export default class Scene_1_0 extends Phaser.Scene {
           this.currentStep++;
           this.runSequence();
         });
-        break;
-
-      case 8:
-        // Madre - última llamada
-        this.showDialogue('Madre', '¡Ya basta de muecas! Bajo la máscara, esta noche todos somos un solo corazón para Filanccia. ¡Ven!');
         break;
 
       case 9:
