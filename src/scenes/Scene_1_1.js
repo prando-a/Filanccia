@@ -161,11 +161,23 @@ export default class Scene_1_1 extends Phaser.Scene {
   createNPCs() {
     const { width, height } = this.scale;
     const centerX = width / 2;
-    const familyZone = 80; // Ancho de la zona a evitar alrededor de la familia
+    const familyZone = 80;
 
-    // Crear NPCs distribuidos por el suelo (evitando el centro)
-    for (let i = 0; i < 25; i++) {
-      // Generar X evitando la zona central donde camina la familia
+    // Pool de 100 sprites únicos (adultos + niños, front + back)
+    const npcKeys = [];
+    for (let i = 1; i <= 25; i++) npcKeys.push(`crowd_npc_front_${i}`);
+    for (let i = 1; i <= 25; i++) npcKeys.push(`crowd_npc_back_${i}`);
+    for (let i = 26; i <= 50; i++) npcKeys.push(`crowd_npc_front_child_${i}`);
+    for (let i = 26; i <= 50; i++) npcKeys.push(`crowd_npc_back_child_${i}`);
+    Phaser.Utils.Array.Shuffle(npcKeys);
+
+    // Distribuir NPCs a lo largo de todo el recorrido de scroll (sin reciclaje)
+    // 30s × ~120px/s = 3600px de scroll total
+    const scrollDistance = 3600;
+    const minY = height * 0.35 - scrollDistance;
+    const maxY = height + 200;
+
+    for (let i = 0; i < npcKeys.length; i++) {
       let x;
       if (Phaser.Math.Between(0, 1) === 0) {
         x = Phaser.Math.Between(50, centerX - familyZone);
@@ -173,13 +185,11 @@ export default class Scene_1_1 extends Phaser.Scene {
         x = Phaser.Math.Between(centerX + familyZone, width - 50);
       }
 
-      const y = Phaser.Math.Between(height * 0.35, height + 200);
-      const scale = Phaser.Math.FloatBetween(0.6, 0.95);
+      const y = Phaser.Math.FloatBetween(minY, maxY);
+      const isChild = npcKeys[i].includes('child');
+      const scale = isChild ? Phaser.Math.FloatBetween(0.75, 0.85) : 1;
 
-      const npcIndex = Phaser.Math.Between(1, 15);
-      const npcKey = i % 3 === 0 ? `crowd_npc_front_${npcIndex}` : `crowd_npc_back_${npcIndex}`;
-
-      const npc = this.add.sprite(x, y, npcKey)
+      const npc = this.add.sprite(x, y, npcKeys[i])
         .setOrigin(0.5, 1)
         .setScale(scale)
         .setDepth(10 + y);
@@ -248,26 +258,11 @@ export default class Scene_1_1 extends Phaser.Scene {
   }
 
   updateNPCs(delta) {
-    const { width, height } = this.scale;
-    const centerX = width / 2;
-    const familyZone = 80;
-
-    // Normalizar velocidad a 60fps
     const speedFactor = delta / 16.667;
 
     this.npcs.forEach(npc => {
       npc.y += this.groundScrollSpeed * speedFactor;
       npc.setDepth(10 + npc.y);
-
-      // Reciclar cuando sale de pantalla (evitando el centro)
-      if (npc.y > height + 100) {
-        npc.y = Phaser.Math.Between(-100, -50);
-        if (Phaser.Math.Between(0, 1) === 0) {
-          npc.x = Phaser.Math.Between(50, centerX - familyZone);
-        } else {
-          npc.x = Phaser.Math.Between(centerX + familyZone, width - 50);
-        }
-      }
     });
   }
 

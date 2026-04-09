@@ -120,14 +120,16 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('mayor_atril', `${charPath}/town_mayor/atril.png`);
     this.load.image('mayor_estructura', `${charPath}/town_mayor/estructura.png`);
 
-    // ----- NPCS MULTITUD (Scene 1-2) -----
-    // Front-facing NPCs (facing camera)
-    for (let i = 1; i <= 15; i++) {
+    // ----- NPCS MULTITUD -----
+    // Adultos: front (25) y back (25)
+    for (let i = 1; i <= 25; i++) {
       this.load.image(`crowd_npc_front_${i}`, `${charPath}/npcs/front/npc${i}.png`);
-    }
-    // Back-facing NPCs (facing away from camera)
-    for (let i = 1; i <= 15; i++) {
       this.load.image(`crowd_npc_back_${i}`, `${charPath}/npcs/back/npc${i}.png`);
+    }
+    // Niños: front (25) y back (25)
+    for (let i = 26; i <= 50; i++) {
+      this.load.image(`crowd_npc_front_child_${i}`, `${charPath}/npcs/front/children/npc${i}.png`);
+      this.load.image(`crowd_npc_back_child_${i}`, `${charPath}/npcs/back/children/npc${i}.png`);
     }
 
     // ----- MÚSICOS (Scene 1-3) - Spritesheets con 4 frames de animación -----
