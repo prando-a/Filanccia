@@ -25,12 +25,12 @@ export default class Scene_1_2 extends Phaser.Scene {
       .setDisplaySize(width, height * 0.30);
 
     // Edificios a los lados de la plaza
-    this.add.image(0, (height * 0.45) -30, 'plaza_lado_izq')
+    this.add.image(0, (height * 0.45) - 30, 'plaza_lado_izq')
       .setOrigin(0, 1)
       .setDepth(2)
       .setScale(3);
 
-    this.add.image(width, (height * 0.45) -30, 'plaza_lado_derecho')
+    this.add.image(width, (height * 0.45) - 30, 'plaza_lado_derecho')
       .setOrigin(1, 1)
       .setDepth(2)
       .setScale(3);
@@ -52,10 +52,10 @@ export default class Scene_1_2 extends Phaser.Scene {
     // ============================================
 
     // Posición donde el alcalde está de pie (sobre los adoquines)
-    const alcaldeY = height * 0.46;
+    const alcaldeY = height * 0.40;
 
     // Estructura/tarima - su parte superior donde "pisa" el alcalde
-    const estructura = this.add.image(centerX, alcaldeY -140, 'mayor_estructura')
+    const estructura = this.add.image(centerX, alcaldeY - 140, 'mayor_estructura')
       .setOrigin(0.5, 0)
       .setDepth(10)
       .setScale(1.1);
