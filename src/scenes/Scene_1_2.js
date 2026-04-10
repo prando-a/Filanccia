@@ -66,9 +66,34 @@ export default class Scene_1_2 extends Phaser.Scene {
       .setDepth(20);
 
     // Atril delante del alcalde
-    const atril = this.add.image(centerX, alcaldeY, 'mayor_atril')
+    const atril = this.add.image(centerX, alcaldeY + 10, 'mayor_atril')
       .setOrigin(0.5, 1)
       .setDepth(30);
+
+    // ---- ANTORCHAS (ajustar posición aquí) ----
+    const flameOffsetX = 120;  // distancia horizontal desde el centro
+    const flameY = alcaldeY + 114; // altura vertical
+    const flameScale = 1.1;
+    const flameDepth = 25; // entre estructura(10) y atril(30)
+
+    this.anims.create({
+      key: 'flame_anim',
+      frames: this.anims.generateFrameNumbers('flame', { start: 0, end: 31 }),
+      frameRate: 12,
+      repeat: -1
+    });
+
+    this.flameLeft = this.add.sprite(centerX - flameOffsetX, flameY, 'flame')
+      .setOrigin(0.5, 1)
+      .setScale(flameScale)
+      .setDepth(flameDepth)
+      .play('flame_anim');
+
+    this.flameRight = this.add.sprite(centerX + flameOffsetX + 1, flameY, 'flame')
+      .setOrigin(0.5, 1)
+      .setScale(flameScale)
+      .setDepth(flameDepth)
+      .play('flame_anim');
 
     // ============================================
     // MULTITUD
@@ -134,7 +159,8 @@ export default class Scene_1_2 extends Phaser.Scene {
 
     this.marlo = this.add.sprite(familiaX, familiaY + 15, 'marlo_idle_north')
       .setOrigin(0.5, 1)
-      .setDepth(familiaY + 15);
+      .setDepth(familiaY + 15)
+      .setScale(0.80);
 
     // ============================================
     // CAJA DE DIÁLOGO

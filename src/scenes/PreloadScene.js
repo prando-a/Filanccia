@@ -119,6 +119,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('mayor_son_dead', `${charPath}/town_mayor/mayor-son-dead.png`);
     this.load.image('mayor_atril', `${charPath}/town_mayor/atril.png`);
     this.load.image('mayor_estructura', `${charPath}/town_mayor/estructura.png`);
+    this.load.spritesheet('flame', `${charPath}/town_mayor/flame-Sheet.png`, { frameWidth: 128, frameHeight: 128 });
 
     // ----- NPCS MULTITUD -----
     // Adultos: front (25) y back (50)
