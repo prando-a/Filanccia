@@ -22,7 +22,7 @@ export default class Scene_1_2 extends Phaser.Scene {
     // Cielo con imagen de fondo
     const bg = this.add.image(centerX, 0, 'menu_bg')
       .setOrigin(0.5, 0)
-      .setDisplaySize(width, height * 0.30);
+      .setDisplaySize(width * 0.3, height * 0.25);
 
     // Edificios a los lados de la plaza
     this.add.image(0, (height * 0.45) - 30, 'plaza_lado_izq')
