@@ -166,7 +166,7 @@ export default class Scene_1_1 extends Phaser.Scene {
     // Pool de 100 sprites únicos (adultos + niños, front + back)
     const npcKeys = [];
     for (let i = 1; i <= 25; i++) npcKeys.push(`crowd_npc_front_${i}`);
-    for (let i = 1; i <= 25; i++) npcKeys.push(`crowd_npc_back_${i}`);
+    for (let i = 1; i <= 50; i++) npcKeys.push(`crowd_npc_back_${i}`);
     for (let i = 26; i <= 50; i++) npcKeys.push(`crowd_npc_front_child_${i}`);
     for (let i = 26; i <= 50; i++) npcKeys.push(`crowd_npc_back_child_${i}`);
     Phaser.Utils.Array.Shuffle(npcKeys);

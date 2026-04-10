@@ -75,6 +75,7 @@ export default class Scene_1_2 extends Phaser.Scene {
     // ============================================
 
     this.multitud = [];
+    this.buildCrowdPool();
 
     // Función helper para evitar el área de la tarima
     const avoidStage = (x) => x < centerX - 150 || x > centerX + 150;
@@ -186,14 +187,39 @@ export default class Scene_1_2 extends Phaser.Scene {
     });
   }
 
+  buildCrowdPool() {
+    // Pool mezclado con ratio ~2:1 adultos:niños, sin repeticiones
+    const adults = [];
+    for (let i = 1; i <= 50; i++) adults.push(`crowd_npc_back_${i}`);
+    const children = [];
+    for (let i = 26; i <= 50; i++) children.push(`crowd_npc_back_child_${i}`);
+
+    Phaser.Utils.Array.Shuffle(adults);
+    Phaser.Utils.Array.Shuffle(children);
+
+    // Intercalar: 2 adultos, 1 niño
+    const pool = [];
+    let ai = 0, ci = 0;
+    while (ai < adults.length || ci < children.length) {
+      if (ai < adults.length) pool.push(adults[ai++]);
+      if (ai < adults.length) pool.push(adults[ai++]);
+      if (ci < children.length) pool.push(children[ci++]);
+    }
+
+    this._crowdPool = pool;
+    this._crowdIndex = 0;
+  }
+
   createCiudadano(x, y, scale) {
-    // Elegir un NPC aleatorio de los 15 disponibles
-    // Usamos back porque la multitud mira hacia el alcalde (de espaldas a la cámara)
-    const npcIndex = Phaser.Math.Between(1, 15);
-    const npcKey = `crowd_npc_back_${npcIndex}`;
+    // Tomar el siguiente NPC del pool sin repeticiones
+    const npcKey = this._crowdPool[this._crowdIndex % this._crowdPool.length];
+    this._crowdIndex++;
+
+    const isChild = npcKey.includes('child');
+    const finalScale = isChild ? scale * 0.8 : scale;
 
     const ciudadano = this.add.sprite(x, y, npcKey)
-      .setScale(scale)
+      .setScale(finalScale)
       .setOrigin(0.5, 1)
       .setDepth(y); // Y-sorting
 

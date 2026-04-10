@@ -121,9 +121,11 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('mayor_estructura', `${charPath}/town_mayor/estructura.png`);
 
     // ----- NPCS MULTITUD -----
-    // Adultos: front (25) y back (25)
+    // Adultos: front (25) y back (50)
     for (let i = 1; i <= 25; i++) {
       this.load.image(`crowd_npc_front_${i}`, `${charPath}/npcs/front/npc${i}.png`);
+    }
+    for (let i = 1; i <= 50; i++) {
       this.load.image(`crowd_npc_back_${i}`, `${charPath}/npcs/back/npc${i}.png`);
     }
     // Niños: front (25) y back (25)
