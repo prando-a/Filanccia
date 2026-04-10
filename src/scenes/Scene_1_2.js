@@ -95,6 +95,80 @@ export default class Scene_1_2 extends Phaser.Scene {
       .setDepth(flameDepth)
       .play('flame_anim');
 
+    // ---- OSCURIDAD + ILUMINACIÓN CÁLIDA DE ANTORCHAS ----
+    // --- Ajustables ---
+    const lightRadius = 225;       // radio base de la luz
+    const darknessAlpha = 0.30;    // oscuridad de la noche (0=nada, 1=negro)
+    const lightYOffset = -55;      // sube el centro de luz hacia la llama
+    const lightScaleX = 1.3;       // estira la luz horizontalmente
+    const lightScaleY = 1.0;       // escala vertical
+    const warmAlpha = 0.22;        // intensidad del tinte cálido
+
+    // Textura de luz con gradiente radial suave (canvas nativo)
+    const texSize = lightRadius * 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = texSize;
+    canvas.height = texSize;
+    const ctx = canvas.getContext('2d');
+    const gradient = ctx.createRadialGradient(
+      lightRadius, lightRadius, 0,
+      lightRadius, lightRadius, lightRadius
+    );
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+    gradient.addColorStop(0.2, 'rgba(255,255,255,0.9)');
+    gradient.addColorStop(0.4, 'rgba(255,255,255,0.5)');
+    gradient.addColorStop(0.7, 'rgba(255,255,255,0.15)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, texSize, texSize);
+    this.textures.addCanvas('light_soft', canvas);
+
+    // Textura cálida para tinte anaranjado (canvas nativo)
+    const warmCanvas = document.createElement('canvas');
+    warmCanvas.width = texSize;
+    warmCanvas.height = texSize;
+    const wCtx = warmCanvas.getContext('2d');
+    const warmGrad = wCtx.createRadialGradient(
+      lightRadius, lightRadius, 0,
+      lightRadius, lightRadius, lightRadius
+    );
+    warmGrad.addColorStop(0, 'rgba(255,160,50,1)');
+    warmGrad.addColorStop(0.15, 'rgba(255,130,30,0.85)');
+    warmGrad.addColorStop(0.4, 'rgba(255,100,10,0.4)');
+    warmGrad.addColorStop(0.7, 'rgba(230,70,0,0.12)');
+    warmGrad.addColorStop(1, 'rgba(200,50,0,0)');
+    wCtx.fillStyle = warmGrad;
+    wCtx.fillRect(0, 0, texSize, texSize);
+    this.textures.addCanvas('light_warm', warmCanvas);
+
+    // Capa de oscuridad
+    this.darkness = this.add.renderTexture(0, 0, width, height)
+      .setOrigin(0, 0)
+      .setDepth(998);
+
+    // Capa de tinte cálido (encima de la oscuridad, blend aditivo)
+    this.warmLayer = this.add.renderTexture(0, 0, width, height)
+      .setOrigin(0, 0)
+      .setDepth(999)
+      .setBlendMode(Phaser.BlendModes.ADD);
+
+    // Posiciones de las luces
+    this.lights_data = [
+      { x: centerX - flameOffsetX, y: flameY + lightYOffset },
+      { x: centerX + flameOffsetX + 1, y: flameY + lightYOffset }
+    ];
+
+    // Sprites auxiliares (no visibles en escena)
+    this._lightSprite = this.make.image({ key: 'light_soft', add: false })
+      .setOrigin(0.5, 0.5)
+      .setScale(lightScaleX, lightScaleY);
+
+    this._warmSprite = this.make.image({ key: 'light_warm', add: false })
+      .setOrigin(0.5, 0.5)
+      .setScale(lightScaleX, lightScaleY);
+
+    this._lightConfig = { darknessAlpha, warmAlpha, lightScaleX, lightScaleY };
+
     // ============================================
     // MULTITUD
     // ============================================
@@ -210,6 +284,36 @@ export default class Scene_1_2 extends Phaser.Scene {
     this.cameras.main.fadeIn(1000, 0, 0, 0);
     this.cameras.main.once('camerafadeincomplete', () => {
       this.time.delayedCall(500, () => this.runSequence());
+    });
+  }
+
+  update() {
+    if (!this.darkness) return;
+
+    const { darknessAlpha, warmAlpha, lightScaleX, lightScaleY } = this._lightConfig;
+
+    // Rellenar con oscuridad
+    this.darkness.clear();
+    this.darkness.fill(0x000000, darknessAlpha);
+
+    // Limpiar capa cálida
+    this.warmLayer.clear();
+
+    // Parpadeo orgánico (varía ligeramente en escala y alpha)
+    const flicker = 0.96 + Math.random() * 0.08;
+    const flickerAlpha = warmAlpha * (0.85 + Math.random() * 0.3);
+
+    this._lightSprite.setScale(lightScaleX * flicker, lightScaleY * flicker);
+    this._warmSprite.setScale(lightScaleX * flicker, lightScaleY * flicker);
+    this._warmSprite.setAlpha(flickerAlpha);
+
+    // Iluminar en cada posición de antorcha
+    this.lights_data.forEach(l => {
+      this._lightSprite.setPosition(l.x, l.y);
+      this.darkness.erase(this._lightSprite);
+
+      this._warmSprite.setPosition(l.x, l.y);
+      this.warmLayer.draw(this._warmSprite);
     });
   }
 
