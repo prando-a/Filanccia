@@ -115,6 +115,7 @@ export default class PreloadScene extends Phaser.Scene {
 
     // ----- ALCALDE (Mayor) -----
     this.load.image('mayor_stand', `${charPath}/town_mayor/mayor-stand.png`);
+    this.load.image('mayor_portrait', `${charPath}/mayor_portrait_scene_1_2.png`);
     this.load.image('mayor_son', `${charPath}/town_mayor/mayor-son.png`);
     this.load.image('mayor_son_dead', `${charPath}/town_mayor/mayor-son-dead.png`);
     this.load.image('mayor_atril', `${charPath}/town_mayor/atril.png`);

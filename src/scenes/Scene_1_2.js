@@ -256,30 +256,39 @@ export default class Scene_1_2 extends Phaser.Scene {
     // CAJA DE DIÁLOGO
     // ============================================
 
-    this.dialogueBox = this.add.container(centerX, height - 95);
+    this.dialogueBox = this.add.container(centerX, height - 75);
     this.dialogueBox.setVisible(false).setDepth(1000);
 
-    const boxBg = this.add.rectangle(0, 0, width - 60, 150, 0x000000, 0.85);
-    boxBg.setStrokeStyle(2, 0xffffff);
+    const boxBg = this.add.rectangle(0, 0, width - 100, 120, 0x000000, 0.75);
+    boxBg.setStrokeStyle(2, 0x8b6a4b);
 
-    this.speakerText = this.add.text(-width / 2 + 50, -55, '', {
-      fontSize: '16px',
+    // Retrato del hablante (derecha, sin marco extra)
+    this.portraitImage = this.add.image(290, 0, 'marlo_portrait').setScale(2);
+    this.portraitImage.setVisible(false);
+
+    // Mapa de retratos por nombre de hablante
+    this.portraitMap = {
+      'Alcalde': 'mayor_portrait'
+    };
+
+    this.speakerText = this.add.text(-width / 2 + 70, -42, '', {
+      fontSize: '13px',
       color: '#ffd700',
       fontStyle: 'bold'
     });
 
-    this.dialogueText = this.add.text(-width / 2 + 50, -30, '', {
-      fontSize: '18px',
+    this.dialogueText = this.add.text(-width / 2 + 70, -22, '', {
+      fontSize: '14px',
       color: '#ffffff',
-      wordWrap: { width: width - 100 }
+      wordWrap: { width: width - 160 }
     });
 
-    this.continueHint = this.add.text(width / 2 - 70, 55, '[ESPACIO]', {
-      fontSize: '12px',
+    this.continueHint = this.add.text(-width / 2 + 70, 40, '[ESPACIO]', {
+      fontSize: '10px',
       color: '#888888'
     });
 
-    this.dialogueBox.add([boxBg, this.speakerText, this.dialogueText, this.continueHint]);
+    this.dialogueBox.add([boxBg, this.portraitImage, this.speakerText, this.dialogueText, this.continueHint]);
 
     // ============================================
     // SECUENCIA DE LA ESCENA
@@ -418,7 +427,20 @@ export default class Scene_1_2 extends Phaser.Scene {
     }
   }
 
-  showDialogue(speaker, text) {
+  showDialogue(speaker, text, portraitOverride) {
+    const { width } = this.scale;
+    const portraitKey = portraitOverride || this.portraitMap[speaker];
+
+    // Mostrar/ocultar retrato y ajustar ancho del texto
+    if (portraitKey) {
+      this.portraitImage.setTexture(portraitKey);
+      this.portraitImage.setVisible(true);
+      this.dialogueText.setWordWrapWidth(width - 280);
+    } else {
+      this.portraitImage.setVisible(false);
+      this.dialogueText.setWordWrapWidth(width - 160);
+    }
+
     this.speakerText.setText(speaker);
     this.dialogueBox.setVisible(true);
     this.continueHint.setVisible(false);
