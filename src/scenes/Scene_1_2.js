@@ -22,18 +22,18 @@ export default class Scene_1_2 extends Phaser.Scene {
     // Cielo con imagen de fondo
     const bg = this.add.image(centerX, 0, 'menu_bg')
       .setOrigin(0.5, 0)
-      .setDisplaySize(width * 0.3, height * 0.25);
+      .setDisplaySize(width * 0.36, height * 0.25);
 
     // Edificios a los lados de la plaza
-    this.add.image(0, (height * 0.45) - 30, 'plaza_lado_izq')
-      .setOrigin(0, 1)
+    this.add.image(0, (height * 0.42) - 20, 'plaza_lado_izq')
+      .setOrigin(0.05, 1.05)
       .setDepth(2)
-      .setScale(3);
+      .setScale(2.9);
 
-    this.add.image(width, (height * 0.45) - 30, 'plaza_lado_derecho')
+    this.add.image(width, (height * 0.42) - 25, 'plaza_lado_derecho')
       .setOrigin(1, 1)
       .setDepth(2)
-      .setScale(3);
+      .setScale(2.85);
 
     // Suelo de la plaza - tilemap de adoquines (cubre todo el ancho)
     const plazaMap = this.make.tilemap({ key: 'plaza_map' });
@@ -63,7 +63,8 @@ export default class Scene_1_2 extends Phaser.Scene {
     // El alcalde de pie (pies en alcaldeY)
     this.alcalde = this.add.image(centerX, alcaldeY, 'mayor_stand')
       .setOrigin(0.5, 1)
-      .setDepth(20);
+      .setDepth(20)
+      .setScale(0.93);
 
     // Atril delante del alcalde
     const atril = this.add.image(centerX, alcaldeY + 10, 'mayor_atril')
@@ -215,6 +216,21 @@ export default class Scene_1_2 extends Phaser.Scene {
       this.createCiudadano(x, y, 1.0);
     }
 
+    // Fila 7 - espectadores de frente (mirando a cámara), junto a los edificios
+    this._frontPool = [];
+    for (let i = 1; i <= 25; i++) this._frontPool.push(`crowd_npc_front_${i}`);
+    Phaser.Utils.Array.Shuffle(this._frontPool);
+    this._frontIndex = 0;
+
+    // Grupo izquierdo (junto al edificio izquierdo)
+    for (let i = 0; i < 2; i++) {
+      this.createCiudadanoFront(120 + i * 40, height * 0.35 + Phaser.Math.Between(-5, 5), 0.86);
+    }
+    // Grupo derecho (junto al edificio derecho)
+    for (let i = 0; i < 2; i++) {
+      this.createCiudadanoFront(width - 250 - i * 40, height * 0.30 + Phaser.Math.Between(-5, 5), 0.84);
+    }
+
     // ============================================
     // FAMILIA (Marlo, Padre, Madre)
     // ============================================
@@ -354,6 +370,27 @@ export default class Scene_1_2 extends Phaser.Scene {
       .setDepth(y); // Y-sorting
 
     // Movimiento sutil de la multitud
+    this.tweens.add({
+      targets: ciudadano,
+      y: y + Phaser.Math.Between(-2, 2),
+      duration: Phaser.Math.Between(800, 1200),
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
+
+    this.multitud.push(ciudadano);
+  }
+
+  createCiudadanoFront(x, y, scale) {
+    const npcKey = this._frontPool[this._frontIndex % this._frontPool.length];
+    this._frontIndex++;
+
+    const ciudadano = this.add.sprite(x, y, npcKey)
+      .setScale(scale)
+      .setOrigin(0.5, 1)
+      .setDepth(y);
+
     this.tweens.add({
       targets: ciudadano,
       y: y + Phaser.Math.Between(-2, 2),
