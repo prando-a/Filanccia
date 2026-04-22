@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="39">
+<map version="1.10" tiledversion="1.12.1" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="3" nextobjectid="43">
  <tileset firstgid="1" name="hall" tilewidth="32" tileheight="32" tilecount="546" columns="26">
   <image source="hall.gif" width="832" height="672"/>
  </tileset>
@@ -49,23 +49,32 @@
   <object id="17" x="620.667" y="-0.666667" width="72.6667" height="85.3333"/>
   <object id="18" x="481.333" y="0.666667" width="153.333" height="116"/>
   <object id="19" x="431.333" y="4" width="51.3333" height="92"/>
-  <object id="20" x="692" y="163.333" width="26" height="89.3333"/>
-  <object id="21" x="676.667" y="176" width="16" height="69.3333"/>
+  <object id="20" x="692" y="163.333" width="26" height="82.3333"/>
+  <object id="21" x="676.667" y="176" width="16" height="64.3333"/>
   <object id="22" x="717.333" y="175.333" width="18.6667" height="66"/>
-  <object id="23" x="770.667" y="250.667" width="30" height="68.6667"/>
-  <object id="24" x="769.333" y="416" width="34.6667" height="64"/>
-  <object id="25" x="691.333" y="319.333" width="30.6667" height="90"/>
-  <object id="26" x="723.333" y="338" width="11.3333" height="60.6667"/>
-  <object id="27" x="676.667" y="333.333" width="19.3333" height="68.6667"/>
-  <object id="28" x="690.667" y="478" width="28.6667" height="92.6667"/>
-  <object id="29" x="677.333" y="492" width="16.6667" height="69.3333"/>
+  <object id="23" x="774.667" y="250.667" width="26" height="68.6667"/>
+  <object id="24" x="774.333" y="416" width="29.6667" height="64"/>
+  <object id="25" x="691.333" y="319.333" width="30.6667" height="81"/>
+  <object id="26" x="723.333" y="338" width="11.3333" height="57.6667"/>
+  <object id="27" x="676.667" y="333.333" width="19.3333" height="62.6667"/>
+  <object id="28" x="690.667" y="484" width="28.6667" height="82.6667"/>
+  <object id="29" x="677.333" y="492" width="16.6667" height="66.3333"/>
   <object id="30" x="721.333" y="493.333" width="10" height="65.3333"/>
   <object id="31" x="538" y="540" width="81.3333" height="44.6667"/>
-  <object id="32" x="534.667" y="474" width="81.3333" height="44"/>
-  <object id="34" x="538.667" y="379.333" width="80.6667" height="46.6667"/>
-  <object id="35" x="535.333" y="314.667" width="80" height="48"/>
-  <object id="36" x="534.667" y="221.333" width="83.3333" height="32.6667"/>
-  <object id="37" x="534" y="155.333" width="82.6667" height="46"/>
+  <object id="32" x="534.667" y="477" width="81.3333" height="41"/>
+  <object id="34" x="538.667" y="379.333" width="80.6667" height="41.6667"/>
+  <object id="35" x="535.333" y="314.667" width="80" height="44"/>
+  <object id="36" x="534.667" y="221.333" width="83.3333" height="28.6667"/>
+  <object id="37" x="534" y="158.333" width="82.6667" height="43"/>
   <object id="38" x="56.6667" y="181.333" width="70" height="45.3333"/>
+  <object id="39" name="marlo_spawn" x="720" y="446" width="32" height="32">
+   <ellipse/>
+  </object>
+  <object id="41" name="father_spawn" x="693" y="416" width="32" height="32">
+   <ellipse/>
+  </object>
+  <object id="42" name="mother_spawn" x="668" y="446" width="32" height="32">
+   <ellipse/>
+  </object>
  </objectgroup>
 </map>

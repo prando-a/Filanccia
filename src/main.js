@@ -75,4 +75,7 @@ async function ensureFont() {
 
   // Global game registry for shared state
   game.registry.set('debug', false);
+
+  // Expuesto para debug desde la consola del navegador
+  window.game = game;
 })();

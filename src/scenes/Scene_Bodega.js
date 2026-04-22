@@ -369,6 +369,9 @@ export default class Scene_Bodega extends Phaser.Scene {
       up: 'W', down: 'S', left: 'A', right: 'D'
     });
 
+    // Evita que el navegador se trague las teclas (scroll de página) en pantallas con overflow
+    this.input.keyboard.addCapture('UP,DOWN,LEFT,RIGHT,W,A,S,D,SPACE,E,R,ESC');
+
     this.input.keyboard.on('keydown-ESC', () => {
       if (this.settingsUI?.isVisible()) {
         this.settingsUI.toggle();

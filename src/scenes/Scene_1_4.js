@@ -52,6 +52,14 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.colliders = [];
     this.bodegaZone = null;
 
+    // Spawns definidos en Tiled (rect 32x32). Usamos el centro-inferior del
+    // rect como posición de los pies del personaje (origen 0.5, 1 en Phaser),
+    // y como son coordenadas del tilemap quedan consistentes con los colliders
+    // en cualquier resolución.
+    this.marloSpawn = null;
+    this.padreSpawn = null;
+    this.madreSpawn = null;
+
     const objectLayer = this.palacioMap.getObjectLayer('colliders');
 
     if (objectLayer) {
@@ -68,6 +76,12 @@ export default class Scene_1_4 extends Phaser.Scene {
             width: scaledW,
             height: scaledH
           };
+        } else if (obj.name === 'marlo_spawn') {
+          this.marloSpawn = { x: scaledX + scaledW / 2, y: scaledY + scaledH };
+        } else if (obj.name === 'father_spawn') {
+          this.padreSpawn = { x: scaledX + scaledW / 2, y: scaledY + scaledH };
+        } else if (obj.name === 'mother_spawn') {
+          this.madreSpawn = { x: scaledX + scaledW / 2, y: scaledY + scaledH };
         } else {
           this.colliders.push({
             x: scaledX,
@@ -166,14 +180,18 @@ export default class Scene_1_4 extends Phaser.Scene {
     // ============================================
 
     if (!isResuming) {
-      this.padre = this.add.image(width - 200, height * 0.7, 'father_idle_west')
+      const padreX = this.padreSpawn ? this.padreSpawn.x : width - 200;
+      const padreY = this.padreSpawn ? this.padreSpawn.y : height * 0.7;
+      this.padre = this.add.image(padreX, padreY, 'father_idle_west')
         .setOrigin(0.5, 1)
-        .setDepth(height * 0.7)
+        .setDepth(padreY)
         .setScale(1.15);
 
-      this.madre = this.add.image(width - 220, height * 0.7, 'mother_idle_west')
+      const madreX = this.madreSpawn ? this.madreSpawn.x : width - 220;
+      const madreY = this.madreSpawn ? this.madreSpawn.y : height * 0.7;
+      this.madre = this.add.image(madreX, madreY, 'mother_idle_west')
         .setOrigin(0.5, 1)
-        .setDepth(height * 0.7)
+        .setDepth(madreY)
         .setScale(0.80);
     }
 
@@ -188,10 +206,12 @@ export default class Scene_1_4 extends Phaser.Scene {
         .setDepth(900);
       this.marloDirection = 'south';
     } else {
-      // Posición con familia para secuencia
-      this.marlo = this.add.sprite(width - 200, height * 0.75, 'marlo_idle_west')
+      // Posición con familia para secuencia (spawn del tilemap)
+      const marloX = this.marloSpawn ? this.marloSpawn.x : width - 200;
+      const marloY = this.marloSpawn ? this.marloSpawn.y : height * 0.75;
+      this.marlo = this.add.sprite(marloX, marloY, 'marlo_idle_west')
         .setOrigin(0.5, 1)
-        .setDepth(height * 0.75);
+        .setDepth(marloY);
       this.marloDirection = 'west';
     }
 
@@ -264,6 +284,9 @@ export default class Scene_1_4 extends Phaser.Scene {
     this.wasd = this.input.keyboard.addKeys({
       up: 'W', down: 'S', left: 'A', right: 'D'
     });
+
+    // Evita que el navegador se trague las teclas (scroll de página) en pantallas con overflow
+    this.input.keyboard.addCapture('UP,DOWN,LEFT,RIGHT,W,A,S,D,SPACE,E,R,ESC');
 
     // ESC para finalizar (solo en exploración libre) o cerrar settings
     this.input.keyboard.on('keydown-ESC', () => {
