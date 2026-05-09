@@ -219,6 +219,22 @@ export default class Scene_1_3 extends Phaser.Scene {
       this.espectadores.push(spectator);
     });
 
+    // -------------------- INVITADOS DE ESPALDAS A LA BARRA --------------------
+    // Sprites del pool back/ (npc47, npc48) ubicados arriba a la derecha,
+    // como invitados pidiendo en la barra. Posiciones absolutas — edita aquí.
+    const invitadosBarra = [
+      { x: 500, y: escalerasY - 85, key: 'crowd_npc_back_47', scale: 0.88 },
+      { x: 545, y: escalerasY - 90, key: 'crowd_npc_back_48', scale: 0.88 }
+    ];
+    invitadosBarra.forEach(inv => {
+      const s = this.add.image(inv.x, inv.y, inv.key)
+        .setOrigin(0.5, 1)
+        .setDepth(inv.y)
+        .setScale(inv.scale);
+      this.espectadores.push(s);
+    });
+    // -------------------------------------------------------------------------
+
     // ============================================
     // FAMILIA DE MARLO (espectadores, lado derecho del salón)
     // Reutiliza los puntos `marlo_spawn`, `father_spawn`, `mother_spawn`
@@ -287,8 +303,8 @@ export default class Scene_1_3 extends Phaser.Scene {
     // Para activar un retrato: 1) crea el png; 2) cárgalo en PreloadScene;
     // 3) asegúrate de que la clave aquí coincida.
     this.portraitMap = {
-      'Noble Anciano': 'noble_anciano_portrait',
-      'Dama Joven': 'dama_joven_portrait',
+      'Noble Anciano': 'old_noble_portrait',
+      'Dama Joven': 'young_noble_lady_portrait',
       'Otro Noble': 'otro_noble_portrait',
       'Comerciante': 'comerciante_portrait',
       'Dama Anciana': 'dama_anciana_portrait',
