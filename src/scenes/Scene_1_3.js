@@ -317,7 +317,7 @@ export default class Scene_1_3 extends Phaser.Scene {
       'Otro Noble': 'young_noble_man_portrait',
       'Comerciante': 'merchant_portrait',
       'Dama Anciana': 'old_lady_portrait',
-      'Alcalde': 'mayor_portrait',
+      'Alcalde': 'mayor_portrait_scene_1_3',
       'Noble': 'noble_portrait',
       'Dama': 'dama_portrait',
       'Ciudadano': 'ciudadano_portrait',
