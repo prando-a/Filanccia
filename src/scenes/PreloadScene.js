@@ -55,6 +55,8 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('old_noble_portrait', `${charPath}/old_noble_portrait.png`);
     this.load.image('young_noble_lady_portrait', `${charPath}/young_noble_lady.png`);
     this.load.image('young_noble_man_portrait', `${charPath}/young_noble_man.png`);
+    this.load.image('merchant_portrait', `${charPath}/merchant_portrait.png`);
+    this.load.image('old_lady_portrait', `${charPath}/old_lady_portrait.png`);
 
     // ----- MARLO -----
     // Idle (4 direcciones) - con máscara (por defecto)
