@@ -231,6 +231,15 @@ export default class Scene_1_3 extends Phaser.Scene {
         .setOrigin(0.5, 1)
         .setDepth(inv.y)
         .setScale(inv.scale);
+      // Leve balanceo ocioso (igual que el resto de espectadores)
+      this.tweens.add({
+        targets: s,
+        y: inv.y + Phaser.Math.Between(-2, 2),
+        duration: Phaser.Math.Between(1400, 2200),
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      });
       this.espectadores.push(s);
     });
     // -------------------------------------------------------------------------
@@ -305,7 +314,7 @@ export default class Scene_1_3 extends Phaser.Scene {
     this.portraitMap = {
       'Noble Anciano': 'old_noble_portrait',
       'Dama Joven': 'young_noble_lady_portrait',
-      'Otro Noble': 'otro_noble_portrait',
+      'Otro Noble': 'young_noble_man_portrait',
       'Comerciante': 'comerciante_portrait',
       'Dama Anciana': 'dama_anciana_portrait',
       'Alcalde': 'mayor_portrait',
