@@ -48,16 +48,17 @@ export default class Scene_1_3 extends Phaser.Scene {
 
     this.musicians = [];
     const musicianPositions = [
-      { x: salaX - 80, y: salaY + 20 },
-      { x: salaX - 40, y: salaY + 20 },
-      { x: salaX + 0, y: salaY + 20 },
-      { x: salaX + 40, y: salaY + 20 }
+      { x: salaX - 80, y: salaY + 35 },
+      { x: salaX - 40, y: salaY + 35 },
+      { x: salaX + 0, y: salaY + 35 },
+      { x: salaX + 40, y: salaY + 35 }
     ];
 
     for (let i = 0; i < 4; i++) {
       const musician = this.add.sprite(musicianPositions[i].x, musicianPositions[i].y, `musician_${i + 1}`)
         .setOrigin(0.5, 1)
-        .setDepth(salaY);
+        .setDepth(salaY)
+        .setScale(0.9);
       musician.play(`musician_${i + 1}_play`);
       this.musicians.push(musician);
     }
@@ -79,118 +80,243 @@ export default class Scene_1_3 extends Phaser.Scene {
     const escalerasY = height * 0.38;
 
     // Alabarderos (4 frente a las escaleras)
-    this.add.image(centerX - 100, escalerasY, 'alabardiere')
-      .setOrigin(0.5, 1)
-      .setDepth(escalerasY);
-
-    this.add.image(centerX - 50, escalerasY, 'alabardiere')
-      .setOrigin(0.5, 1)
-      .setDepth(escalerasY);
-
-    this.add.image(centerX + 50, escalerasY, 'alabardiere')
+    this.add.image(centerX - 130, escalerasY + 25, 'alabardiere')
       .setOrigin(0.5, 1)
       .setDepth(escalerasY)
-      .setFlipX(true);
+      .setScale(1.05);
 
-    this.add.image(centerX + 100, escalerasY, 'alabardiere')
+    this.add.image(centerX - 90, escalerasY + 25, 'alabardiere')
       .setOrigin(0.5, 1)
       .setDepth(escalerasY)
-      .setFlipX(true);
+      .setScale(1.05);
 
+    this.add.image(centerX - 10, escalerasY + 25, 'alabardiere')
+      .setOrigin(0.5, 1)
+      .setDepth(escalerasY)
+      .setFlipX(true)
+      .setScale(1.05);
+
+    this.add.image(centerX + 30, escalerasY + 25, 'alabardiere')
+      .setOrigin(0.5, 1)
+      .setDepth(escalerasY)
+      .setFlipX(true)
+      .setScale(1.05);
+
+    /*
     // Carabinieri a los lados
-    this.add.image(centerX - 150, escalerasY, 'carabiniere')
+    this.add.image(centerX - 170, escalerasY + 20, 'carabiniere')
       .setOrigin(0.5, 1)
       .setDepth(escalerasY);
 
-    this.add.image(centerX + 150, escalerasY, 'carabiniere')
+    this.add.image(centerX + 150, escalerasY + 20, 'carabiniere')
       .setOrigin(0.5, 1)
       .setDepth(escalerasY)
       .setFlipX(true);
+    */
 
     // Alcalde (en el escenario, centrado)
-    this.alcalde = this.add.image(centerX + 30, escalerasY - 20, 'mayor_stand')
-      .setOrigin(0.5, 1)
-      .setDepth(escalerasY + 10);
-
-    // Hijo del Alcalde (al lado del alcalde, semi-oculto inicialmente)
-    this.hijoAlcalde = this.add.image(centerX - 30, escalerasY - 15, 'mayor_son')
+    this.alcalde = this.add.image(centerX - 30, escalerasY - 30, 'mayor_stand')
       .setOrigin(0.5, 1)
       .setDepth(escalerasY + 10)
-      .setAlpha(0.5);
+      .setScale(0.9);
+
+    // Hijo del Alcalde (al lado del alcalde, semi-oculto inicialmente)
+    this.hijoAlcalde = this.add.image(centerX - 70, escalerasY - 35, 'mayor_son')
+      .setOrigin(0.5, 1)
+      .setDepth(escalerasY + 10)
+      .setAlpha(0.8)
+      .setScale(0.9);
 
     // ============================================
-    // BAILARINES (zona amplia del salón)
+    // BAILARINES + ESPECTADORES (sin repeticiones)
     // ============================================
 
     this.bailarines = [];
+    this.espectadores = [];
     this.bailando = true;
 
-    // Zona de baile definida por esquinas
-    const zonaMinX = 60;
-    const zonaMaxX = 740;
-    const zonaMinY = escalerasY + 60;
-    const zonaMaxY = escalerasY + 300;
-
-    // Crear parejas de baile distribuidas
-    const posicionesBaile = [];
-
-    // Fila 1 (más cerca de las escaleras)
-    for (let x = zonaMinX + 50; x < zonaMaxX - 50; x += 90) {
-      posicionesBaile.push({ x: x, y: zonaMinY + 20 });
+    // Pool de sprites adultos (24: npc1..npc25 excepto npc12 que es guardia)
+    // y pool de niños (25: npc26..npc50). Shuffle + pop garantiza cero
+    // repeticiones.
+    const poolAdultos = [];
+    for (let i = 1; i <= 25; i++) {
+      if (i !== 12) poolAdultos.push(`crowd_npc_front_${i}`);
     }
-
-    // Fila 2
-    for (let x = zonaMinX + 80; x < zonaMaxX - 80; x += 85) {
-      posicionesBaile.push({ x: x, y: zonaMinY + 80 });
+    const poolNinos = [];
+    for (let i = 26; i <= 50; i++) {
+      poolNinos.push(`crowd_npc_front_child_${i}`);
     }
+    Phaser.Utils.Array.Shuffle(poolAdultos);
+    Phaser.Utils.Array.Shuffle(poolNinos);
 
-    // Fila 3
-    for (let x = zonaMinX + 60; x < zonaMaxX - 60; x += 95) {
-      posicionesBaile.push({ x: x, y: zonaMinY + 140 });
-    }
+    // -------------------- AJUSTES DE LA PISTA --------------------
+    // Cada entrada = una fila de parejas. Modifica count/spacing/offsetX/y
+    // para reorganizar la pista de baile.
+    // 11 parejas × 2 adultos = 22 adultos (quedan 2 para espectadores).
+    const filasBaile = [
+      { y: escalerasY + 95, count: 3, spacing: 105, offsetX: 85 },
+      { y: escalerasY + 160, count: 3, spacing: 110, offsetX: 115 },
+      { y: escalerasY + 220, count: 3, spacing: 105, offsetX: 75 },
+      { y: escalerasY + 280, count: 2, spacing: 130, offsetX: 165 }
+    ];
+    // Ruido aleatorio (en px) para romper la alineación perfecta de cada fila.
+    const jitterBaile = { x: 18, y: 10 };
+    // -------------------------------------------------------------
 
-    // Fila 4 (más al fondo)
-    for (let x = zonaMinX + 100; x < zonaMaxX - 100; x += 100) {
-      posicionesBaile.push({ x: x, y: zonaMinY + 200 });
-    }
+    let parejaIndex = 0;
+    filasBaile.forEach(fila => {
+      for (let i = 0; i < fila.count; i++) {
+        const baseX = fila.offsetX + i * fila.spacing;
+        const jitX = Phaser.Math.Between(-jitterBaile.x, jitterBaile.x);
+        const jitY = Phaser.Math.Between(-jitterBaile.y, jitterBaile.y);
+        const keyA = poolAdultos.shift();
+        const keyB = poolAdultos.shift();
+        if (!keyA || !keyB) break;
+        this.createParejaBaile(baseX + jitX, fila.y + jitY, parejaIndex, keyA, keyB);
+        parejaIndex++;
+      }
+    });
 
-    // Fila 5 (última fila)
-    for (let x = zonaMinX + 70; x < zonaMaxX - 70; x += 110) {
-      posicionesBaile.push({ x: x, y: zonaMaxY - 20 });
-    }
+    // -------------------- ESPECTADORES (fuera de pista) --------------------
+    // Posiciones individuales. Edita x/y o añade/quita entradas.
+    //   `child: true`  usa el pool de niños (escala 0.75).
+    // Rango seguro: y in [escalerasY+80, escalerasY+300]  (y in [308, 528] en
+    // pantalla). Por encima queda tras el escenario; por debajo cae fuera del
+    // suelo renderizado.
+    const espectadoresPos = [
+      // Cluster izq superior (frente al escenario, izquierda de la pista)
+      { x: 30, y: escalerasY + 30 },
+      { x: 55, y: escalerasY + 30, child: true },
+      // Cluster der superior (entre la pista y la barra)
+      { x: 520, y: escalerasY + 50 },
+      { x: 545, y: escalerasY + 50, child: true },
+      // Lateral derecho (media altura, a la derecha de filas 2 y 3)
+      { x: 420, y: escalerasY + 180 },
+      { x: 430, y: escalerasY + 270, child: true },
+      // Grupo inferior (debajo de la fila 4, separados lateralmente)
+      { x: 80, y: escalerasY + 340, child: true },
+      { x: 390, y: escalerasY + 340 }
+    ];
+    // -----------------------------------------------------------------------
 
-    posicionesBaile.forEach((pos, i) => {
-      this.createParejaBaile(pos.x, pos.y, i);
+    espectadoresPos.forEach(pos => {
+      const key = pos.child ? poolNinos.shift() : poolAdultos.shift();
+      if (!key) return;
+      const scale = pos.child ? 0.75 : 0.9;
+      const spectator = this.add.image(pos.x, pos.y, key)
+        .setOrigin(0.5, 1)
+        .setDepth(pos.y)
+        .setScale(scale);
+      // Leve balanceo ocioso
+      this.tweens.add({
+        targets: spectator,
+        y: pos.y + Phaser.Math.Between(-2, 2),
+        duration: Phaser.Math.Between(1400, 2200),
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      });
+      this.espectadores.push(spectator);
     });
 
     // ============================================
-    // CAJA DE DIÁLOGO
+    // FAMILIA DE MARLO (espectadores, lado derecho del salón)
+    // Reutiliza los puntos `marlo_spawn`, `father_spawn`, `mother_spawn`
+    // del tilemap (los mismos que Scene_1_4) para que la posición sea
+    // consistente con esa escena y con cualquier resolución.
     // ============================================
 
-    this.dialogueBox = this.add.container(centerX, height - 95);
+    const mapOffsetX = (width - scaledWidth) / 2;
+    const mapOffsetY = (height - scaledHeight) / 2;
+    const familiaObjects = palacioMap.getObjectLayer('colliders');
+    let padreSpawn = null;
+    let madreSpawn = null;
+    let marloSpawn = null;
+    if (familiaObjects) {
+      familiaObjects.objects.forEach(obj => {
+        const sx = mapOffsetX + obj.x * mapScale;
+        const sy = mapOffsetY + obj.y * mapScale;
+        const sw = obj.width * mapScale;
+        const sh = obj.height * mapScale;
+        // Centro-inferior del rect = pies del personaje (origen 0.5, 1)
+        if (obj.name === 'father_spawn') {
+          padreSpawn = { x: sx + sw / 2, y: sy + sh };
+        } else if (obj.name === 'mother_spawn') {
+          madreSpawn = { x: sx + sw / 2, y: sy + sh };
+        } else if (obj.name === 'marlo_spawn') {
+          marloSpawn = { x: sx + sw / 2, y: sy + sh };
+        }
+      });
+    }
+
+    if (padreSpawn) {
+      this.padre = this.add.image(padreSpawn.x, padreSpawn.y, 'father_idle_south')
+        .setOrigin(0.5, 1)
+        .setDepth(padreSpawn.y)
+        .setScale(1.1);
+    }
+    if (madreSpawn) {
+      this.madre = this.add.image(madreSpawn.x, madreSpawn.y, 'mother_idle_east')
+        .setOrigin(0.5, 1)
+        .setDepth(madreSpawn.y)
+        .setScale(0.8);
+    }
+    if (marloSpawn) {
+      this.marlo = this.add.image(marloSpawn.x, marloSpawn.y, 'marlo_idle_west')
+        .setOrigin(0.5, 1)
+        .setDepth(marloSpawn.y)
+        .setScale(0.9);;
+    }
+
+    // ============================================
+    // CAJA DE DIÁLOGO (estilo Scene_1_2: con retrato a la derecha)
+    // ============================================
+
+    this.dialogueBox = this.add.container(centerX, height - 75);
     this.dialogueBox.setVisible(false).setDepth(1000);
 
-    const boxBg = this.add.rectangle(0, 0, width - 60, 150, 0x000000, 0.85);
-    boxBg.setStrokeStyle(2, 0xffffff);
+    const boxBg = this.add.rectangle(0, 0, width - 100, 120, 0x000000, 0.75);
+    boxBg.setStrokeStyle(2, 0x8b6a4b);
 
-    this.speakerText = this.add.text(-width / 2 + 50, -55, '', {
-      fontSize: '16px',
+    // Retrato del hablante (lado derecho de la caja, sin marco extra)
+    this.portraitImage = this.add.image(290, 0, 'marlo_portrait').setScale(2);
+    this.portraitImage.setVisible(false);
+
+    // Mapa de retratos por nombre de hablante. Si una clave no tiene textura
+    // cargada, ese diálogo se muestra sin retrato (sin romper la escena).
+    // Para activar un retrato: 1) crea el png; 2) cárgalo en PreloadScene;
+    // 3) asegúrate de que la clave aquí coincida.
+    this.portraitMap = {
+      'Noble Anciano': 'noble_anciano_portrait',
+      'Dama Joven': 'dama_joven_portrait',
+      'Otro Noble': 'otro_noble_portrait',
+      'Comerciante': 'comerciante_portrait',
+      'Dama Anciana': 'dama_anciana_portrait',
+      'Alcalde': 'mayor_portrait',
+      'Noble': 'noble_portrait',
+      'Dama': 'dama_portrait',
+      'Ciudadano': 'ciudadano_portrait',
+      'Hijo del Alcalde': 'mayor_son_portrait'
+    };
+
+    this.speakerText = this.add.text(-width / 2 + 70, -42, '', {
+      fontSize: '13px',
       color: '#ffd700',
       fontStyle: 'bold'
     });
 
-    this.dialogueText = this.add.text(-width / 2 + 50, -30, '', {
-      fontSize: '18px',
+    this.dialogueText = this.add.text(-width / 2 + 70, -22, '', {
+      fontSize: '14px',
       color: '#ffffff',
-      wordWrap: { width: width - 100 }
+      wordWrap: { width: width - 160 }
     });
 
-    this.continueHint = this.add.text(width / 2 - 70, 55, '[ESPACIO]', {
-      fontSize: '12px',
+    this.continueHint = this.add.text(-width / 2 + 70, 40, '[ESPACIO]', {
+      fontSize: '10px',
       color: '#888888'
     });
 
-    this.dialogueBox.add([boxBg, this.speakerText, this.dialogueText, this.continueHint]);
+    this.dialogueBox.add([boxBg, this.portraitImage, this.speakerText, this.dialogueText, this.continueHint]);
 
     // ============================================
     // SECUENCIA DE LA ESCENA
@@ -215,21 +341,15 @@ export default class Scene_1_3 extends Phaser.Scene {
     });
   }
 
-  createParejaBaile(x, y, index) {
+  createParejaBaile(x, y, index, keyA, keyB) {
     const pareja = this.add.container(x, y);
 
-    // NPCs válidos para bailar (excluir guardias - npc12)
-    const validNPCs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15];
-    const npc1Index = validNPCs[(index * 2) % validNPCs.length];
-    const npc2Index = validNPCs[(index * 2 + 1) % validNPCs.length];
-
-    // Persona 1
-    const p1 = this.add.image(-20, 0, `crowd_npc_front_${npc1Index}`)
+    // Los sprites vienen del pool shuffled (sin repeticiones)
+    const p1 = this.add.image(-20, 0, keyA)
       .setOrigin(0.5, 1)
       .setScale(0.9);
 
-    // Persona 2
-    const p2 = this.add.image(20, 0, `crowd_npc_front_${npc2Index}`)
+    const p2 = this.add.image(20, 0, keyB)
       .setOrigin(0.5, 1)
       .setScale(0.9);
 
@@ -319,7 +439,21 @@ export default class Scene_1_3 extends Phaser.Scene {
     }
   }
 
-  showDialogue(speaker, text) {
+  showDialogue(speaker, text, portraitOverride) {
+    const { width } = this.scale;
+    const portraitKey = portraitOverride || this.portraitMap[speaker];
+
+    // Mostrar retrato solo si la textura existe (permite iterar añadiendo
+    // retratos uno a uno sin romper la escena).
+    if (portraitKey && this.textures.exists(portraitKey)) {
+      this.portraitImage.setTexture(portraitKey);
+      this.portraitImage.setVisible(true);
+      this.dialogueText.setWordWrapWidth(width - 280);
+    } else {
+      this.portraitImage.setVisible(false);
+      this.dialogueText.setWordWrapWidth(width - 160);
+    }
+
     this.speakerText.setText(speaker);
     this.dialogueBox.setVisible(true);
     this.continueHint.setVisible(false);
