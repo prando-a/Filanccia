@@ -122,7 +122,16 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image('mayor_stand', `${charPath}/town_mayor/mayor-stand.png`);
     this.load.image('mayor_portrait', `${charPath}/mayor_portrait_scene_1_2.png`);
     this.load.image('mayor_portrait_scene_1_3', `${charPath}/mayor_portrait.png`);
+    this.load.image('mayor_son_portrait', `${charPath}/mayor_son_portrait.png`);
+    this.load.image('mayor_son_smiling_portrait', `${charPath}/mayor_son_smiling_portrait.png`);
+    this.load.image('mayor_son_thinking_portrait', `${charPath}/mayor_son_thinking_portrait.png`);
+    this.load.image('mayor_son_angry_portrait', `${charPath}/mayor_son_angry_portrait.png`);
+    this.load.image('noble_portrait1', `${charPath}/noble_portrait1.png`);
+    this.load.image('noble_portrait2', `${charPath}/noble_portrait2.png`);
+    this.load.image('dama_portrait', `${charPath}/dama_portrait.png`);
+    this.load.image('ciudadano_portrait', `${charPath}/ciudadano_portrait.png`);
     this.load.image('mayor_son', `${charPath}/town_mayor/mayor-son.png`);
+    this.load.spritesheet('mayor_son_walk_south', `${charPath}/town_mayor/mayor_son_walking_south.png`, { frameWidth: 64, frameHeight: 64 });
     this.load.image('mayor_son_dead', `${charPath}/town_mayor/mayor-son-dead.png`);
     this.load.image('mayor_atril', `${charPath}/town_mayor/atril.png`);
     this.load.image('mayor_estructura', `${charPath}/town_mayor/estructura.png`);
@@ -344,6 +353,15 @@ export default class PreloadScene extends Phaser.Scene {
         repeat: -1
       });
     }
+
+    // ----- HIJO DEL ALCALDE: ANIMACIÓN DE CAMINAR -----
+    // Spritesheet 512x64 → 8 frames de 64x64
+    this.anims.create({
+      key: 'mayor_son_walk_south',
+      frames: this.anims.generateFrameNumbers('mayor_son_walk_south', { start: 0, end: 7 }),
+      frameRate: 10,
+      repeat: -1
+    });
 
     // Short delay then go to menu
     this.time.delayedCall(500, () => {

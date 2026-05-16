@@ -318,7 +318,8 @@ export default class Scene_1_3 extends Phaser.Scene {
       'Comerciante': 'merchant_portrait',
       'Dama Anciana': 'old_lady_portrait',
       'Alcalde': 'mayor_portrait_scene_1_3',
-      'Noble': 'noble_portrait',
+      // 'Noble' aparece en dos cases (20 y 23) con dos retratos distintos.
+      // Por eso no lo mapeamos aquí y pasamos el portraitOverride en la llamada.
       'Dama': 'dama_portrait',
       'Ciudadano': 'ciudadano_portrait',
       'Hijo del Alcalde': 'mayor_son_portrait'
@@ -620,7 +621,7 @@ export default class Scene_1_3 extends Phaser.Scene {
       // ============================================
 
       case 20:
-        this.showDialogue('Noble', '¡Bravo! ¡Una elección excelente!');
+        this.showDialogue('Noble', '¡Bravo! ¡Una elección excelente!', 'noble_portrait1');
         break;
 
       case 21:
@@ -632,7 +633,7 @@ export default class Scene_1_3 extends Phaser.Scene {
         break;
 
       case 23:
-        this.showDialogue('Noble', 'La dinastía continúa. Filanccia está en buenas manos.');
+        this.showDialogue('Noble', 'La dinastía continúa. Filanccia está en buenas manos.', 'noble_portrait2');
         break;
 
       case 24:
@@ -649,26 +650,34 @@ export default class Scene_1_3 extends Phaser.Scene {
       // ============================================
 
       case 26:
-        this.showDialogue('Hijo del Alcalde', '(VOZ CLARA, UN TEMBLOR LEVE) Padre... ciudadanos. Solo he querido, siempre, escuchar el rumor de los canales y vuestras voces con el mismo respeto. Prometo... ser digno de esta máscara que me entregáis.');
+        // Saludo con sonrisa nerviosa (retrato sonriente)
+        this.showDialogue('Hijo del Alcalde', '(VOZ CLARA, UN TEMBLOR LEVE) Padre... ciudadanos.', 'mayor_son_smiling_portrait');
         break;
 
       case 27:
-        this.showDialogue('Hijo del Alcalde', 'Sé que tengo grandes zapatos que llenar. Mi padre ha sido un líder ejemplar.');
+        // Continuación del discurso (retrato normal)
+        this.showDialogue('Hijo del Alcalde', 'Solo he querido, siempre, escuchar el rumor de los canales y vuestras voces con el mismo respeto. Prometo... ser digno de esta máscara que me entregáis.');
         break;
 
       case 28:
-        this.showDialogue('Hijo del Alcalde', 'Pero os prometo que dedicaré cada día de mi vida al servicio de Filanccia.');
+        // Momento reflexivo (retrato pensativo)
+        this.showDialogue('Hijo del Alcalde', 'Sé que tengo grandes zapatos que llenar. Mi padre ha sido un líder ejemplar.', 'mayor_son_thinking_portrait');
         break;
 
       case 29:
-        this.showDialogue('Hijo del Alcalde', 'Continuaré las tradiciones que nos han hecho grandes...');
+        this.showDialogue('Hijo del Alcalde', 'Pero os prometo que dedicaré cada día de mi vida al servicio de Filanccia.');
         break;
 
       case 30:
-        this.showDialogue('Hijo del Alcalde', 'Y trabajaré para construir un futuro aún más brillante para todos nosotros.');
+        this.showDialogue('Hijo del Alcalde', 'Continuaré las tradiciones que nos han hecho grandes...');
         break;
 
       case 31:
+        // Tono más firme / decidido (retrato enfadado)
+        this.showDialogue('Hijo del Alcalde', 'Y trabajaré para construir un futuro aún más brillante para todos nosotros.', 'mayor_son_angry_portrait');
+        break;
+
+      case 32:
         this.showDialogue('Hijo del Alcalde', '¡Por Filanccia! ¡Por el centenario! ¡Y por los próximos cien años de prosperidad!');
         break;
 
@@ -676,15 +685,15 @@ export default class Scene_1_3 extends Phaser.Scene {
       // APLAUSOS FINALES
       // ============================================
 
-      case 32:
+      case 33:
         this.showDialogue('Multitud', '¡¡¡VIVA!!! ¡¡¡VIVA EL FUTURO ALCALDE!!!');
         break;
 
-      case 33:
+      case 34:
         this.showDialogue('Alcalde', '¡Y ahora, que continúe la celebración! ¡Que la música no pare hasta el amanecer!');
         break;
 
-      case 34:
+      case 35:
         // Fade out y transición
         this.tweens.killAll();
         this.cameras.main.fadeOut(1000, 0, 0, 0);
@@ -696,71 +705,46 @@ export default class Scene_1_3 extends Phaser.Scene {
   }
 
   presentarHijo(callback) {
-    // Destacar al hijo del alcalde
+    // El hijo avanza unos pasos hacia el frente. Para la animación de
+    // caminar usamos un sprite temporal con `mayor_son_walk_south`; al
+    // terminar lo destruimos y reposicionamos la imagen estática original.
+    const pasosAdelante = 10; // píxeles que avanza el hijo
+    const startX = this.hijoAlcalde.x;
+    const startY = this.hijoAlcalde.y;
+    const endY = startY + pasosAdelante;
+
+    // Ocultar la imagen estática mientras camina
+    this.hijoAlcalde.setVisible(false);
+
+    // Sprite temporal con la animación de caminar (misma escala/depth/alpha)
+    const hijoWalk = this.add.sprite(startX, startY, 'mayor_son_walk_south')
+      .setOrigin(0.5, 1)
+      .setDepth(this.hijoAlcalde.depth)
+      .setAlpha(this.hijoAlcalde.alpha)
+      .setScale(this.hijoAlcalde.scaleX);
+    hijoWalk.play('mayor_son_walk_south');
+
     this.tweens.add({
-      targets: this.hijoAlcalde,
+      targets: hijoWalk,
       alpha: 1,
-      scale: 1.1,
-      duration: 800,
-      ease: 'Power2',
+      y: endY,
+      duration: 1200,
+      ease: 'Sine.easeInOut',
+      onUpdate: () => {
+        // Mantener el depth-sort correcto mientras camina
+        hijoWalk.setDepth(hijoWalk.y);
+      },
       onComplete: () => {
+        // Destruir el sprite animado y devolver la imagen estática a la nueva posición
+        hijoWalk.destroy();
+        this.hijoAlcalde.x = startX;
+        this.hijoAlcalde.y = endY;
+        this.hijoAlcalde.setAlpha(1);
+        this.hijoAlcalde.setDepth(endY);
+        this.hijoAlcalde.setVisible(true);
         // Pausa dramática
         this.time.delayedCall(1500, callback);
       }
-    });
-
-    // Texto indicador
-    const { width, height } = this.scale;
-    const presentText = this.add.text(width / 2, height * 0.35, '[ El hijo del Alcalde es presentado ]', {
-      fontSize: '14px',
-      color: '#ffd700',
-      fontStyle: 'italic',
-      backgroundColor: '#00000088',
-      padding: { x: 10, y: 5 }
-    }).setOrigin(0.5).setAlpha(0).setDepth(500);
-
-    this.tweens.add({
-      targets: presentText,
-      alpha: 1,
-      duration: 500,
-      onComplete: () => {
-        this.time.delayedCall(1500, () => {
-          this.tweens.add({
-            targets: presentText,
-            alpha: 0,
-            duration: 500
-          });
-        });
-      }
-    });
-
-    // Observación de Marlo - Strappavolti ya estaba en la sala
-    this.time.delayedCall(800, () => {
-      const marloObs = this.add.text(width / 2, height * 0.52,
-        '"Entre todas las máscaras que miran al escenario,\nhay una, tras una columna, que no se mueve.\nNo respira. Solo espera."', {
-        fontSize: '13px',
-        color: '#aaffaa',
-        fontStyle: 'italic',
-        backgroundColor: '#00000088',
-        padding: { x: 10, y: 6 },
-        align: 'center'
-      }).setOrigin(0.5).setAlpha(0).setDepth(500);
-
-      this.tweens.add({
-        targets: marloObs,
-        alpha: 1,
-        duration: 600,
-        onComplete: () => {
-          this.time.delayedCall(3500, () => {
-            this.tweens.add({
-              targets: marloObs,
-              alpha: 0,
-              duration: 600,
-              onComplete: () => marloObs.destroy()
-            });
-          });
-        }
-      });
     });
   }
 
